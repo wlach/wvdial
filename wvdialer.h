@@ -40,163 +40,182 @@ struct OptInfo
 class WvConf;
 
 class WvDialer : public WvStreamClone
-    /***********************************/
+/***********************************/
 {
 public:
-   WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = false );
-   virtual ~WvDialer();
+    WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = false );
+    virtual ~WvDialer();
    
-   WvModemBase *modem;
+    bool	dial();
+    void	hangup();
+    void	execute();
    
-   bool	dial();
-   void	hangup();
-   void	execute();
-   
-   bool check_attempts_exceeded(int connect_attempts);
+    bool check_attempts_exceeded(int connect_attempts);
 
-   void	pppd_watch( int w );
+    void	pppd_watch( int w );
    
-   int         ask_password();
+    int         ask_password();
    
-   enum Status {
-       Idle,
-	   ModemError,
-	   OtherError,
-	   Online,
-	   Dial,
-	   PreDial1,
-	   PreDial2,
-	   WaitDial,
-	   WaitAnything,
-	   WaitPrompt,
-	   AutoReconnectDelay
-   };
+    enum Status {
+	Idle,
+	ModemError,
+	OtherError,
+	Online,
+	Dial,
+	PreDial1,
+	PreDial2,
+	WaitDial,
+	WaitAnything,
+	WaitPrompt,
+	AutoReconnectDelay
+    };
 
-   Status status() const
-   { return stat; }
+    Status status() const
+    { return stat; }
    
-   virtual bool pre_select(SelectInfo &si);
-   virtual bool isok() const;
+    virtual bool pre_select(SelectInfo &si);
+    virtual bool isok() const;
    
-   int	  connect_attempts;
-   int	  dial_stat;
-   char   *connect_status() const;
-   bool   init_modem();
-   void   unlock_modem();
-   bool   lock_modem();
+    int	  connect_attempts;
+    int	  dial_stat;
+    char   *connect_status() const;
+    bool   init_modem();
+    void   unlock_modem();
+    bool   lock_modem();
+
+    WvModemBase* take_modem()
+    {
+	WvModemBase* modem;
+
+	if (!cloned)
+	    init_modem();
+
+	modem = static_cast<WvModemBase*>(cloned);
+	cloned = NULL;
+
+	return modem;
+    }
+
+    void give_modem(WvModemBase* _modem)
+    {
+	if (cloned)
+	    delete cloned;
+
+	cloned = _modem;
+    }
    
-   friend class WvDialBrain;
+    friend class WvDialBrain;
    
-   struct {
-       WvString	        modem;
-       int		baud;
-       WvString	        init1;
-       WvString	        init2;
-       WvString	        init3;
-       WvString	        init4;
-       WvString	        init5;
-       WvString	        init6;
-       WvString	        init7;
-       WvString	        init8;
-       WvString	        init9;
-       WvString	        phnum;
-       WvString	        phnum1;
-       WvString	        phnum2;
-       WvString	        phnum3;
-       WvString	        phnum4;
-       WvString	        dial_prefix;
-       WvString	        areacode;
-       WvString	        dial_cmd;
-       WvString	        login;
-       WvString	        login_prompt;
-       WvString	        password;
-       WvString	        pass_prompt;
-       WvString	        where_pppd;
-       WvString	        pppd_option;
-       WvString	        force_addr;
-       WvString	        remote;
-       WvString	        default_reply;
-       WvString         country;
-       WvString         provider;
-       WvString         product;
-       WvString         homepage;
-       WvString         dialmessage1;
-       WvString         dialmessage2;
-       WvString         dnstest1, dnstest2;
-       int              carrier_check;
-       int		stupid_mode;
-       int		new_pppd;
-       int		auto_reconnect;
-       int		abort_on_busy;
-       int		abort_on_no_dialtone;
-       int              dial_attempts;
-       int              compuserve;
-       int              tonline;
-       int              auto_dns;
-       int              check_dns;
-       int              check_dfr;
-       int              idle_seconds;
-       int              isdn;
-       int              ask_password;
+    struct {
+	WvString	        modem;
+	int		baud;
+	WvString	        init1;
+	WvString	        init2;
+	WvString	        init3;
+	WvString	        init4;
+	WvString	        init5;
+	WvString	        init6;
+	WvString	        init7;
+	WvString	        init8;
+	WvString	        init9;
+	WvString	        phnum;
+	WvString	        phnum1;
+	WvString	        phnum2;
+	WvString	        phnum3;
+	WvString	        phnum4;
+	WvString	        dial_prefix;
+	WvString	        areacode;
+	WvString	        dial_cmd;
+	WvString	        login;
+	WvString	        login_prompt;
+	WvString	        password;
+	WvString	        pass_prompt;
+	WvString	        where_pppd;
+	WvString	        pppd_option;
+	WvString	        force_addr;
+	WvString	        remote;
+	WvString	        default_reply;
+	WvString         country;
+	WvString         provider;
+	WvString         product;
+	WvString         homepage;
+	WvString         dialmessage1;
+	WvString         dialmessage2;
+	WvString         dnstest1, dnstest2;
+	int              carrier_check;
+	int		stupid_mode;
+	int		new_pppd;
+	int		auto_reconnect;
+	int		abort_on_busy;
+	int		abort_on_no_dialtone;
+	int              dial_attempts;
+	int              compuserve;
+	int              tonline;
+	int              auto_dns;
+	int              check_dns;
+	int              check_dfr;
+	int              idle_seconds;
+	int              isdn;
+	int              ask_password;
        
-   } options;
+    } options;
    
    
-   WvDialMon pppd_mon;               // class to analyse messages of pppd
+    WvDialMon pppd_mon;               // class to analyse messages of pppd
    
    
 private:
-   WvDialBrain  *brain;
-   WvConf       &cfg;
-   WvStringList *sect_list;
+    WvDialBrain  *brain;
+    WvConf       &cfg;
+    WvStringList *sect_list;
    
-   bool		chat_mode;
+    bool		chat_mode;
    
-   bool		been_online;
-   time_t	connected_at;
-   time_t	auto_reconnect_delay;
-   time_t	auto_reconnect_at;
-   WvPipe       *ppp_pipe;
+    bool		been_online;
+    time_t	connected_at;
+    time_t	auto_reconnect_delay;
+    time_t	auto_reconnect_at;
+    WvPipe       *ppp_pipe;
    
-   int     	phnum_count;
-   int     	phnum_max;  
+    int     	phnum_count;
+    int     	phnum_max;  
    
-   WvLog	log;
-   WvLog	err;
-   WvLog	modemrx;
+    WvLog	log;
+    WvLog	err;
+    WvLog	modemrx;
    
-   Status	stat;
+    Status	stat;
    
-   time_t	last_rx;
-   time_t	last_execute;
-   int		prompt_tries;
-   WvString	prompt_response;
+    time_t	last_rx;
+    time_t	last_execute;
+    int		prompt_tries;
+    WvString	prompt_response;
    
-   void		load_options();
+    void		load_options();
    
-   void		async_dial();
-   void		async_waitprompt();
+    void		async_dial();
+    void		async_waitprompt();
    
-   void		start_ppp();
+    void		start_ppp();
    
-   // The following members are for the wait_for_modem() function.
-   int		wait_for_modem( char *strs[], int timeout, bool neednewline,
+    // The following members are for the wait_for_modem() function.
+    int		wait_for_modem( char *strs[], int timeout, bool neednewline,
 				bool verbose = true);
-   int		async_wait_for_modem( char * strs[], bool neednewline,
+    int		async_wait_for_modem( char * strs[], bool neednewline,
 				      bool verbose = true);
-   char	        buffer[ INBUF_SIZE + 1 ];
-   off_t	offset;
-   void	        reset_offset();
+    char	        buffer[ INBUF_SIZE + 1 ];
+    off_t	offset;
+    void	        reset_offset();
    
-   // Called from WvDialBrain::guess_menu()
-   bool 	is_pending() { return( modem->select( 1000 ) ); }
+    // Called from WvDialBrain::guess_menu()
+    bool 	is_pending() { return( cloned->select( 1000 ) ); }
    
-   // These are used to read the messages of pppd
-   int          pppd_msgfd[2];		// two fd of the pipe
-   WvStream     *pppd_log;		// to read messages of pppd
+    // These are used to read the messages of pppd
+    int          pppd_msgfd[2];		// two fd of the pipe
+    WvStream     *pppd_log;		// to read messages of pppd
    
-   // These are used to pipe the password to pppd
-   int          pppd_passwdfd[2];	// two fd of the pipe
+    // These are used to pipe the password to pppd
+    int          pppd_passwdfd[2];	// two fd of the pipe
    
 };
 #endif // __DIALER_H

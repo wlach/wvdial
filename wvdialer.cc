@@ -55,12 +55,11 @@ static int messagetail_pid = 0;
 
 WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 /***************************************************************************/
-: WvStreamClone( (WvStream **)&modem ),
+: WvStreamClone( 0 ),
     cfg(_cfg), log( "WvDial", WvLog::Debug ),
     err( log.split( WvLog::Error ) ),
     modemrx( "WvDial Modem", WvLog::Debug )
 {
-    modem 		 = NULL;
     ppp_pipe 		 = NULL;
     pppd_log		 = NULL;
     been_online 	 = false;
@@ -154,8 +153,6 @@ WvDialer::~WvDialer()
 	delete ppp_pipe;
     if( pppd_log )
         delete pppd_log;
-    if( modem )
-	delete modem;
     if( brain )
     	delete brain;
 }
@@ -244,11 +241,11 @@ void WvDialer::hangup()
 	time_t 	now;
 	time( &now );
 	log( "Disconnecting at %s", ctime( &now ) );
-	if( modem )
+	if( cloned )
 	{
-	    modem->hangup();
-	    delete modem;
-	    modem = NULL;
+	    static_cast<WvModemBase*>(cloned)->hangup();
+	    delete cloned;
+	    cloned = NULL;
 	}
 	stat = Idle;
     }
@@ -281,7 +278,7 @@ bool WvDialer::pre_select( SelectInfo& si )
 bool WvDialer::isok() const
 /*************************/
 {
-    bool b = ( !modem || modem->isok() )
+    bool b = ( !cloned || cloned->isok() )
 	&& stat != ModemError && stat != OtherError;
     /*
      if (!b)
@@ -365,7 +362,7 @@ void WvDialer::execute()
     
     // the modem object might not exist, if we just disconnected and are
     // redialing.
-    if( !modem && !init_modem() )
+    if( !cloned && !init_modem() )
     	return;
 
     last_execute = time( NULL );
@@ -383,7 +380,7 @@ void WvDialer::execute()
 	break;
     case WaitAnything:
 	// we allow some time after connection for silly servers/modems.
-	if( modem->select( 500 ) ) 
+	if( cloned->select( 500 ) ) 
 	{
 	    // if any data comes in at all, switch to impatient mode.
 	    stat = WaitPrompt;
@@ -398,7 +395,7 @@ void WvDialer::execute()
 	{
 	    // We prod the server with a CR character every once in a while.
 	    // FIXME: Does this cause problems with login prompts?
-	    modem->write( "\r", 1 );
+	    cloned->write( "\r", 1 );
 	}
 	break;
     case WaitPrompt:
@@ -419,8 +416,8 @@ void WvDialer::execute()
 	    // we must delete the WvModem object so it can be recreated
 	    // later; starting pppd seems to screw up the file descriptor.
 	    hangup();
-	    delete( modem );
-	    modem = NULL;
+	    delete( cloned );
+	    cloned = NULL;
 	    
 	    time_t call_duration = time( NULL ) - connected_at;
 	    
@@ -685,8 +682,11 @@ bool WvDialer::init_modem()
 	// the buffer is empty.
 	offset = 0;
     
-	if( modem ) 
-	    delete modem;
+	if( cloned )
+	{
+	    delete cloned;
+	    cloned = NULL;
+	}
 	
 	// Open the modem...
 	if( chat_mode ) 
@@ -694,7 +694,7 @@ bool WvDialer::init_modem()
 	    int flags = fcntl( STDIN_FILENO, F_GETFL );
 	    if( ( flags & O_ACCMODE ) == O_RDWR ) 
 	    {
-		modem = new WvModemBase( STDIN_FILENO );
+		cloned = new WvModemBase( STDIN_FILENO );
 	    } 
 	    else 
 	    {
@@ -715,25 +715,25 @@ bool WvDialer::init_modem()
 		    err( "can't open %s: %m\n", getenv( "MODEM" ) );
 		    exit( 1 );
 		}
-		modem = new WvModemBase( tty );
+		cloned = new WvModemBase( tty );
 	    }
 	} 
 	else
 	{
-	    modem = new WvModem( options.modem, options.baud );
+	    cloned = new WvModem( options.modem, options.baud );
 	}
-	if( !modem->isok() ) 
+	if( !cloned->isok() ) 
 	{
-	    err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
+	    err( "Cannot open %s: %s\n", options.modem, cloned->errstr() );
 	    continue;
 	}
 	
 	log( "Initializing modem.\n" );
 	
 	// make modem happy
-	modem->print( "\r\r\r\r\r" );
-	while( modem->select( 100 ) )
-	    modem->drain();
+	cloned->print( "\r\r\r\r\r" );
+	while( cloned->select( 100 ) )
+	    cloned->drain();
 	
 	// Send up to nine init strings, in order.
 	int	init_count;
@@ -756,17 +756,17 @@ bool WvDialer::init_modem()
 	    }
 	    if( !! *this_str ) 
 	    {
-		modem->print( "%s\r", *this_str );
+		cloned->print( "%s\r", *this_str );
 		log( "Sending: %s\n", *this_str );
 		
 		received = wait_for_modem( init_responses, 5000, true );
 		switch( received ) 
 		{
 		case -1:
-		    modem->print( "ATQ0\r" );
+		    cloned->print( "ATQ0\r" );
 		    log( "Sending: ATQ0\n" );
 		    received = wait_for_modem( init_responses, 500, true );
-		    modem->print( "%s\r", *this_str );
+		    cloned->print( "%s\r", *this_str );
 		    log( "Re-Sending: %s\n", *this_str );
 		    received = wait_for_modem( init_responses, 5000, true );
 		    switch( received ) 
@@ -817,9 +817,9 @@ void WvDialer::async_dial()
 	// Hit enter a few times.
 	for( int i=0; i<3; i++ ) 
 	{
-	    modem->write( "\r", 1 );
+	    cloned->write( "\r", 1 );
 	    continue_select(500);
-	    if (!isok() || !modem)
+	    if (!isok() || !cloned)
 		break;
 	}
 	stat = Dial;
@@ -856,7 +856,7 @@ void WvDialer::async_dial()
 				 !options.dial_prefix ? "" : ",",
 				 options.areacode,
 				 *this_str );
-	modem->print( s );
+	cloned->print( s );
 	log( "Sending: %s\n", s );
 	log( "Waiting for carrier.\n" );
 
@@ -1239,7 +1239,7 @@ void WvDialer::start_ppp()
     }
  
     ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
-			   modem, modem, modem );
+			   cloned, cloned, cloned );
 
     log( WvLog::Notice, "pid of pppd: %s\n", ppp_pipe->getpid() );
 
@@ -1256,7 +1256,7 @@ void WvDialer::async_waitprompt()
 
     if( options.carrier_check == true ) 
     {
-	if( !modem || !modem->carrier() ) 
+	if( !cloned || !static_cast<WvModemBase*>(cloned)->carrier() ) 
 	{
 	    err( "Connected, but carrier signal lost!  Retrying...\n" );
 	    stat = PreDial2;
@@ -1281,7 +1281,7 @@ void WvDialer::async_waitprompt()
 
 	prompt_response = brain->check_prompt( buffer );
 	if( prompt_response != NULL )
-	    modem->print( "%s\r", prompt_response );
+	    cloned->print( "%s\r", prompt_response );
     }
 }
 
@@ -1310,16 +1310,16 @@ int WvDialer::wait_for_modem( char * 	strs[],
     int		len;
     const char *ppp_marker = NULL;
 
-    while( modem->select( timeout ) ) 
+    while( cloned->select( timeout ) ) 
     {
 	last_rx = time( NULL );
 	onset = offset;
-	offset += modem->read( buffer + offset, INBUF_SIZE - offset );
+	offset += cloned->read( buffer + offset, INBUF_SIZE - offset );
 	
 	// make sure we do not split lines TOO arbitrarily, or the
 	// logs will look bad.
-	while( offset < INBUF_SIZE && modem->select( 100 ) )
-	    offset += modem->read( buffer + offset, INBUF_SIZE - offset );
+	while( offset < INBUF_SIZE && cloned->select( 100 ) )
+	    offset += cloned->read( buffer + offset, INBUF_SIZE - offset );
 	
 	// Make sure there is a NULL on the end of the buffer.
 	buffer[ offset ] = '\0';
