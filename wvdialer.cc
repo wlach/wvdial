@@ -80,8 +80,6 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
     	}
     }
 
-    setcallback( execute_callback, this );
-
     // Activate the brain and read configuration.
     brain = new WvDialBrain( this );
     load_options( cfg, sect_list );
@@ -241,14 +239,6 @@ char * WvDialer::connect_status() const
     	return( NULL );
     }
     return( msg );
-}
-
-int WvDialer::execute_callback( WvStream &, void *userdata )
-/**********************************************************/
-{
-    WvDialer &d = *(WvDialer *) userdata;
-    d.execute();
-    return( 0 ); 
 }
 
 void WvDialer::execute()

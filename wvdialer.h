@@ -136,8 +136,6 @@ private:
 
     void		start_ppp();
 
-    static int 		execute_callback(WvStream&, void * userdata);
-    
     // The following members are for the wait_for_modem() function.
     int		wait_for_modem( char *strs[], int timeout, bool neednewline,
     				bool verbose = true);
