@@ -36,6 +36,7 @@ static char *	dial_responses[] = {
 	"error",
 	"voice",
 	"fclass",
+	"no answer",
 	NULL
 };
 
@@ -231,6 +232,8 @@ char * WvDialer::connect_status() const
     	    strcpy( msg, "Voice answer on last attempt.  Trying again." );
     	else if( dial_stat == 6 )
     	    strcpy( msg, "Fax answer on last attempt.  Trying again." );
+	else if( dial_stat == 7 )
+            strcpy( msg, "No answer on last attempt.  Trying again." );
     	else
     	    return( NULL );
 	break;
@@ -559,7 +562,7 @@ void WvDialer::async_dial()
     
     switch( received ) {
     case -1:	// nothing -- return control.
-	if( last_rx - time( NULL ) >= 60 ) {
+	if( time( NULL ) - last_rx  >= 60 ) {
 	    log( WvLog::Warning, "Timed out while dialing.  Trying again.\n" );
 	    stat = PreDial1;
 	    connect_attempts++;
@@ -657,15 +660,25 @@ void WvDialer::async_dial()
 	connect_attempts++;
 	dial_stat = 6;
     	stat = PreDial2;
-
-	//if Attempts in wvdial.conf is 0..dont do anything
 	if(options.dial_attempts != 0){
-		if(check_attempts_exceeded(connect_attempts)){
-			hangup();
-		}
+	    if(check_attempts_exceeded(connect_attempts)){
+		hangup();
+	    }
 	}
-
 	return;
+
+     case 8:    // NO ANSWER
+        log( WvLog::Warning, "No Answer.  Trying again.\n" );
+        stat = PreDial1;
+        connect_attempts++;
+        dial_stat = 7;
+        if(options.dial_attempts != 0){
+            if(check_attempts_exceeded(connect_attempts)){
+        	hangup();
+            }
+        }
+        continue_select(2000);
+        return;
     default:
 	err( "Unknown dial response string.\n" );
 	stat = ModemError;
