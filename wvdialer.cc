@@ -51,7 +51,7 @@ static char *	prompt_strings[] = {
 //       WvDialer Public Functions
 //**************************************************
 
-WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list )
+WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = false )
 /********************************************************/
 : WvStreamClone( (WvStream **)&modem ),
     cfg(_cfg), log( "WvDial", WvLog::Debug ),
@@ -71,6 +71,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list )
     connected_at         = 0;
     
     sect_list = _sect_list;
+    chat_mode = _chat_mode;
     
     log( "WvDial: Internet dialer version " WVDIAL_VER_STRING "\n" );
 
@@ -281,6 +282,7 @@ void WvDialer::execute()
     	async_waitprompt();
     	break;
     case Online:
+	assert( !chat_mode );
     	// If already online, we only need to make sure pppd is still there.
 	if( ppp_pipe && ppp_pipe->child_exited() ) {
 	    if( ppp_pipe->child_killed() ) {
@@ -415,7 +417,10 @@ bool WvDialer::init_modem()
     }
 
     // Open the modem...
-    modem = new WvModem( options.modem, options.baud );
+    if( chat_mode )
+	modem = new WvModemBase( STDIN_FILENO );
+    else
+	modem = new WvModem( options.modem, options.baud );
     if( !modem->isok() ) {
 	err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
 	return( false );
@@ -572,6 +577,8 @@ void WvDialer::async_dial()
 void WvDialer::start_ppp()
 /************************/
 {
+    if( chat_mode ) exit(0); // pppd is already started...
+
     WvString	addr_colon( "%s:", options.force_addr );
 
     char const *argv[] = {

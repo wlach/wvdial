@@ -16,7 +16,8 @@ const char wvdial_version_text[] =
 const char wvdial_help_text[] = 
 "Usage: wvdial { option || sect1 sect2 sect3 ... } \n"
 "\n"
-"  options:	--help		display this help and exit\n"
+"  options:	--chat		used when running wvdial from pppd\n"
+"  		--help		display this help and exit\n"
 " 		--version	output version information and exit\n"
 "\n"
 "Optional \"sect\" arguments refer to sections in /etc/wvdial.conf.\n"

@@ -9,7 +9,9 @@
 
 #include "wvdialer.h"
 #include "wvver.h"
+#include "wvlog.h"
 #include "wvlogrcv.h"
+#include "wvsyslog.h"
 #include "wvconf.h"
 
 #include <signal.h>
@@ -81,8 +83,11 @@ int main( int argc, char ** argv )
 #endif
 
     WvDialLogger 	rc;
+    WvSyslog		*syslog = NULL;
     WvConf		cfg( "/etc/wvdial.conf" );
     WvStringList	*sections = new WvStringList;
+
+    bool chat_mode = false;
     
     signal( SIGTERM, signalhandler );
     signal( SIGINT, signalhandler );
@@ -94,6 +99,11 @@ int main( int argc, char ** argv )
 
     if( argc > 1 ) {
     	for( int i=1; i < argc; i++ ) {
+	    if( !strcmp( argv[i], "--chat" ) ) {
+		syslog = new WvSyslog( "WvDial", true, WvLog::Info );
+		chat_mode = true;
+		continue;
+	    }
 	    if( !strcmp( argv[i], "--help" ) ) {
 	    	print_help();
 	    	return( 1 );
@@ -112,7 +122,7 @@ int main( int argc, char ** argv )
 	sections->append( new WvString( "Dialer Defaults" ), true);
     }
     
-    WvDialer dialer( cfg, sections );
+    WvDialer dialer( cfg, sections, chat_mode );
 	
     if( dialer.dial() == false )
 	return  1;
@@ -124,6 +134,9 @@ int main( int argc, char ** argv )
     }
 
     dialer.hangup();
+
+    if( syslog )
+	delete syslog;
 
     return( 0 );
 }
