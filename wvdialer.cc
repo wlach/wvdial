@@ -271,7 +271,7 @@ bool WvDialer::isok() const
 	&& stat != ModemError && stat != OtherError;
     /*
     if (!b)
-	fprintf( stderr, "Returning not ok!!\n" );
+	err("Returning not ok!!\n" );
     */
     return( b );
 }
@@ -980,8 +980,9 @@ int WvDialer::ask_password()
 {
   char tmp[60];
   
-  fprintf( stdout, "Please enter password (or empty password to stop):\n" );
-  fflush( stdout );		// kinternet needs this
+  log("Please enter password (or empty password to stop):\n" );
+//  fflush( stdout );		// kinternet needs this - WvLog should do it
+				// automagically
   
   set_echo( STDOUT_FILENO, 0 );
   fgets( tmp, 50, stdin );
@@ -1013,7 +1014,7 @@ void WvDialer::start_ppp()
     
     // open a pipe to access the messages of pppd
     if( pipe( pppd_msgfd ) == -1 ) {
-      fprintf( stderr, "pipe failed: %s\n", strerror(errno) );
+      err("pipe failed: %s\n", strerror(errno) );
       exit( EXIT_FAILURE );
     }
     pppd_log = new WvStream( pppd_msgfd[0] );
@@ -1025,7 +1026,7 @@ void WvDialer::start_ppp()
     char buffer2[20] = "";
     if( options.password != NULL && options.password[0] != '\0' ) {
       if( pipe( pppd_passwdfd ) == -1 ) {
-	fprintf( stderr, "pipe failed: %s\n", strerror(errno) );
+	err("pipe failed: %s\n", strerror(errno) );
 	exit( EXIT_FAILURE );
       }
       ::write( pppd_passwdfd[1], (const char *) options.password, options.password.len() );

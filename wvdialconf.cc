@@ -35,8 +35,7 @@ void check_ppp_options()
 	    || !strncmp(line, "cua",  3)
 	    || !strncmp(line, "connect", 7))
 	{
-	    fprintf(stderr,
-		"\n*** WARNING!  Line \"%s\"\n"
+	    wvcon->print("\n*** WARNING!  Line \"%s\"\n"
 		"   in /etc/ppp/options may conflict with wvdial!\n\n", line);
 	}
     }
@@ -51,13 +50,13 @@ int main(int argc, char **argv)
     
     if (argc != 2 || argv[1][0]=='-')
     {
-	fprintf(stderr, "Usage: %s <configfile-name>\n"
+	wvcon->print("Usage: %s <configfile-name>\n"
 		"\t(create/update a wvdial.conf file automatically)\n",
 		argv[0]);
 	return 1;
     }
     
-    fprintf(stderr, "Scanning your serial ports for a modem.\n\n");
+    wvcon->print("Scanning your serial ports for a modem.\n\n");
     
     WvModemScanList l;
     while (!l.isdone()) {
@@ -68,16 +67,15 @@ int main(int argc, char **argv)
     
     if (l.count() < 1)
     {
-	fprintf(stderr,
-	  "\n\n"
+	wvcon->print("\n\n"
 	  "Sorry, no modem was detected!  "
 	    "Is it in use by another program?\n"
 	  "Did you configure it properly with setserial?\n\n"
 		
-	  "Please read the FAQ at http://www.worldvisions.ca/wvdial/\n\n"
+	  "Please read the FAQ at http://open.nit.ca/wvdial/\n\n"
 		
 	  "If you still have problems, send mail to "
-	    "wvdial-list@worldvisions.ca.\n");
+	    "wvdial-list@lists.nit.ca.\n");
 	return 1;
     }
     
@@ -87,14 +85,14 @@ int main(int argc, char **argv)
     WvModemScan &m = i;
     WvString fn = m.filename(), init = m.initstr();
     
-    fprintf(stderr, "\nFound %s on %s",
+    wvcon->print("\nFound %s on %s",
         m.is_isdn() ? "an ISDN TA" :
         strncmp("/dev/ttyACM",fn,11) ? "a modem" : "an USB modem", (const char *)fn);
     if (m.use_modem_link) {
-        fprintf(stderr, ", using link /dev/modem in config.\n");
+        wvcon->print(", using link /dev/modem in config.\n");
         fn = "/dev/modem";
     } else {
-        fprintf(stderr, ".\n");    
+        wvcon->print(".\n");    
     }
     WvConf cfg(argv[1],660); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
@@ -108,9 +106,9 @@ int main(int argc, char **argv)
             strncmp("/dev/ttyACM",fn,11) ? "Analog Modem" : "USB Modem");  
  
     if (m.modem_name)
-        fprintf(stderr, "Config for %s written to %s.\n", (const char *)m.modem_name, argv[1]);
+        wvcon->print("Config for %s written to %s.\n", (const char *)m.modem_name, argv[1]);
     else
-        fprintf(stderr, "Modem configuration written to %s.\n", argv[1]);
+        wvcon->print("Modem configuration written to %s.\n", argv[1]);
 
     // insert some entries to let people know what they need to edit
     if (!cfg.get(s, "Phone"))
