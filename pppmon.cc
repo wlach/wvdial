@@ -95,7 +95,7 @@ int main( int argc, char ** argv )
       
       do {
 	
-	line = pppd_log->getline( 100 );
+	line = pppd_log->blocking_getline( 100 );
 	if( line != NULL ) {
 	  char *buffer1 = pppd_mon.analyse_line( line );
 	  if( buffer1 != NULL && buffer1[0] != '\0' ) {

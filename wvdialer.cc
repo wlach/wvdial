@@ -332,7 +332,7 @@ void WvDialer::pppd_watch( int ms )
     {
     	char *line;
     
-    	while ( (line = pppd_log->getline( ms )) )
+    	while ( (line = pppd_log->blocking_getline( ms )) )
     	{
 	    WvString buffer1(pppd_mon.analyse_line( line ));
 	    if (!!buffer1)

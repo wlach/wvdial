@@ -55,11 +55,11 @@ bool WvPapChap::load_file( char * filename )
     if( file.isok() == false )
     	return( false );
 
-    from_file = file.getline( 0 );
+    from_file = file.getline();
     while( from_file ) {
     	tmp = new WvString( from_file );
     	contents.append( tmp, true );
-    	from_file = file.getline( 0 );
+    	from_file = file.getline();
     }
     file.close();
 

@@ -17,7 +17,7 @@ void check_ppp_options()
     WvFile file("/etc/ppp/options", O_RDONLY);
     char *line;
     
-    while ((line = file.getline(0)) != NULL)
+    while ((line = file.getline()) != NULL)
     {
 	line = trim_string(line);
 	
