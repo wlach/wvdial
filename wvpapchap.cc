@@ -96,14 +96,17 @@ void WvPapChap::do_secret( const char * _username, const char * _password,
     WvString password;
     WvString remote;
 
-    if( !_username || !password )
+    if( !_username || !_password )
     	return;
     
     // we need to backslash-escape all punctuation, so that pppd reads it
     // correctly.
     username = backslash_escape( _username );
     password = backslash_escape( _password );
-    remote   = backslash_escape( _remote );
+    remote   = _remote;
+
+    if( !remote )
+        remote = "*";
 
     for( iter.rewind(); iter.next(); ) {
     	// Is this line a comment?
