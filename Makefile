@@ -1,3 +1,4 @@
+TOPDIR=../..
 include $(TOPDIR)/rules.mk
 
 XPATH=.. ../utils ../configfile ../streams
