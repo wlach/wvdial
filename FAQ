@@ -1,0 +1,8 @@
+
+wvdial stays in foreground -- you really are connected
+
+don't forget to set up /etc/resolv.conf
+
+setserial
+
+/etc/ppp/options
