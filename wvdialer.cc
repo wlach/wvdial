@@ -5,6 +5,7 @@
  * Implementation of the WvDialer smart-dialer class.  
  *
  */
+
 #include "wvdialer.h"
 #include "wvver.h"
 
@@ -51,8 +52,8 @@ static char *	prompt_strings[] = {
 //       WvDialer Public Functions
 //**************************************************
 
-WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = false )
-/********************************************************/
+WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
+/***************************************************************************/
 : WvStreamClone( (WvStream **)&modem ),
     cfg(_cfg), log( "WvDial", WvLog::Debug ),
     err( log.split( WvLog::Error ) ),
@@ -182,8 +183,8 @@ void WvDialer::hangup()
     }
 }
 
-bool WvDialer::select_setup(SelectInfo &si)
-/**************************************************************************/
+bool WvDialer::select_setup( SelectInfo& si )
+/*******************************************/
 {
     if( isok() && stat != Online && stat != Idle
 	       && time( NULL ) - last_execute > 1 )
@@ -201,11 +202,11 @@ bool WvDialer::select_setup(SelectInfo &si)
 bool WvDialer::isok() const
 /*************************/
 {
-    bool b = (!modem || modem->isok())
+    bool b = ( !modem || modem->isok() )
 	&& stat != ModemError && stat != OtherError;
     if (!b)
-	fprintf(stderr, "Returning not ok!!\n");
-    return b;
+	fprintf( stderr, "Returning not ok!!\n" );
+    return( b );
 }
 
 char * WvDialer::connect_status() const
@@ -359,7 +360,7 @@ void WvDialer::execute()
 //**************************************************
 
 void WvDialer::load_options()
-/*****************************************************************/
+/***************************/
 {
     OptInfo opts[] = {
     // string options:
@@ -412,6 +413,10 @@ void WvDialer::load_options()
 	    opts[i].str_member->unique();
     	}
     }
+
+    // Support Init, as well as Init1, to make old WvDial people happy.
+    options.init1 = cfg.fuzzy_get( *sect_list, "Init",
+                        cfg.get( d, "Init", options.init1 ) );
 }
 
 bool WvDialer::init_modem()
@@ -742,7 +747,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	    }
 	}
 	
-	if (strs[ result ] == NULL)
+	if( strs[ result ] == NULL )
 	    result = -1;
 
 	// Search the buffer for a valid menu option...
@@ -760,7 +765,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	    offset = INBUF_SIZE/2;
 	}
 	
-	if (result != -1)
+	if( result != -1 )
 	    break;
     }
     
