@@ -32,7 +32,7 @@ binary-arch: build
 	dh_installdirs
 	$(MAKE) PREFIX=`pwd`/debian/tmp/usr \
 		PPPDIR=`pwd`/debian/tmp/etc/ppp/peers \
-		install
+		install-bin
 	#cp debian/pon.wvdial debian/poff.wvdial debian/tmp/usr/bin/
 	dh_installdocs
 	dh_installman
