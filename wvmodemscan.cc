@@ -502,13 +502,12 @@ static int filesort(const void *_e1, const void *_e2)
 }
 
 
-void WvModemScanList::setup()
+WvModemScanList::WvModemScanList() : log("Port Scan", WvLog::Debug)
 {
     struct dirent **namelist;
     struct stat mouse, modem;
     int num, count, mousestat, modemstat;
     
-    log = new WvLog("Port Scan", WvLog::Debug);
     thisline = -1;
     printed = false;
     
@@ -528,7 +527,7 @@ void WvModemScanList::setup()
 	// a modem.
 	if (mousestat==0 && mouse.st_ino == (ino_t)namelist[count]->d_ino)
 	{
-	    log->print("\nIgnoring %s because /dev/mouse is a link to it.\n",
+	    log("\nIgnoring %s because /dev/mouse is a link to it.\n",
 		       namelist[count]->d_name);
 	    continue;
 	}
@@ -538,7 +537,7 @@ void WvModemScanList::setup()
 	// so PCMCIA can change it where it has detected a serial port and
 	// wvdial will follow without the need for another wvdialconf call.
 	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino) {
-	    log->print("\nScanning %s first, /dev/modem is a link to it.\n",
+	    log("\nScanning %s first, /dev/modem is a link to it.\n",
 		       namelist[count]->d_name);
 	    prepend(new WvModemScan(WvString("%s", namelist[count]->d_name), true),
 		   true);
@@ -552,13 +551,6 @@ void WvModemScanList::setup()
     free(namelist);
 }
 
-
-void WvModemScanList::shutdown()
-{
-    delete log;
-}
-
-bool ready = false;
 
 // we used to try to scan all ports simultaneously; unfortunately, this
 // caused problems when people had "noncritical" IRQ conflicts (ie. two
@@ -599,9 +591,9 @@ void WvModemScanList::execute()
 	    
 	    ++thisline %= 8;
 	    if (!thisline)
-		log->print("\n");
+		log("\n");
 
-	    log->print("%-4s ", cptr);
+	    log("%-4s ", cptr);
 	}
 
 	i.unlink();
@@ -615,23 +607,10 @@ void WvModemScanList::execute()
 	    printed = true;
     }
 	    
-    if (s.isdone()) {
-	log->write("\n", 1);
-	ready = true;
-#if 0
-        for (i.rewind(); i.next(); )
-		if (!i().isdone()) 
-			i.unlink();
-#endif
-    }
-
+    if (isdone()) 
+	log("\n");
 }
 
-
-bool WvModemScanList::isready()
-{
-    return ready;
-}
 
 bool WvModemScanList::isdone()
 {

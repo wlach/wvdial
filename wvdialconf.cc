@@ -59,11 +59,8 @@ int main(int argc, char **argv)
     wvcon->print("Scanning your serial ports for a modem.\n\n");
     
     WvModemScanList l;
-    while (!l.isdone()) {
+    while (!l.isdone())
 	l.execute();
-	if (l.isready())
-		break;
-    }
     
     if (l.count() < 1)
     {

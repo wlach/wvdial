@@ -71,16 +71,19 @@ public:
 // After an instance of the class has been created, run execute()
 // again and again until isdone()==true; then the contents of the list
 // is a set of all available modems, in the form of WvModemScan objects.
-DeclareWvList2(WvModemScan,
-	       WvLog *log;
-	       int thisline;
-	       bool printed;
-	       void setup();
-	       void shutdown();
-	       void execute();
-	       bool isdone();
-	       bool isready();
-	       );
+DeclareWvList3(WvModemScan, WvModemScanListBase, );
+
+class WvModemScanList : public WvModemScanListBase
+{
+    WvLog log;
+    int thisline;
+    bool printed;
+public:
+    WvModemScanList();
+    
+    void execute();
+    bool isdone();
+};
 
 
 #endif // __WVMODEMSCAN_H
