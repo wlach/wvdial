@@ -1,6 +1,6 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2002 Net Integration Technologies, Inc.
+ *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
  *
  * Re-write of wvpapsecrets.cc.  This one supports CHAP as well, and is also
  * much safer.

@@ -1,6 +1,6 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2002 Net Integration Technologies, Inc.
+ *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
  *
  * Standalone WvDial program, for testing the WvDialer class.
  *
@@ -29,16 +29,10 @@ class WvDialLogger : public WvLogConsole
 public:
     WvDialLogger() : WvLogConsole( dup( 2 ) ) // log to stderr (fd 2)
         { }
-    virtual ~WvDialLogger();
+
 protected:
     virtual void _make_prefix();
 };
-
-
-WvDialLogger::~WvDialLogger()
-/***************************/
-{
-}
 
 
 void WvDialLogger::_make_prefix()
@@ -67,12 +61,12 @@ static void print_help()
     printf( "\n%s", wvdial_help_text );
 }
 
-static void signalhandler( int signum )
+static void signalhandler(int sig)
 /***********************************/
 {
-    printf( "Caught signal #%d!  Attempting to exit gracefully...\n", signum );
+    fprintf(stderr, "Caught signal %d:  Attempting to exit gracefully...\n", sig);
     want_to_die = true;
-    signal( signum, SIG_DFL );
+    signal(sig, SIG_DFL);
 }
 
 
