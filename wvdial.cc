@@ -79,12 +79,8 @@ int main( int argc, char ** argv )
     
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
-#ifdef USE_WVCONFEMU
     UniConfRoot uniconf("temp:");
     WvConf cfg(uniconf);
-#else
-    WvConf		    cfg("/dev/null");
-#endif
     WvStringList	sections;
     WvStringList	cmdlineopts;
     WvLog		    log( "WvDial", WvLog::Debug );
