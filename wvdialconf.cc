@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     WvConf cfg(argv[1]);
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
-    cfg.set(s, "Baud", m.maxbaud());
+    cfg.setint(s, "Baud", m.maxbaud());
     cfg.set(s, "Init1", "ATZ");
     cfg.set(s, "Init2", init);
 

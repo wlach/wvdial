@@ -399,8 +399,8 @@ void WvDialer::load_options()
     	if( opts[i].str_member == NULL ) {
     	    // it's an int/bool option.
     	    *( opts[i].int_member ) =
-    	    		cfg.fuzzy_get( *sect_list, opts[i].name,
-    	    		    cfg.get( d, opts[i].name, opts[i].int_default ) );
+		cfg.fuzzy_getint( *sect_list, opts[i].name,
+		       cfg.getint( d, opts[i].name, opts[i].int_default ) );
     	} else {
     	    // it's a string option.
     	    *( opts[i].str_member ) = 
