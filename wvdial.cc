@@ -195,7 +195,7 @@ int main( int argc, char ** argv )
         sections.append( new WvString("Command-Line"),true);
     }
     
-    if( !cfg.isok() || !cfg.isclean() ) 
+    if( !cfg.isok() ) 
     {
 	return 1;
     }
