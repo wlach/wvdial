@@ -1,3 +1,8 @@
+
+CONNECT 115200/PPP 64000/NONE
+
+
+
    Bethel College Terminal Server
  Please select one of the following:
  1) Log in to menno  
