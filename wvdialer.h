@@ -101,6 +101,10 @@ public:
     	WvString	init8;
     	WvString	init9;
     	WvString	phnum;
+    	WvString	phnum1;
+    	WvString	phnum2;
+    	WvString	phnum3;
+    	WvString	phnum4;
     	WvString	dial_prefix;
     	WvString	areacode;
     	WvString	dial_cmd;
@@ -134,6 +138,9 @@ private:
     time_t		auto_reconnect_delay;
     time_t		auto_reconnect_at;
     WvPipe *		ppp_pipe;
+
+    int     		phnum_count;
+    int     		phnum_max;  
 
     WvLog		log;
     WvLog		err;

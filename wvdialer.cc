@@ -46,7 +46,8 @@ static char *	prompt_strings[] = {
 	NULL
 };
 
-
+int	phnum_count = 0;
+int	phnum_max = 0;
 
 
 //**************************************************
@@ -72,7 +73,8 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     auto_reconnect_at    = 0;
     connected_at         = 0;
     weird_pppd_problem   = false;
-    
+    phnum_count = 0;
+    phnum_max = 0;      
     // tell wvstreams we need our own subtask
     uses_continue_select = true;
     
@@ -90,7 +92,21 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     	    	 iter );
     	}
     }
-
+ 
+   // Ensure all inherited sections exist, warning if not.
+    WvConfigSectionList::Iter iter2 (cfg);
+    for (iter2.rewind(); iter2.next();) { 
+        WvConfigSection & sect2 = iter2;    
+        WvConfigEntry * entry = sect2["Inherits"];
+        if (entry) {
+            WvString inherits = entry->value;
+            if (cfg[inherits] == NULL)
+                err( WvLog::Warning,  
+                     "Warning: inherited section [%s] does not exist in wvdial.conf\n",
+                     inherits);
+       }
+    }  
+ 
     // Activate the brain and read configuration.
     brain = new WvDialBrain( this );
 
@@ -147,6 +163,13 @@ bool WvDialer::dial()
     
     if( stat != Idle )
 	return( false );
+
+    phnum_max = 0;
+    if( options.phnum1.len() ) { phnum_max++;
+      if( options.phnum2.len() ) { phnum_max++;
+        if( options.phnum3.len() ) { phnum_max++;
+          if( options.phnum4.len() ) { phnum_max++;
+    } } } }
 
     // we need to re-init the modem if we were online before.
     if( been_online && !init_modem() )
@@ -380,6 +403,10 @@ void WvDialer::load_options()
     	{ "Init8",           &options.init8,        NULL, "",               0 },
     	{ "Init9",           &options.init9,        NULL, "",               0 },
     	{ "Phone",           &options.phnum,        NULL, "",               0 },
+    	{ "Phone1",          &options.phnum1,       NULL, "",               0 },
+    	{ "Phone2",          &options.phnum2,       NULL, "",               0 },
+    	{ "Phone3",          &options.phnum3,       NULL, "",               0 },
+    	{ "Phone4",          &options.phnum4,       NULL, "",               0 },
     	{ "Dial Prefix",     &options.dial_prefix,  NULL, "",               0 },
     	{ "Area Code",       &options.areacode,     NULL, "",               0 },
     	{ "Dial Command",    &options.dial_cmd,     NULL, "ATDT",           0 },
@@ -546,11 +573,27 @@ void WvDialer::async_dial()
     if( stat == Dial ) {
     	// Construct the dial string.  We use the dial command, prefix,
 	// area code, and phone number as specified in the config file.
+	WvString *this_str;
+        switch( phnum_count ) 
+	{  
+            case 0:     
+		this_str = &options.phnum;      break;
+            case 1:     
+		this_str = &options.phnum1;     break;
+            case 2:     
+		this_str = &options.phnum2;     break;
+            case 3:     
+		this_str = &options.phnum3;     break;
+            case 4:
+            default:
+                this_str = &options.phnum4;     break;
+        }
+
 	WvString s( "%s %s%s%s%s\r", options.dial_cmd,
 				 options.dial_prefix,
 				 !options.dial_prefix ? "" : ",",
 				 options.areacode,
-				 options.phnum );
+				 *this_str );
 	modem->print( s );
 	log( "Sending: %s\n", s );
 	log( "Waiting for carrier.\n" );
@@ -624,11 +667,16 @@ void WvDialer::async_dial()
 	    err( "The line is busy.\n" );
 	    stat = ModemError;
 	} else {
-	    log( "The line is busy.  Trying again in 5 seconds.\n" );
-	    stat = PreDial1;
-	    connect_attempts++;
-	    dial_stat = 4;
-	    continue_select(2000);
+       	   if( phnum_count++ == phnum_max )
+           	phnum_count = 0;
+           if( phnum_count == 0 )
+           	log( WvLog::Warning, "The line is busy. Trying again.\n" );
+       	   else
+           	log( WvLog::Warning, "The line is busy. Trying other number.\n");
+	   stat = PreDial1;
+	   connect_attempts++;
+	   dial_stat = 4;
+	   continue_select(2000);
 	}
 	return;
     case 5:	// ERROR
