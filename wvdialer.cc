@@ -183,7 +183,7 @@ void WvDialer::hangup()
     }
 }
 
-bool WvDialer::select_setup( SelectInfo& si )
+bool WvDialer::pre_select( SelectInfo& si )
 /*******************************************/
 {
     if( isok() && stat != Online && stat != Idle
@@ -195,7 +195,7 @@ bool WvDialer::select_setup( SelectInfo& si )
 	// we need to execute() even if no modem data is incoming.
 	return( true );
     } else {
-	return WvStreamClone::select_setup( si );
+	return WvStreamClone::pre_select( si );
     }
 }
 

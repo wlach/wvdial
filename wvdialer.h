@@ -68,7 +68,7 @@ public:
     Status status() const
         { return stat; }
     
-    virtual bool select_setup(SelectInfo &si);
+    virtual bool pre_select(SelectInfo &si);
     virtual bool isok() const;
 
     int	   connect_attempts;
