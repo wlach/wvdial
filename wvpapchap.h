@@ -39,7 +39,8 @@ private:
     bool load_file( char * filename );
     void nuke_contents();
     bool write_file( char * filename );
-    void do_secret( char * username, char * password, char * remote );
+    void do_secret( const char * username, const char * password,
+		    const char * remote );
 };
 
 #endif __WVPAPCHAP_H

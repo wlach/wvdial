@@ -175,8 +175,7 @@ void WvDialer::hangup()
     }
 }
 
-bool WvDialer::select_setup( fd_set &r, fd_set &w, fd_set &x, int &max_fd,
-			     bool readable, bool writable, bool isexception )
+bool WvDialer::select_setup(SelectInfo &si)
 /**************************************************************************/
 {
     if( isok() && stat != Online && stat != Idle
@@ -188,8 +187,7 @@ bool WvDialer::select_setup( fd_set &r, fd_set &w, fd_set &x, int &max_fd,
 	// we need to execute() even if no modem data is incoming.
 	return( true );
     } else {
-	return WvStreamClone::select_setup( r, w, x, max_fd,
-					    readable, writable, isexception );
+	return WvStreamClone::select_setup( si );
     }
 }
 

@@ -93,7 +93,8 @@ bool WvPapChap::write_file( char * filename )
     return( true );
 }
 
-void WvPapChap::do_secret( char * username, char * password, char * remote )
+void WvPapChap::do_secret( const char * username, const char * password, 
+			   const char * remote )
 /**************************************************************************/
 // Goes through the "contents" list, looking for lines that have the same
 // username.  If they do, and the remote value is either "*" or remote,
@@ -116,7 +117,7 @@ void WvPapChap::do_secret( char * username, char * password, char * remote )
     	}
 
     	// Is the line blank?
-    	char * p = iter();
+    	const char * p = iter();
     	do 
     	    p++;
     	while( *p != '\0' && isspace( *p ) );
@@ -127,7 +128,7 @@ void WvPapChap::do_secret( char * username, char * password, char * remote )
     	}
 
 	// p points at the first non-whitespace char.
-	char * q = p;
+	const char * q = p;
 	do
 	    q++;
 	while( *q != '\0' && !isspace( *q ) );

@@ -68,8 +68,7 @@ public:
     Status status() const
         { return stat; }
     
-    virtual bool select_setup( fd_set &r, fd_set &w, fd_set &x, int &max_fd,
-			       bool readable, bool writable, bool isexception );
+    virtual bool select_setup(SelectInfo &si);
     virtual bool isok() const;
 
     int	   connect_attempts;
