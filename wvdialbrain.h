@@ -66,7 +66,7 @@ private:
 
     // Menu-string tokenizer....
     BrainToken *	tokenize( char * left, char * right );
-    inline BrainToken * tokenize( char * str );
+    BrainToken * tokenize( char * str );
     void		token_list_done( BrainToken * token_list );
 
     // Called from guess_menu....
