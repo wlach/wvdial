@@ -244,6 +244,7 @@ bool WvDialBrain::is_login_prompt( const char * buf )
     	    is_prompt( buf, "user.id", true ) ||
     	    is_prompt( buf, "signon" ) ||
     	    is_prompt( buf, "sign.on", true ) ||
+    	    is_prompt( buf, "usuario", false ) ||
     	    ( dialer->options.login_prompt[0] &&
     	      is_prompt( buf, dialer->options.login_prompt ) ) );
 }
