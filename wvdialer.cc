@@ -175,19 +175,19 @@ bool WvDialer::dial()
     	return( false );
     }
 
-    if( !options.phnum[0] ) 
+    if (!options.phnum) 
     {
 	err( "Configuration does not specify a valid phone number.\n" );
     	stat = OtherError;
     }
 
-    if( !options.login[0] ) 
+    if (!options.login) 
     {
 	err( "Configuration does not specify a valid login name.\n" );
     	stat = OtherError;
     }
 
-    if( !options.password[0] ) 
+    if (!options.password) 
     {
 	err( "Configuration does not specify a valid password.\n" );
     	stat = OtherError;
@@ -668,7 +668,7 @@ bool WvDialer::init_modem()
     
     load_options();
 
-    if( !options.modem[0] ) 
+    if (!options.modem) 
     {
 	err( "Configuration does not specify a valid modem device.\n" );
     	stat = ModemError;
@@ -1178,7 +1178,7 @@ void WvDialer::start_ppp()
     
     // open a pipe to pass password to pppd
     WvString buffer2;
-    if( options.password != NULL && options.password[0] != '\0' ) 
+    if (!options.password) 
     {
 	if( pipe( pppd_passwdfd ) == -1 ) 
 	{
@@ -1199,12 +1199,12 @@ void WvDialer::start_ppp()
 	"usehostname",
 	"-detach",
 	"user", options.login,
-	options.force_addr[0] ? (const char *)addr_colon : "noipdefault",
+	(!!options.force_addr) ? (const char *)addr_colon : "noipdefault",
 	options.new_pppd ? "call" : NULL, 
 	options.new_pppd ? "wvdial" : NULL,
 	options.new_pppd && options.auto_dns ? "usepeerdns"	   : NULL,
 	options.new_pppd && options.isdn     ? "default-asyncmap"  : NULL,
-	options.new_pppd && options.pppd_option[0] ? (const char *) options.pppd_option : NULL,
+	options.new_pppd && (!!options.pppd_option) ? (const char *) options.pppd_option : NULL,
 	options.new_pppd && options.idle_seconds >= 0 ? "idle"	   : NULL, 
 	options.new_pppd && options.idle_seconds >= 0 ? (const char *)idle_seconds : NULL, 
 	"logfd", buffer1,

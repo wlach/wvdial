@@ -224,6 +224,12 @@ int main( int argc, char ** argv )
     
     int retval;
     
+    if (want_to_die)
+    {
+	// Probably dieing from a user signal
+        retval = 2;
+    }
+
     if ((dialer.status() != WvDialer::Idle) || !dialer.isok()) 
     {
 		retval = 1;

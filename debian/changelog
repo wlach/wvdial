@@ -1,4 +1,19 @@
-wvdial (1.54-1) unstable; urgency=low
+wvdial (1.54+20031110-1) unstable; urgency=low
+
+  * Fix build depends. (Closes: #218344)
+
+ -- James Morrison <phython@debian.org>  Mon, 10 Nov 2003 10:02:11 -0500
+
+wvdial (1.54+20031017-1) unstable; urgency=low
+
+  * Make a non-native debian package with an empty diff. (Closes: #160969)
+  * Add manpages for pon.wvdial and poff.wvdial (Closes: #201673)
+  * Test the option WvStrings not their first characters. (Closes: #212601)
+  * Exit with value 2 on a user signal. (Closes: #145404)
+
+ -- James Morrison <phython@debian.org>  Fri, 17 Oct 2003 14:21:38 -0400
+
+wvdial (1.54+20030509-1) unstable; urgency=low
 
   * Synchronize with WvStreams 3.73
   * More cleanup of various internals
