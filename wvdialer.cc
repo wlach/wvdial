@@ -368,13 +368,13 @@ void WvDialer::load_options( WvConf& cfg, WvStringList& sect_list )
     	{ "Force Address",   &options.force_addr,   NULL, "",               0 },
     	{ "Remote Name",     &options.remote,       NULL, "*",              0 },
     	{ "Default Reply",   &options.default_reply,NULL, "ppp",	    0 },
+    	{ "ISDN",	     &options.isdn,	    NULL, "",		    0 },
 
     // int/bool options
     	{ "Baud",            NULL, &options.baud,          "", DEFAULT_BAUD },
     	{ "Carrier Check",   NULL, &options.carrier_check, "", true         },
     	{ "Stupid Mode",     NULL, &options.stupid_mode,   "", false        },
     	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", false	    },
-    	{ "ISDN",	     NULL, &options.isdn,	   "", false        },
     	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", true	    },
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
@@ -451,7 +451,7 @@ bool WvDialer::init_modem()
 
     // If we're using an ISDN modem, allow one second for the SPID
     // settings to kick in.  It dials so fast anyway that no one will care.
-    if( options.isdn )
+    if( options.isdn.str[0] )
 	sleep( 1 );
     
     // Everything worked fine.

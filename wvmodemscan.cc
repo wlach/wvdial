@@ -308,13 +308,18 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 }
 
 
-bool WvModemScan::is_isdn() const
+char *WvModemScan::is_isdn() const
 {
     if (!identifier.str[0])
-    	return false;
+    	return NULL;
 
-    return (identifier == "3C882");	// 3Com Impact IQ
-}
+    if (identifier == "3C882")		// 3Com Impact IQ
+    	return identifier.str;
+    if (identifier == "940")		// Motorola BitSurfr
+    	return identifier.str;
+
+    return NULL;
+}	
 
 
 static int fileselect(const struct dirent *e)

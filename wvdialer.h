@@ -102,10 +102,10 @@ private:
     	WvString	force_addr;
     	WvString	remote;
     	WvString	default_reply;
+    	WvString	isdn;
     	int		carrier_check;
     	int		stupid_mode;
     	int		new_pppd;
-    	int		isdn;
     	int		auto_reconnect;
     } options;
 
