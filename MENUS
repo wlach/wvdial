@@ -87,5 +87,12 @@ Which service, please?
 
 
 Doesn't work:
-	prompts that are followed immediately by CRLF, then wait on a blank
+------------
+
+
+prompts that are followed immediately by CRLF, then wait on a blank
 	line.
+
+
+Enter your username or type 'new' if new user:
+
