@@ -1057,11 +1057,11 @@ void WvDialer::start_ppp()
     };
     
     /* Filter out NULL holes in the raw argv list: */
-    char const *argv[sizeof(argv_raw)];
+    char * argv[sizeof(argv_raw)];
     int argv_index = 0;
     for (unsigned int i = 0; i < sizeof(argv_raw)/sizeof(char *); i++) {
 	if (argv_raw[i])
-            argv[argv_index++] = argv_raw[i];
+            argv[argv_index++] = (char *)argv_raw[i];
     }
     argv[argv_index] = NULL;
 
@@ -1098,7 +1098,8 @@ void WvDialer::start_ppp()
 //    }
 //    log("pppd args: %s\n", pppd_args);
 
-    ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
+    // ugly cast however without it the argv list can't be init'd
+    ppp_pipe = new WvPipe( argv[0], (const char * const *)argv, false, false, false,
 			   modem, modem, modem );
 
     log( WvLog::Notice, "pid of pppd: %s\n", ppp_pipe->getpid() );
