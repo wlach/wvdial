@@ -90,7 +90,7 @@ const char * WvDialBrain::check_prompt( const char * buffer )
     
     // If we've been here too many times, or too long ago, just give up and
     // start pppd.
-    if( prompt_tries >= 5 || time( NULL ) - dialer->last_rx >= 5 ) {
+    if( prompt_tries >= 5 || time( NULL ) - dialer->last_rx >= 10 ) {
     	dialer->log( WvLog::Notice, "Don't know what to do!  "
     		"Starting pppd and hoping for the best.\n" );
     	dialer->start_ppp();
@@ -164,7 +164,7 @@ bool WvDialBrain::is_prompt( const char * c,
 // looking for a SPECIFIC prompt that contains that string.
 {
     const char *	cptr;
-    static const char *	prompt_punct	= ")>}]:.|-?$%=";
+    static const char *	prompt_punct	= ")>}]:.|-?$%=\x11";
     
     // if no promptstring was given, the search is simple:  it is a 
     // prompt if the last line ends in punctuation and no newline.

@@ -15,6 +15,9 @@ papchaptest: papchaptest.o wvdial.a ../streams/streams.a ../utils/utils.a
 wvdial: wvdial.o wvdial.a ../configfile/configfile.a ../streams/streams.a \
 	  ../utils/utils.a
 
+atztest: atztest.o wvdial.a ../configfile/configfile.a ../streams/streams.a \
+	  ../utils/utils.a
+
 wvdialconf: wvdialconf.o wvdial.a ../configfile/configfile.a \
 	  ../streams/streams.a ../utils/utils.a
 

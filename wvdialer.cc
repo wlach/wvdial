@@ -428,6 +428,9 @@ bool WvDialer::init_modem()
     	stat = ModemError;
 	return( false ); // if we get this error, we already have a problem.
     }
+    
+    // the buffer is empty.
+    offset = 0;
 
     // Open the modem...
     if( chat_mode )
@@ -717,6 +720,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	// easier parsing.
 	replace_char( buffer + onset, '\0', ' ', offset - onset );
 	strip_parity( buffer + onset, offset - onset );
+	replace_char( buffer + onset, '\0', ' ', offset - onset );
 
 	if( verbose )
 	    modemrx.write( buffer + onset, offset - onset );
