@@ -1,6 +1,6 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2000 Net Integration Technologies, Inc.
+ *   Copyright (C) 1997-2001 Net Integration Technologies, Inc.
  *
  * Stuff that wvdial prints...
  *
@@ -11,7 +11,7 @@
 
 const char wvdial_version_text[] = 
 "WvDial " WVDIAL_VER_STRING
-": Copyright (c) 1997-2000 Net Integration Technologies, Inc.\n";
+": Copyright (c) 1997-2001 Net Integration Technologies, Inc.\n";
 
 const char wvdial_help_text[] = 
 "Usage: wvdial { option || sect1 sect2 sect3 ... } \n"
