@@ -254,6 +254,8 @@ char * WvDialer::connect_status() const
 void WvDialer::execute()
 /**********************/
 {
+    WvStreamClone::execute();
+    
     // the modem object might not exist, if we just disconnected and are
     // redialing.
     if( !modem && !init_modem() )
