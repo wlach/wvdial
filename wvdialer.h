@@ -75,6 +75,9 @@ public:
     bool   weird_pppd_problem;
     int	   dial_stat;
     char * connect_status() const;
+    bool   init_modem();
+    void   unlock_modem();
+    bool   lock_modem();
 
     friend class WvDialBrain;
 
@@ -137,7 +140,6 @@ private:
 
     void		load_options();
     
-    bool		init_modem();
     void		async_dial();
     void		async_waitprompt();
 
