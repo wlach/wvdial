@@ -573,7 +573,7 @@ void WvModemScanList::execute()
 
     if (!i.cur()) return; 
     
-    WvModemScan &s(i);
+    WvModemScan &s(*i);
     
     if (!s.isok())
     {

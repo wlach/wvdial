@@ -85,17 +85,17 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     // Ensure all sections in sect_list actually exist, warning if not.
     WvStringList::Iter	iter( *sect_list );
     for( iter.rewind(); iter.next(); ) {
-    	if( cfg[iter] == NULL ) {
+    	if( cfg[*iter] == NULL ) {
     	    err( WvLog::Warning,
 		 "Warning: section [%s] does not exist in wvdial.conf.\n",
-    	    	 iter );
+    	    	 *iter );
     	}
     }
  
    // Ensure all inherited sections exist, warning if not.
     WvConfigSectionList::Iter iter2 (cfg);
     for (iter2.rewind(); iter2.next();) { 
-        WvConfigSection & sect2 = iter2;    
+        WvConfigSection & sect2 = *iter2;
         WvConfigEntry * entry = sect2["Inherits"];
         if (entry) {
             WvString inherits = entry->value;

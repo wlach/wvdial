@@ -76,7 +76,7 @@ bool WvPapChap::write_file( char * filename )
 
     WvStringList::Iter	iter( contents );
     for( iter.rewind(); iter.next(); )
-    	file.print( "%s\n", iter );
+    	file.print( "%s\n", *iter );
 
     file.close();
     return( true );

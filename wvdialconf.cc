@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     WvModemScanList::Iter i(l);
     
     i.rewind(); i.next();
-    WvModemScan &m = i;
+    WvModemScan &m = *i;
     WvString fn = m.filename(), init = m.initstr();
     
     wvcon->print("\nFound %s on %s",
