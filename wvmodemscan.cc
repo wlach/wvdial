@@ -1,6 +1,6 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997, 1998 Worldvisions Computer Technology, Inc.
+ *   Copyright (C) 1997, 1998, 1999 Worldvisions Computer Technology, Inc.
  *
  * Intelligent serial port scanner: try to find a port (or ports)
  * with a working modem, guess a basic startup init string, and find

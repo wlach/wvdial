@@ -1,6 +1,6 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997, 1998 Worldvisions Computer Technology, Inc.
+ *   Copyright (C) 1997, 1998, 1999 Worldvisions Computer Technology, Inc.
  *
  * Re-write of wvpapsecrets.cc.  This one supports CHAP as well, and is also
  * much safer.
