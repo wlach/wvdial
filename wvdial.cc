@@ -101,7 +101,8 @@ int main( int argc, char ** argv )
     if( argc > 1 ) {
     	for( int i=1; i < argc; i++ ) {
 	    if( !strcmp( argv[i], "--chat" ) ) {
-		syslog = new WvSyslog( "WvDial", true, WvLog::Info );
+		syslog = new WvSyslog( "WvDial", false, WvLog::Debug2, 
+				       WvLog::Debug2 );
 		chat_mode = true;
 		continue;
 	    }
