@@ -13,7 +13,7 @@ LIBS = -L../wvstreams -lwvutils -lwvstreams
 
 wvdial wvdialconf papchaptest atztest: wvdial.a
 
-pppmon: pppmon.o wvdial.a
+pppmon: wvdial.a
 
 clean:
 	rm -f wvdial wvdialconf wvdialmon papchaptest pppmon atztest *.o *.a

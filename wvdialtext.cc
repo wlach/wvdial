@@ -21,6 +21,7 @@ const char wvdial_help_text[] =
 "	     --chat		    used when running wvdial from pppd\n"
 "  	     --help		    display this help and exit\n"
 " 	     --version		    output version information and exit\n"
+"	     --no-syslog	    don't send output to SYSLOG\n"
 "\n"
 "Optional \"sect\" arguments refer to sections in configuration file (usually)\n"
 "/etc/wvdial.conf, $HOME/.wvdialrc or the file specified by --config.\n"
