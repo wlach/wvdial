@@ -79,7 +79,7 @@ WvString WvModemScan::initstr() const
 	strcat(s.edit(), " ");
     }
     
-    return trim_string(s.edit());
+    return s;
 }
 
 
@@ -150,9 +150,7 @@ void WvModemScan::execute()
 	    tries++;
 
 	    if (tries >= 3)
-	    {
 	    	debug("nothing.\n");
-	    }
 
 	    // else try again shortly
 	}
@@ -384,7 +382,8 @@ void WvModemScanList::setup()
 	    continue;
 	}
 	
-	append(new WvModemScan(namelist[count]->d_name), true);
+	append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
+	       true);
     }
     
     while (--num >= 0)
