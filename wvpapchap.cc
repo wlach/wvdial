@@ -94,7 +94,7 @@ bool WvPapChap::write_file( char * filename )
     return( true );
 }
 
-void WvPapChap::do_secret( const char * username, const char * password, 
+void WvPapChap::do_secret( const char * _username, const char * password, 
 			   const char * remote )
 /**************************************************************************/
 // Goes through the "contents" list, looking for lines that have the same
@@ -104,9 +104,22 @@ void WvPapChap::do_secret( const char * username, const char * password,
 // remote defaults to "wvdial".
 {
     WvStringList::Iter	iter( contents );
+    WvString username;
+    char *cptr;
 
-    if( !username || !password )
+    if( !_username || !password )
     	return;
+    
+    // we need to change backslash to double-backslash in usernames, so pppd
+    // reads them correctly.
+    username.setsize(strlen(_username) * 2 + 1);
+    for (cptr = username.edit(); *_username; _username++)
+    {
+	*cptr++ = *_username;
+	if (*_username == '\\')
+	    *cptr++ = '\\'; // double it
+    }
+    *cptr = 0;
 
     iter.rewind();
     iter.next();
