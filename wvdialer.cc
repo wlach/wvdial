@@ -132,7 +132,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     if (options.homepage.len()) 
     {
         log(WvLog::Notice, "Homepage of %s: %s\n",
-	    options.provider.len() ? options.provider : "this provider",
+	    options.provider.len() ? options.provider.cstr() : "this provider",
 	    options.homepage);
     }
 
