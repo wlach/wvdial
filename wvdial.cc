@@ -152,10 +152,18 @@ int main( int argc, char ** argv )
 	}
     }
 
+    int retval;
+
+    if ((dialer.status() != WvDialer::Idle) || !dialer.isok()) {
+	retval = 1;
+    } else {
+	retval = 0;
+    }
+
     dialer.hangup();
 
     if( syslog )
 	delete syslog;
 
-    return( 0 );
+    return( retval );
 }

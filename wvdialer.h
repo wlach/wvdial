@@ -107,6 +107,8 @@ public:
     	int		stupid_mode;
     	int		new_pppd;
     	int		auto_reconnect;
+    	int		abort_on_busy;
+    	int		abort_on_no_dialtone;
     } options;
 
 private:

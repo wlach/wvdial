@@ -394,6 +394,8 @@ void WvDialer::load_options()
     	{ "Stupid Mode",     NULL, &options.stupid_mode,   "", false        },
     	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", true         },
     	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", true	    },
+    	{ "Abort on Busy",   NULL, &options.abort_on_busy, "", false	    },
+    	{ "Abort on No Dialtone", NULL, &options.abort_on_no_dialtone, "", true },
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
 
@@ -578,17 +580,27 @@ void WvDialer::async_dial()
 	return;
     case 2:	// NO DIALTONE
     case 3:	// NO DIAL TONE
-	err( "No dial tone.  Trying again in 5 seconds.\n" );
-	stat = PreDial2;
-	connect_attempts++;
-	dial_stat = 3;
+	if( options.abort_on_no_dialtone == true ) {
+	    err( "No dial tone.\n" );
+	    stat = ModemError;
+	} else {
+	    log( "No dial tone.  Trying again in 5 seconds.\n" );
+	    stat = PreDial2;
+	    connect_attempts++;
+	    dial_stat = 3;
+	}
 	return;
     case 4:	// BUSY
-	log( WvLog::Warning, "The line is busy.  Trying again.\n" );
-	stat = PreDial1;
-	connect_attempts++;
-	dial_stat = 4;
-	continue_select(2000);
+	if( options.abort_on_busy == true ) {
+	    err( "The line is busy.\n" );
+	    stat = ModemError;
+	} else {
+	    log( "The line is busy.  Trying again in 5 seconds.\n" );
+	    stat = PreDial1;
+	    connect_attempts++;
+	    dial_stat = 4;
+	    continue_select(2000);
+	}
 	return;
     case 5:	// ERROR
 	err( "Invalid dial command.\n" );
