@@ -426,79 +426,89 @@ void WvDialer::load_options()
 bool WvDialer::init_modem()
 /*************************/
 {
-    int	received;
+    int	received, count;
     
     load_options();
 
-    if( modem ) delete modem;
-    
     if( !options.modem[0] ) {
 	err( "Configuration does not specify a valid modem device.\n" );
     	stat = ModemError;
 	return( false ); // if we get this error, we already have a problem.
     }
     
-    // the buffer is empty.
-    offset = 0;
-
-    // Open the modem...
-    if( chat_mode )
-	modem = new WvModemBase( STDIN_FILENO );
-    else
-	modem = new WvModem( options.modem, options.baud );
-    if( !modem->isok() ) {
-	err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
-	return( false );
-    }
-
-    log( "Initializing modem.\n" );
+    for (count = 0; count < 3; count++)
+    {
+	// the buffer is empty.
+	offset = 0;
     
-    // make modem happy
-    modem->print( "\r\r\r\r\r" );
-    while( modem->select( 100 ) )
-	modem->drain();
+	if( modem ) delete modem;
+	
+	// Open the modem...
+	if( chat_mode )
+	    modem = new WvModemBase( STDIN_FILENO );
+	else
+	    modem = new WvModem( options.modem, options.baud );
+	if( !modem->isok() ) {
+	    err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
+	    continue;
+	}
+	
+	log( "Initializing modem.\n" );
+	
+	// make modem happy
+	modem->print( "\r\r\r\r\r" );
+	while( modem->select( 100 ) )
+	    modem->drain();
+	
+	// Send up to nine init strings, in order.
+	int	init_count;
+	for( init_count=1; init_count<=9; init_count++ ) {
+	    WvString *	this_str;
+	    switch( init_count ) {
+	        case 1:    this_str = &options.init1;	break;
+	    	case 2:    this_str = &options.init2;	break;
+	        case 3:    this_str = &options.init3;	break;
+	        case 4:    this_str = &options.init4;	break;
+    	        case 5:    this_str = &options.init5;	break;
+    	        case 6:    this_str = &options.init6;	break;
+    	        case 7:    this_str = &options.init7;	break;
+    	        case 8:    this_str = &options.init8;	break;
+    	        case 9:
+                default:
+	                   this_str = &options.init9;	break;
+	    }
+	    if( !! *this_str ) {
+		modem->print( "%s\r", *this_str );
+		log( "Sending: %s\n", *this_str );
+		
+		received = wait_for_modem( init_responses, 5000, true );
+		switch( received ) {
+		case -1:
+		    err( "Modem not responding.\n" );
+		    goto end_outer;
+		case 1:
+		    err( "Bad init string.\n" );
+		    goto end_outer;
+		}
+	    }
+	}
 
-    // Send up to nine init strings, in order.
-    int	init_count;
-    for( init_count=1; init_count<=9; init_count++ ) {
-    	WvString *	this_str;
-    	switch( init_count ) {
-	    case 1:    this_str = &options.init1;	break;
-	    case 2:    this_str = &options.init2;	break;
-	    case 3:    this_str = &options.init3;	break;
-	    case 4:    this_str = &options.init4;	break;
-    	    case 5:    this_str = &options.init5;	break;
-    	    case 6:    this_str = &options.init6;	break;
-    	    case 7:    this_str = &options.init7;	break;
-    	    case 8:    this_str = &options.init8;	break;
-    	    case 9:
-            default:
-	               this_str = &options.init9;	break;
-    	}
-    	if( !! *this_str ) {
-    	    modem->print( "%s\r", *this_str );
-    	    log( "Sending: %s\n", *this_str );
-
-    	    received = wait_for_modem( init_responses, 5000, true );
-    	    switch( received ) {
-    	    case -1:
-    	    	err( "Modem not responding.\n" );
-    	    	return( false );
-    	    case 1:
-    	    	err( "Bad init string.\n" );
-    	    	return( false );
-    	    }
-    	}
+	// If we're using an ISDN modem, allow one second for the SPID
+	// settings to kick in.  It dials so fast anyway that no one will care.
+	if( options.isdn[0] )
+	    sleep( 1 );
+	
+	// Everything worked fine.
+	log( "Modem initialized.\n" );
+	return( true );
+	
+	// allows us to exit the internal loop
+      end_outer:
+	continue;
     }
-
-    // If we're using an ISDN modem, allow one second for the SPID
-    // settings to kick in.  It dials so fast anyway that no one will care.
-    if( options.isdn[0] )
-	sleep( 1 );
     
-    // Everything worked fine.
-    log( "Modem initialized.\n" );
-    return( true );
+    // we tried 3 times and it didn't work.
+    return( false );
 }
 
 void WvDialer::async_dial()
