@@ -86,6 +86,8 @@ const char * WvDialBrain::guess_menu( char * buf )
 const char * WvDialBrain::check_prompt( const char * buffer )
 /*****************************************************/
 {
+    WvString tprompt;
+    
     // If we've been here too many times, or too long ago, just give up and
     // start pppd.
     if( prompt_tries >= 5 || time( NULL ) - dialer->last_rx >= 5 ) {
@@ -129,7 +131,12 @@ const char * WvDialBrain::check_prompt( const char * buffer )
     	dialer->reset_offset();
     	prompt_tries++;
 
-    	return( prompt_response );
+	// only use our prompt guess the first time.
+	// if it fails, go back to the default reply.
+	tprompt = prompt_response;
+	prompt_response = "";
+	
+    	return( tprompt );
 
     } else {
     	// not a prompt at all!

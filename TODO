@@ -7,9 +7,6 @@ a message to wvdial-list-request@worldvisions.ca with the subject
 
 WvDial
 ------
-- this login prompt doesn't work because it contains the word PPP:
-  "Enter hostname (e.g. shell3.ba) with no password, or your SLIP/PPP login:"
-- "PRESS 1 FOR PPP, 2 FOR SHELL" (Golden Triangle)
 - "Command>" should be a prompt (Janis in London)
 - start PPP when you get an IP address string
 - 1ms-lag-mode for wvmodem
