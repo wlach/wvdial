@@ -1,4 +1,8 @@
-TOPDIR=..
+ifeq ($(TOPDIR),)                                                                              
+  TOPDIR=.       
+  PKGINC=/usr/include/wvstreams /usr/local/include/wvstreams
+endif
+
 include $(TOPDIR)/wvrules.mk
 
 XPATH=.. ../wvstreams/include $(PKGINC)
