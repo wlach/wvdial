@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <assert.h>
-
+#include <xplc/xplc.h>
 
 static char *	init_responses[] = {
 	"ok",
@@ -81,17 +81,17 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     sect_list = _sect_list;
     chat_mode = _chat_mode;
     
-    log( "WvDial: Internet dialer version " WVDIAL_VER_STRING "\n" );
+    log("WvDial: Internet dialer version " WVDIAL_VER_STRING "\n");
 
     // Ensure all sections in sect_list actually exist, warning if not.
-    WvStringList::Iter	iter( *sect_list );
-    for( iter.rewind(); iter.next(); ) 
+    WvStringList::Iter iter(*sect_list);
+    for(iter.rewind(); iter.next();) 
     {
-    	if( cfg[*iter] == NULL ) 
+    	if(cfg[*iter] == NULL) 
         {
-    	    err( WvLog::Warning,
-		 "Warning: section [%s] does not exist in wvdial.conf.\n",
-    	    	 *iter );
+    	    err(WvLog::Warning,
+		"Warning: section [%s] does not exist in wvdial.conf.\n",
+		*iter);
     	}
     }
  
@@ -112,40 +112,41 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     }  
  
     // Activate the brain and read configuration.
-    brain = new WvDialBrain( this );
+    brain = new WvDialBrain(this);
 
     // init_modem() reads the config options.  It MUST run here!
     
-    if( !init_modem() )
+    if(!init_modem())
     {
 	// init_modem() printed an error
 	stat = ModemError;
 	return;
     }
-
+    
     if (options.provider.len()) 
     {
 	log( WvLog::Notice, "Dialing %s %s.\n",
 		options.provider,
 		options.product);
     }
-    if (options.homepage.len()) {
-        log( WvLog::Notice, "Homepage of %s: %s\n",
-		options.provider.len() ? (const char *)options.provider : "this provider",
-		options.homepage);
+    if (options.homepage.len()) 
+    {
+        log(WvLog::Notice, "Homepage of %s: %s\n",
+	    options.provider.len() ? options.provider : "this provider",
+	    options.homepage);
     }
 
-    if( options.auto_reconnect && options.idle_seconds > 0) 
+    if(options.auto_reconnect && options.idle_seconds > 0) 
     {
-    	err( WvLog::Notice,
+	err(WvLog::Notice,
 	    "Idle Seconds = %s, disabling automatic reconnect.\n",
-				WvString(options.idle_seconds));
+	    options.idle_seconds);
         options.auto_reconnect = false;
     }
     
-    pppd_mon.setdnstests (options.dnstest1, options.dnstest2);
-    pppd_mon.setcheckdns (options.check_dns);
-    pppd_mon.setcheckdfr (options.check_dfr);
+    pppd_mon.setdnstests(options.dnstest1, options.dnstest2);
+    pppd_mon.setcheckdns(options.check_dns);
+    pppd_mon.setcheckdfr(options.check_dfr);
 }
 
 WvDialer::~WvDialer()
@@ -153,26 +154,22 @@ WvDialer::~WvDialer()
 {
     terminate_continue_select();
 
-    if( ppp_pipe )
-	ppp_pipe->release();
-    if( pppd_log )
-        pppd_log->release();
-    if( brain )
-    	delete brain;
+    RELEASE(ppp_pipe);
+    RELEASE(pppd_log);
+    delete brain;
 }
 
 bool WvDialer::dial()
 /*******************/
 // Returns false on error, or true to go asynchronous while dialing.
 {
-    if( stat == Online )
-    	return( true );
+    if(stat == Online)
+    	return(true);
 	
-    if( stat != Idle ) 
+    if(stat != Idle) 
     {
-	// (error message has already been printed elsewhere)
-    	// err( "Modem is not ready to dial.\n" );
-    	return( false );
+	// error message has already been printed elsewhere
+    	return(false);
     }
 
     if (!options.phnum) 
@@ -197,25 +194,23 @@ bool WvDialer::dial()
 	return( false );
 
     phnum_max = 0;
-    if( options.phnum1.len() ) 
+    if(options.phnum1.len()) 
     { 
 	phnum_max++;
-        if( options.phnum2.len() ) 
+        if(options.phnum2.len()) 
 	{ 
 	    phnum_max++;
-            if( options.phnum3.len() ) 
+            if(options.phnum3.len()) 
 	    { 
 		phnum_max++;
-          	if( options.phnum4.len() ) 
-		{ 
+          	if(options.phnum4.len()) 
 		    phnum_max++;
-    		}
 	    }
 	}
     }
 
     // we need to re-init the modem if we were online before.
-    if( been_online && !init_modem() )
+    if(been_online && !init_modem())
 	stat = ModemError;
     else
     {
@@ -225,7 +220,7 @@ bool WvDialer::dial()
 	brain->reset();
     }
     
-    return( true );
+    return(true);
 }
 
 void WvDialer::hangup()
@@ -286,7 +281,7 @@ bool WvDialer::isok() const
     return( b );
 }
 
-char * WvDialer::connect_status() const
+char *WvDialer::connect_status() const
 /*************************************/
 {
     static char msg[ 160 ];
@@ -339,7 +334,6 @@ void WvDialer::pppd_watch( int ms )
   
     if( pppd_log != NULL && pppd_log->isok() ) 
     {
-    
     	char *line;
     
     	while ( (line = pppd_log->getline( ms )) )
