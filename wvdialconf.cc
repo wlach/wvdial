@@ -91,7 +91,7 @@ int main(int argc, char **argv)
     } else {
         wvcon->print(".\n");    
     }
-    WvConf cfg(argv[1],660); // Create it read/write owner and group only
+    WvConf cfg(argv[1],0660); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
     cfg.setint(s, "Baud", m.maxbaud());
