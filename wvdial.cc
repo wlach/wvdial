@@ -90,7 +90,7 @@ int main( int argc, char ** argv )
     WvStringList	cmdlineopts;
     WvLog		log( "WvDial", WvLog::Debug );
     char *		homedir = getenv("HOME");
-    int			haveconfig = 1;
+    int			haveconfig = 0;
     int			havecmdlineopts = 0;
     
     bool chat_mode = false;
@@ -108,7 +108,7 @@ int main( int argc, char ** argv )
 	    {	
 		if (!access(argv[++i < argc ? i : i-1 ],F_OK)) 
 		{
-		    haveconfig = 0;
+		    haveconfig = 1;
 		    cfg.load_file(WvString(argv[i]));
 		    continue;
 		} 
