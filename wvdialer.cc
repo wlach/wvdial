@@ -1032,9 +1032,8 @@ void WvDialer::start_ppp()
       }
       ::write( pppd_passwdfd[1], (const char *) options.password, options.password.len() );
       ::close( pppd_passwdfd[1] );
-      buffer2.append("%d", pppd_passwdfd[0] );
+      buffer2.append("%s", pppd_passwdfd[0] );
     }
-    
     
     char const *argv_raw[] = {
         options.where_pppd,
@@ -1055,7 +1054,7 @@ void WvDialer::start_ppp()
 	options.new_pppd &&
 	options.idle_seconds >= 0 ? (const char *)idle_seconds	   : NULL, 
 	"logfd", buffer1,
-	!!buffer2 ? "passwordfd" : NULL, !!buffer2 ? (const char *)buffer2 : NULL,
+//	!!buffer2 ? "passwordfd" : NULL, !!buffer2 ? (const char *)buffer2 : NULL,
 	NULL
     };
     

@@ -86,10 +86,13 @@ int main( int argc, char ** argv )
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
     WvConf		cfg( "/etc/wvdial.conf", 0600 );
+    WvConf		*extracfg = NULL;
     WvStringList	*sections = new WvStringList;
+    WvStringList	*cmdlineopts = new WvStringList;
     WvLog		log( "WvDial", WvLog::Debug );
     char *		homedir = getenv("HOME");
     int			haveconfig = 1;
+    int			havecmdlineopts = 0;
     
     bool chat_mode = false;
     bool write_syslog = true;
@@ -117,6 +120,11 @@ int main( int argc, char ** argv )
 		    return 1;			    
 		}
 	    }
+            if( strchr( argv[i], '=' ) ) {
+                havecmdlineopts = 1;
+                cmdlineopts->append(new WvString(argv[i]),true);
+                continue;
+            }
 	    if( !strcmp( argv[i], "--chat" ) ) 
 	    {
 		chat_mode = true;
@@ -158,6 +166,33 @@ int main( int argc, char ** argv )
 		cfg.load_file(rcfile);
         }
     
+    // Inject all of the command line options on into the cfg file in a new
+    // section called Command-Line if there are command line options.
+    if ( havecmdlineopts == 1 ) {
+	WvString filename;
+	if (homedir)
+	    filename = WvString("%s/.wvdial.tmp.%s",homedir,getpid());
+	else
+	    filename = WvString("/tmp/wvdial.%s",getpid());
+	extracfg = new WvConf(filename,0600);
+        WvStringList::Iter i(*cmdlineopts);
+        for (i.rewind();i.next();)
+        {
+            char *name = i().edit();
+            char *value = strchr(name,'=');
+
+            // Value should never be null since it can't get into the list
+            // if it doesn't have an = in i()
+        
+            *value++ = 0;
+            name = trim_string(name);
+            value = trim_string(value);
+            extracfg->set("Command-Line",name,value);
+        }
+	cfg.load_file(filename); // can we unlink it now??
+        sections->append( new WvString("Command-Line"),true);
+    }
+
     if( !cfg.isok() || !cfg.isclean() ) 
     {
 	return 1;

@@ -92,6 +92,9 @@ char *WvDialMon::analyse_line(const char *line)
 {
     regmatch_t rm[1];
     
+    if (line == NULL )
+        return NULL;
+
     // PAP stuff
     // 
     if (strstr(line, "AuthReq") != NULL)
