@@ -1,4 +1,4 @@
-TOPDIR=../..
+TOPDIR=..
 include $(TOPDIR)/wvrules.mk
 
 XPATH=.. ../wvstreams/include
@@ -8,9 +8,9 @@ all: wvdial.a wvdial wvdialconf
 
 wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o
 
-#LIBS = ${EFENCE}
+LIBS = -L../wvstreams -lwvutils -lwvstreams -lwvcrypto
 
-wvdial wvdialconf papchaptest atztest: wvdial.a ../wvstreams/libwvstreams.a
+wvdial wvdialconf papchaptest atztest: wvdial.a
 
 clean:
 	rm -f wvdial wvdialconf papchaptest atztest *.o *.a
