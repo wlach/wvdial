@@ -71,7 +71,7 @@ public:
     };
 
     Status status() const
-    { return stat; }
+        { return stat; }
    
     virtual bool pre_select(SelectInfo &si);
     virtual bool isok() const;
@@ -80,29 +80,9 @@ public:
     int	  dial_stat;
     char   *connect_status() const;
     bool   init_modem();
-    void   unlock_modem();
-    bool   lock_modem();
-
-    WvModemBase* take_modem()
-    {
-	WvModemBase* modem;
-
-	if (!cloned)
-	    init_modem();
-
-	modem = static_cast<WvModemBase*>(cloned);
-	cloned = NULL;
-
-	return modem;
-    }
-
-    void give_modem(WvModemBase* _modem)
-    {
-	if (cloned)
-	    delete cloned;
-
-	cloned = _modem;
-    }
+    void   del_modem();
+    WvModemBase *take_modem();
+    void give_modem(WvModemBase *_modem);
    
     friend class WvDialBrain;
    
@@ -168,6 +148,7 @@ private:
     WvDialBrain  *brain;
     WvConf       &cfg;
     WvStringList *sect_list;
+    WvModemBase *modem;
    
     bool		chat_mode;
    
@@ -208,7 +189,7 @@ private:
     void	        reset_offset();
    
     // Called from WvDialBrain::guess_menu()
-    bool 	is_pending() { return( cloned->select( 1000 ) ); }
+    bool 	is_pending() { return( modem->select( 1000 ) ); }
    
     // These are used to read the messages of pppd
     int          pppd_msgfd[2];		// two fd of the pipe
