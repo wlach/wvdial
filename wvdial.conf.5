@@ -1,0 +1,244 @@
+.TH WVDIAL.CONF 5 "December 1999" "Debian Project" "WvDial"
+.SH NAME
+wvdial.conf \- wvdial configuration file
+.SH DESCRIPTION
+When
+.B wvdial
+starts, it first loads its configuration from
+.IR /etc/wvdial.conf ,
+which contains basic information about the modem port, speed, and init
+string, along with information about your Internet Service Provider (ISP),
+such as the phone number, your username, and your password.
+.sp
+The configuration file
+.I /etc/wvdial.conf
+is in Windows "ini" file format, with
+.B sections
+named in square brackets and a number of
+.B variable = value
+pairs within each section.
+.br
+Here is a sample configuration file:
+.PP
+.RS
+[Dialer Defaults]
+.br
+Modem = /dev/ttyS2
+.br
+Baud = 57600
+.br
+Init = ATZ
+.br
+Init2 = AT S11=50
+.br
+Phone = 555-4242
+.br
+Username = apenwarr
+.br
+Password = my-password
+.sp
+[Dialer phone2]
+.br
+Phone = 555-4243
+.sp
+[Dialer shh]
+.br
+Init3 = ATM0
+.sp
+[Dialer pulse]
+.br
+Dial Command = ATDP
+.RE
+.PP
+The sample configuration file above contains all of the options
+necessary to run the two sample command lines given above.  Here is a
+complete list of settings that
+.B wvdial
+understands:
+.TP
+.I Modem
+The location of the device that
+.B wvdial
+should use as your modem.  The default is
+.BR /dev/modem .
+.TP
+.I Baud
+The speed at which
+.B wvdial
+will communicate with your modem.  The default is 57600 baud.
+.TP
+.I "Init1 ... Init9"
+.B wvdial
+can use up to nine initialization strings to set up your modem.  Before
+dialing, these strings are sent to the modem in numerical order.  These are
+particularly useful when specifying multiple sections.  See above for an
+example that uses Init3 to turn the modem's speaker off.  The default is
+"ATZ" for Init1.
+.TP
+.I Phone
+The phone number you want
+.B wvdial
+to dial. You can add up to 4 other phone numbers that
+.B wvdial
+will dial in order, by adding:
+.TP
+.I Phone1
+.TP
+.I Phone2
+.TP
+.I Phone3
+.TP
+.I Phone4
+.TP
+.I Dial Prefix
+.B wvdial
+will insert this string after the dial command and before the phone number.
+For example, to disable call waiting (in North America, anyway) set
+this to "*70,".
+.TP
+.I Dial Command
+.B wvdial
+will use this string to tell the modem to dial.  The default is "ATDT".
+.TP
+.I Login
+You must set this to the username you use at your ISP.
+.TP
+.I Login Prompt
+If your ISP has an unusual login procedure that
+.B wvdial
+is unable to figure out, you can use this option to specify a
+login prompt.  When this prompt is received from your ISP,
+.B wvdial
+will send the
+.B Login
+string.
+.TP
+.I Password
+You must set this to the password you use at your ISP.
+.TP
+.I Ask Password
+By setting this option
+.B wvdial
+will prompt for your password on every dialin.  Thus you don't have to save
+your password in
+.IR /etc/wvdial.conf .
+(Option added by SuSE.)
+.TP
+.I Password Prompt
+If your ISP has an unusual login procedure that
+.B wvdial
+is unable to figure out, you can use this option to specify a
+password prompt.   When this prompt is received from you ISP,
+.B wvdial
+will send the
+.B Password
+string.
+.TP
+.I PPPD Path
+If your system has pppd somewhere other than
+.BR "/usr/sbin/pppd" ,
+you will need to set this option.
+.TP
+.I Auto DNS
+Try to get the Domain Nameserver (DNS) from the provider.  This option is "on"
+by default.  (Option added by SuSE.)
+.TP
+.I Check DNS
+Check the Domain Nameserver (DNS) after the connection has been set
+up.  This option is "on" by default.  (Option added by SuSE.)
+.TP
+.I DNS Test1
+First DNS lookup for DNS check.  (Option added by SuSE.)
+.TP
+.I DNS Test2
+Second DNS lookup for DNS check.  (Option added by SuSE.)
+.TP
+.I Check Def Route
+Check the default route after the connection has been set
+up.  This option is "on" by default.  (Option added by SuSE.)
+.TP
+.I Force Address
+This option only applies if you have a static IP address at your ISP, and
+even then you probably don't need it.  Some ISP's don't send the IP address
+as part of the PPP negotiation.  This option forces pppd to use the address
+you give it.
+.TP
+.I Remote Name
+If your ISP uses PAP or CHAP authentication, you might need to change this
+to your ISP's authentication name.  In most cases, however, it's safe to use
+the default value, "*".
+.TP
+.I Carrier Check
+.B wvdial
+checks your modem during the connection process to ensure that it is actually
+online.  If you have a weird modem that insists its carrier line is always
+down, you can disable the carrier check by setting this option to "no".
+.TP
+.I Stupid Mode
+When
+.B wvdial
+is in Stupid Mode, it does not attempt to interpret any prompts from the
+terminal server.  It starts pppd immediately after the modem connects.
+Apparently there are ISP's that actually give you a login prompt, but
+work only if you start PPP, rather than logging in.  Go figure.  Stupid
+Mode is (naturally) disabled by default.
+.TP
+.I New PPPD
+You need this option if you have pppd version 2.3.0 or newer, to make
+wvdial create the file
+.BR /etc/ppp/peers/wvdial .
+This option is enabled by default, thus if you have older pppd you need
+to set it to `no' (or upgrade pppd).
+.TP
+.I Default Reply
+When
+.B wvdial
+detects a prompt, and it hasn't seen any clues that indicate what it should
+send as a response to the prompt, it defaults to sending "ppp".  Sometimes
+this is inadequate.  Use this option to override
+.BR wvdial 's
+default prompt response.
+.TP
+.I Auto Reconnect
+If enabled,
+.B wvdial
+will attempt to automatically reestablish a connection if you are
+randomly disconnected by the other side.
+This option is "on" by default.
+.TP
+.I Idle Seconds
+Set the hangup timeout in seconds.  If there is inactivity for the given
+time the connection is shut down.  A hangup timeout of 0 disables this
+feature.
+.TP
+.I Abort on Busy
+If enabled,
+.B wvdial
+will not retry the connection if the modem says that the line is busy.
+This option is "off" by default.
+.TP
+.I Abort on No Dialtone
+If enabled,
+.B wvdial
+will not retry the connection if the modem says that there is no dialtone.
+This option is "on" by default.
+.TP
+.I Dial Attempts
+If value is set,
+.B wvdial
+will quit after that many tries .If set to 0,
+.B wvdial
+will happily keep dialling forever.
+.PP
+The
+.BR wvdialconf (1)
+program can be used to detect your modem and fill in the Modem, Baud,
+and Init/Init2 options automatically.
+.SH "SEE ALSO"
+.BR wvdial (1),
+.BR wvdialconf (1),
+.BR pppd (8).
+.SH AUTHORS
+Dave Coombs and Avery Pennarun for Net Integration Technologies Inc., as
+part of the Worldvisions Weaver project. Greatful contributions have been made by
+many people, including SuSE and RedHat. Thanks Guys!

@@ -1,0 +1,275 @@
+
+Changes to WvDial since the initial release:
+
+1.51 (2002 03 04)
+----
+ - Synchronize with libwvstreams v3.69
+
+ - WvDialConf actually works with this release
+
+ - Applied some patches from Andrew W. Nosenko <awn@bcs.zp.ua> that
+   fix a couple of typos, and which makes sure that the wvdialconf man page
+   gets installed.
+
+ - Applied some patches from RedHat to make sure that WvDial and
+   WvStreams compile clean on 64 bit architectures. Also did some cleanup
+   to make sure that the goofy GCC that RedHat ships doesn't complain on 
+   some bits of WvDial.
+
+ - Applied patches from SuSE to ensure that WvDial compiles cleanly
+   using GCC 3.1, as well, adapt a patch to make sure that wvdialconf
+   creates the wvdial.conf file mode 660. Also applied their multi-phone
+   number patch (so it will dial several phone numbers in order if you ask it
+   nicely), as well as their check to make sure inherited sections actually
+   exist.
+
+ - Applied a mega patch from SuSE that added better ISDN support, added USB
+   modem support, added a "--no-syslog" option, inactivity timeouts,
+   interactive passwords (WvDial will now prompt you for passwords if you
+   ask it to), Connection checking once you're online (which can probably be
+   adapted to run your copy of retchmail (or if you are still using fetchmail..
+   I guess you could run that as well) once you are online. It also reputedly
+   works better with DialD. 
+
+ - Applied patch from Dushyanth Harinath <dushy@symonds.net> to implement
+   the "Dial Attempts" option, which will now cause WvDial to stop trying
+   to dial after the number in this option is exceeded.
+
+ - It should be mentioned somewhere that all of these nifty new features
+   are pretty much completely untested. So please bang at them, look at them,
+   and please send the bug reports to wvdial-list@lists.nit.ca. That's where
+   all of the cool wvdial hackers hang out ;)
+
+
+1.50 (2002 01 28)
+----
+ - Added handling of Configuration Files in other places than
+   /etc/wvdial.conf
+ - Added support for Lucent WinModem devices (/dev/ttyLT)
+ - Added support for command line options (you can now do cool things like:
+	wvdial password=currentSecureIDNumber HeadOffice
+ - Changed so that WvStreams is now not included in the base distribution
+   so you need WvStreams installed as a separate package in order for WvDial
+   to do anything intelligent.
+
+1.42 (Sometime ago)
+----
+ - There were some changes - not sure what they were anymore, but there were 
+   some changes between 1.41 and 1.42
+
+
+1.41 (1999 01 06)
+----
+ - Some internal changes to wvstreams for compatibility with non-gcc
+	compilers.  Nothing much that will interest most people, but anyone
+	hacking on wvdial should hack on this version.
+
+
+1.40 (1999 08 02)
+----
+ - Lots of changes to the underlying wvstreams library and API; you probably
+	won't notice, but it's much cleaner/faster/better now.
+ - '%' is now a valid prompt character.
+ - The wvdial/MENUS file documents login menu types that we currently
+	do/don't support.  Patches to fix any of the unsupported ones are
+	(VERY!) welcome, but try to make sure you don't break any supported
+	ones while you're at it.
+ - After wvdial guesses at a login menu, it now reverts to default_reply. 
+	That means if menu guessing doesn't quite work the first time, you
+	have a chance to recover and send 'ppp' instead.
+ - Michael K. Johnson from Red Hat fixed a bug with baud rate detection:
+ 	we weren't actually checking if the kernel allowed us to set the
+ 	new rate, so wvdialconf choose the wrong one sometimes.
+ - mkj also added support for a "--chat" option to wvdial:  this will allow
+ 	you to use wvdial as a drop-in replacement for the "chat" program,
+ 	because wvdial will talk on stdin/stdout and log messages to syslog.
+	Try something like this:
+		pppd connect 'wvdial --chat' /dev/ttyS2 115200
+	Thanks, Michael!
+ - If you have the liblockdev library installed, we use that instead of our
+	own routines to create lock files in /var/lock.  Among other things,
+	that makes /dev/modem symlinks safe!  (But _everybody_ has to use
+	liblockdev on your system if you really want it to be useful.)
+ - "New PPPD = yes" is now the default, because nearly everyone has the new
+ 	pppd nowadays.  You can still turn it off if you want.
+
+
+1.30 and 1.31 (never released)
+-------------
+ - These were pre-release versions distributed to Patrick Patterson (author
+	of kwvdial) and Red Hat, respectively, to help them integrate their
+	packages with wvdial.
+
+
+1.20 (1998 11 07)
+----
+ - Auto Reconnect is on by default.  It was supposed to be before.  Oops. 
+	Changed some of the delays, too.
+ - WvDial is now smarter with short menus that arrive at the same time as
+ 	their prompts.  Previously, the prompt would get lost, and so the
+ 	prompt wouldn't get answered even if wvdial successfully found the
+	option.
+ - We can now read menus such as "Press P for PPP, R for shell" correctly.
+ - Now using the latest WvStreams library, with several bugfixes and
+	cleanups.
+ - New autodependency mechanism is MUCH faster.
+
+
+1.10 (1998 09 23)
+----
+ - The '$' character is now a valid prompt character.  (So the bash$ prompt
+	can work!)
+ - WvDial keeps track of how many times it has tried to connect during
+ 	the current session.  It also auto-redials if your ISP hangs up
+ 	on you, and has an exponential backoff timer (delay doubles each
+ 	time) if it simply can't connect for some reason.
+ - wvdialconf was setting Init, not Init1 in /etc/wvdial.conf. 
+	Unfortunately, there is no such option, so people wanting to change
+	the ATZ were getting confused.
+
+
+1.01 (1998 09 10)
+----
+ - "Remote Name" option now defaults to '*' instead of 'wvdial' -- this
+	should help people using CHAP.
+ - People with 7e1 connections (ie. certain Compuserve dial-ins) should now
+	be able to connect, because WvDial ignores the incoming parity bit.
+ - WvDial no longer re-initializes the modem on exit.  1.00 did sometimes,
+	for a rather silly reason.
+ - Because of another silly error (capitalization of the word 'Modem')
+ 	WvDial 1.00 was printing the "-->" arrow for _all_ lines, not just
+ 	informational messages.
+ - There was an obscure bug that caused crashing with certain very specific
+ 	prompt styles.
+
+
+1.00 (1998 08 25)
+----
+ - There really wasn't much wrong with it!  This version is 0.41 with
+   patches for a few build problems, the latest WvStreams library, and
+   up-to-date documentation.
+
+
+0.41 (1998 05 16)
+----
+ - Now works better with pppd 2.3.x: you don't need "noauth" in
+	/etc/ppp/options.  Set the option "New PPPD = yes" in wvdial.conf.
+ - Cleaned up some compile problems with the egcs compiler.
+ - Longer delay between TERMinating and KILLing pppd.
+
+
+0.40 (1998 04 19)
+----
+ - WvDial now aborts a connection sequence if it sees that the modem has
+	dropped carrier.  You can disable this with the "Carrier Check" config
+	file option.
+ - Boolean (on/off) options in wvdial.conf can now be set to 1/0,
+	on/off, yes/no, and true/false.
+ - Much cleaner prompt detection code.  Now wvdial can understand any of the
+ 	following menu formats:
+ 		1. Start PPP
+ 		(1) Start PPP
+ 		[1] Start PPP
+ 		Press (1) for PPP
+ 		whack 1 - PPP
+ 		If you press "1", you get PPP.
+ - An all-new "stupid mode" disables prompt responses entirely and just runs
+	pppd immediately when you connect, using PAP.  This is for (you
+	guessed it) "stupid" ISP's that give a login: prompt but don't let
+	you actually log in, but work fine anyway if you just use PAP.  Just
+	set "Stupid Mode = yes" in wvdial.conf.
+ - Up to 9 different init strings, via the config options Init1 through Init9.
+ - Change your dial prefix and dial command separately from the phone number,
+	possibly even in a separate [Dialer] section of wvdial.conf.  WvDial
+	now dials the modem like this:
+		"Dial Command" "Dial Prefix" "Phone"
+	Where by default, "Dial Command" is ATDT and "Dial Prefix" is blank.
+ - Didn't update the manpages, again.
+ 
+
+0.31 (1998 03 15)
+----
+ - WvDial would segfault for some people if pppd died.  Thanks to
+	<davidw@cks.com> and <dsb3@earthlink.net> for pointing this out.
+	The problem was caused by referring to WvDialer::modem after it
+	had been deleted after a disconnect.
+ - Debian package no longer redirects pon/poff to pon.wvdial/poff.wvdial; it
+ 	was too dangerous and done incorrectly.  Also changed postinst to
+ 	only create wvdial.conf at the "configuration" phase of
+ 	installation.
+ - Included a fix from <dsb3@earthlink.net> to search for ISP "welcome"
+ 	messages and avoid the 5-second "don't know what to do" delay.  The
+ 	implementation of this may change later.
+ - WvDial now isn't quite as eager to respond to login prompts; it waits
+ 	100ms first.  That way, if a server prints several login prompts in
+ 	a row, wvdial won't try to answer all of them.
+
+
+0.30 (1998 03 07)
+----
+ - We now use the modem's carrier detect to notice when, during login, the
+	connection has dropped.
+ - login and password prompt override, with the "Login Prompt" and
+	"Password Prompt" options.
+ - Some fixes to prompt detection: "sign*on" is detected, and "~" doesn't
+	count as a prompt string.  We don't do blank-line prompts yet since
+	they're still a bit suspicious.
+ - Added --help and --version command-line options.
+ - We now warn when you specify a non-existent wvdial.conf section on the
+	command line.
+ - Some minor changes to the output display.
+
+
+0.25 (1998 02 14)
+----
+ - wvdial now has a mailing list!  Send a message (subject: subscribe) to
+	wvdial-list-request@worldvisions.ca if you want to get in on all the
+	latest action.  All new releases will be announced here.
+ - Added support for pppd 2.3.x, by editing pap-secrets instead of using the
+	"deprecated" +ua option.  This unfortunately means that you will
+	need to run wvdial as root at least the first time after you
+	set/change your password in /etc/wvdial.conf.  (The +ua option was
+	removed from pppd for security reasons, and most people agree that
+	setting a PPP password is an "administrative" task to be done by
+	root.)
+ - You can now supply an arbitrary number of config file sections on the
+	wvdial command line and wvdial will take options out of them in
+	order.  For example: "wvdial uwaterloo quiet" might take the phone
+	number from the [Dialer uwaterloo] section, the init string from the
+	[Dialer Quiet] section, and the rest of the information from the
+	[Dialer Defaults] section.
+ - Removed various unneeded files from the source tree.  Some of it was
+	Linux-specific, and getting compiled for no reason.  WvDial should
+	_hopefully_ build with very few changes on other systems, now.
+ - "&c0" init string problem fixed -- "CLOCAL" mode should have been enabled
+	in wvmodem.cc.
+
+
+0.20 (1997 12 21)
+----
+ - Debian package now uses debhelper instead of debmake.
+ - Much-improved WvLog class produces cleaner and more readable screen
+	output. (And provides room to grow into nice features like syslog.)
+ - Simplified WvDialer class by using the new WvLog stuff, fixing several
+ 	bugs in the process.
+ - Much better prompt detection / response, now officially tested at least
+	once.
+ - Slightly better ppp negotiation string detection.  It's still stupid, but
+	it works.
+ - Thanks to Stephen P. Molnar <smolnar@postbox.acs.ohio-state.edu> for
+	noticing some horrible bugs in the config file parser, which may
+	now be fixed.
+ - The return code of pppd is now reported correctly.
+
+
+0.12 (1997 12 18)
+----
+ - Quick change to search /dev/ttyI* (ISDN) as well as /dev/ttyS*.  This MAY
+	be all that's necessary to support ISDN... but we're probably not
+	so lucky.  Let us know!
+
+
+0.11
+----
+ - Tiny fix to rules.mk in the source code archive so that non-Debian
+	(actually, non-bash2) users can compile WvDial.

@@ -1,0 +1,53 @@
+#!/usr/bin/make -f
+# debian/rules for WvDial, using debhelper. 
+#
+# Modified by Avery Pennarun from the debhelper sample, which was
+# GNU copyright 1997 by Joey Hess.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	$(MAKE) CXXOPTS="-fno-implement-inlines -fno-rtti -fno-exceptions"
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	$(MAKE) clean
+	dh_clean
+
+# Build architecture-independent files here.
+binary-indep: build
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+	$(MAKE) PREFIX=`pwd`/debian/tmp/usr \
+		PPPDIR=`pwd`/debian/tmp/etc/ppp/peers \
+		install
+	#cp debian/pon.wvdial debian/poff.wvdial debian/tmp/usr/bin/
+	dh_installdocs
+	dh_installmanpages
+	dh_installchangelogs
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+source diff:                                                                  
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary

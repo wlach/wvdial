@@ -1,0 +1,196 @@
+wvdial (1.54) unstable; urgency=high
+
+  * Synchronize with WvStreams 3.71
+  * More cleanup of various internals
+  * Add support for SmartLink WinModems
+
+ -- Patrick Patterson <ppatters@debian.org>  Mon, 29 Jul 2002 18:39:51 -0400
+
+wvdial (1.53.0.1) unstable; urgency=low
+
+  * NMU
+  * Remove ugly cast that seems to not help anything in older g++, and
+    actively break stuff in g++ 3.0, thus causing FTBFS errors (Closes: #141654)
+
+ -- Moshe Zadka <moshez@debian.org>  Sat, 13 Apr 2002 14:02:44 +0300
+
+wvdial (1.53) unstable; urgency=high
+
+  * Synchronize with WvStreams 3.70, fixes WvPipe Bug (Closes: #141277)
+  * Previous updates close various bugs - see previous Changelog entries
+    (Closes: #131645), (Closes: #58124), (Closes: #120879)
+
+ -- Patrick Patterson <ppatters@debian.org>  Fri,  5 Apr 2002 13:34:06 -0500
+
+wvdial (1.52) unstable; urgency=low
+
+  * Fix error in --config option to actually let it get to the default
+
+ -- Patrick Patterson <ppatters@debian.org>  Mon,  1 Apr 2002 23:48:01 -0500
+
+wvdial (1.51) unstable; urgency=medium
+
+  * Synchronise with libwvstreams v3.69
+
+  * Changed WvDial to a native Debian Package (Closes: #131645)
+
+  * New Maintainer for WvDial Patrick Patterson <ppatters@debian.org>, 
+    taking over by mutual agreement from Baruch Even <baruch@debian.org>.
+
+  * WvDialConf actually works with this release
+
+  * Applied some patches from Andrew W. Nosenko <awn@bcs.zp.ua> that
+    fix a couple of typos, and which makes sure that the wvdialconf man page
+    gets installed.
+
+  * Applied some patches from RedHat to make sure that WvDial and
+    WvStreams compile clean on 64 bit architectures. Also did some cleanup
+    to make sure that the goofy GCC that RedHat ships doesn't complain on
+    some bits of WvDial.
+
+  * Applied patches from SuSE to ensure that WvDial compiles cleanly 
+    using GCC 3.1, as well, adapt a patch to make sure that wvdialconf
+    creates the wvdial.conf file mode 660.Also applied their multi-phone
+    number patch (so it will dial several phone numbers in order if you ask
+    it nicely), as well as their check to make sure inherited sections 
+    actually exist.
+
+  * Applied patch from Dushyanth Harinath <dushy@symonds.net> to implement
+    the "Dial Attempts" option, which will now cause WvDial to stop trying
+    to dial after the number in this option is exceeded.
+
+  * Applied a mega patch from SuSE that added better ISDN support, added USB
+    modem support, added a "--no-syslog" option, inactivity timeouts,
+    interactive passwords (WvDial will now prompt you for passwords if you
+    ask it to), Connection checking once you're online (which can probably be
+    adapted to run your copy of retchmail (or if you are still using fetchmail..
+    I guess you could run that as well) once you are online. It also reputedly  
+    works better with DialD.
+
+  *  It should be mentioned somewhere that all of these nifty new features
+     are pretty much completely untested. So please bang at them, look at them,
+     and please send the bug reports to wvdial-list@lists.nit.ca. That's where 
+     all of the cool wvdial hackers hang out ;)
+
+ -- Patrick Patterson <ppatters@debian.org>  Mon,  4 Mar 2002 12:26:20 -0500
+
+wvdial (1.50-1) unstable; urgency=low
+
+  * New Upstream version and major packaging changes
+
+ -- Patrick Patterson <ppatters@nit.ca>  Mon, 28 Jan 2002 14:01:04 -0500
+
+wvdial (1.42-1) unstable; urgency=low
+
+  * New upstream version and some packaging changes.  Should fix
+  	bugs #65144, 66005, 71556, 78350, 91085, 31041, 19883, 53485.
+  * Thanks to Josip Rodin <jrodin@public.srce.hr> for the new wvdial.conf(5)
+  	man page.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Fri, 11 May 2001 15:43:05 -0400
+
+
+wvdial (1.41) unstable; urgency=low
+
+  * Recompiled for potato using the latest upstream version, debhelper,
+  	and libstdc++.  No real changes.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Thu,  6 Jan 2000 21:57:46 -0500
+
+
+wvdial (1.40) unstable; urgency=low
+
+  * New upstream version adds bugs and new features.  Er, I mean, removes
+    bugs.  Of course.  Ahem.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Mon,  2 Aug 1999 15:25:47 -0400
+
+
+wvdial (1.20) frozen unstable; urgency=low
+
+  * New upstream version corrects some bugs in the prompt-response code
+    and Makefiles, so several ISP's now work again.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Sun,  8 Nov 1998 15:45:00 -0500
+
+
+wvdial (1.10) unstable; urgency=low
+
+  * New upstream version.  Now redials automatically if you get
+    disconnected, among other things.  (Boy, being the upstream and
+    downstream maintainer sure can be tiring!)
+
+ -- Avery Pennarun <apenwarr@debian.org>  Wed, 23 Sep 1998 22:22:17 -0400
+
+
+wvdial (1.01) unstable; urgency=low
+
+  * New upstream version.  Fixes a few minor bugs.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Thu, 10 Sep 1998 14:55:50 -0400
+
+
+wvdial (1.00) unstable; urgency=low
+
+  * New upstream version.  Now builds without changes on Debian 2.0.
+    (fixes bug#23103)
+
+ -- Avery Pennarun <apenwarr@debian.org>  Tue, 25 Aug 1998 22:40:07 -0400
+    
+
+wvdial (0.41) frozen unstable; urgency=low
+
+  * New upstream version, fixes bug#19092 (requirement for 'noauth' option)
+  * Now works much better with pppd 2.3.x.
+  * Longer delay before killing pppd; avoids permissions problems.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Sat, 16 May 1998 16:29:31 -0400
+
+
+wvdial (0.31) frozen unstable; urgency=low
+
+  * New upstream version, fixes bug#19173 (core dumps) and several others.
+  * Changed postinst/postrm to not divert pon/poff scripts.
+    Fixes bug#19244.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Sun, 15 Mar 1998 17:23:00 -0500
+
+
+wvdial (0.30) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Sat,  7 Mar 1998 13:23:39 -0500
+
+
+wvdial (0.25) unstable; urgency=low
+
+  * New upstream version.
+  * First release uploaded to hamm.
+  * debian/control specifies a section and a priority now.  (oops!)
+  * Should work properly with pppd 2.3.x, due to use of pap-secrets.
+
+ -- Avery Pennarun <apenwarr@debian.org>  Sat, 14 Feb 1998 17:29:20 -0500
+
+
+wvdial (0.20-1) unstable; urgency=low
+
+  * New source version fixes several bugs.
+  * Now using debhelper instead of debmake to build the Debian package.
+
+ -- Avery Pennarun <apenwarr@worldvisions.ca>  Sun, 21 Dec 1997 18:58:17 -0500
+
+
+wvdial (0.12-1) unstable; urgency=low
+
+  * wvdialconf now probes /dev/ttyI* as well, for ISDN.
+
+ -- Avery Pennarun <apenwarr@worldvisions.ca>  Thu, 18 Dec 1997 14:01:48 -0500
+
+
+wvdial (0.1-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Avery Pennarun <apenwarr@worldvisions.ca>  Tue,  9 Dec 1997 01:39:45 -0500
+

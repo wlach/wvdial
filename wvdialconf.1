@@ -1,0 +1,64 @@
+.TH WVDIALCONF 1 "August 1998" Worldvisions
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+
+.SH NAME
+wvdialconf \- build a configuration file for
+.BR wvdial (1)
+
+.SH SYNOPSIS
+.B wvdialconf
+.I /etc/wvdial.conf
+
+.SH DESCRIPTION
+.B wvdialconf
+detects your modem, its maximum baud rate, and a good initialization
+string and generates or updates the
+.BR wvdial (1)
+configuration file based on this information.
+.PP
+.B wvdialconf
+is completely non-interactive.  You still need to edit
+.I /etc/wvdial.conf
+to specify the phone number, login name, and password of your internet
+account in order for
+.BR wvdial (1)
+to work.
+.PP
+It is safe to run
+.B wvdialconf
+if a configuration file already exists.  In that case, only the
+.IR Modem ,
+.IR Baud ,
+.IR Init ,
+and
+.I Init2
+options are changed in the
+.I "[Dialer Defaults]"
+section, and only if autodetection is successful.
+
+.SH BUGS
+We're willing to entertain the possibility.  Let us know if you have any
+problems by sending an e-mail to
+.BR <wvdial@nit.ca> .
+.PP
+Also, there is now a mailing list for discussion about
+.BR wvdial .
+If you are having problems, or have anything else to say, send e-mail to
+.BR <wvdial-list@lists.nit.ca> .
+
+.SH DIAGNOSTICS
+
+An exit status of 0 means that a modem was detected and the
+configuration file was updated successfully.
+
+Any other value means
+that something went wrong and the configuration file was unchanged.
+
+.SH AUTHORS
+Dave Coombs and Avery Pennarun for Net Integration Technologies, as
+part of the Worldvisions Weaver project. 
+
+.SH SEE ALSO
+.BR wvdial (1),
+.BR wvdial.conf (5).

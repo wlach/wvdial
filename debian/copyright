@@ -1,0 +1,21 @@
+This package was debianized by Patrick Patterson <ppatters@nit.ca> on
+Mon, 18 Feb 2002 19:49:14 -0500.
+
+It was downloaded from http://open.nit.ca/
+
+Upstream Author: Network Integration Technologies Inc.
+
+Copyright:
+
+WvDial is released under the terms of the GNU Library General Public License
+(LGPL) which can be found on Debian systems in the following file:
+
+	/usr/share/common-licenses/LGPL-2
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+FOR A PARTICULAR PURPOSE.  See the GNU Library General Public License for more
+details.
+
+WvDial is Copyright 1997-2002, Network Integration Technologies Inc.
+

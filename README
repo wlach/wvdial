@@ -1,0 +1,288 @@
+
+Welcome to WvDial
+=================
+
+It's amazing!  It's your wildest dream come true!  Dialup networking for
+Linux that doesn't require chat scripts!
+
+Okay, so maybe you're not as excited as I am, but we at Worldvisions hope
+this will brighten up your week.  WvDial is our attempt to make the
+previously rather complicated configuration of Linux dial-up networking as
+simple as phone number - username - password.
+
+Actually we have loftier goals in mind for what we call the "Worldvisions
+Weaver" project, and that's where WvDial comes from.  WvDial and its
+supporting libraries are the first components of the Weaver system that we
+are releasing for free (under the LGPL; see below).  The rest of Weaver will
+probably be released for free eventually, but to maintain our competitive
+edge (and also save our programmers from looking silly) we're keeping the
+rest to ourselves for now.  No promises about that.
+
+But that doesn't stop you from having fun right now!  WvDial is and will
+remain totally free, and we hope that all Linux distributions will try to
+integrate it and help make Linux (even more of) a killer Internet
+workstation.
+
+But first there is something we should tell you:
+
+The GNU Library General Public License
+======================================
+
+WvDial was written by Dave Coombs and Avery Pennarun of Worldvisions
+Computer Technology, Inc. and is released to the public under the terms of
+GNU's LGPL, or Library General Public License.
+
+This is not quite the same as the General Public License (GPL) that most
+Linux software uses.  The LGPL is actually *less* restrictive -- you can use
+LGPL software inside your own programs, and you are *not* required to place
+your program under the GPL or LGPL.  That means companies or individuals
+can, if they want, take all the code in WvDial and use it in a product
+without giving anyone their own source code.
+
+But there's a catch, of course -- basically, you have to make the source
+code to WvDial itself available to users, and if you *change* the WvDial
+code in any way, you must also release the changes under the terms of the
+LGPL.  That means you have to give out the source code to your changes. 
+That also means that we or anyone can build a product based on the modified
+WvDial, and although the source code to WvDial must be provided, the rest of
+the system does not have to be (L)GPL'd.
+
+We think that this is a fair way to share this software, because it
+guarantees that everyone can fix bugs and when anyone does, everyone can get
+the patch.  But still, people can build small Linux systems based on WvDial
+(...like our Weaver) without having to give out the source code to their
+*entire* main program.
+
+Naturally none of that is legally binding.  The nice people at GNU have
+prepared the legalese already and you can find their license verbatim in the
+file COPYING.LIB or, if you installed the Debian package,
+/usr/doc/copyright/LGPL.  Please read it carefully before distributing (or
+worse, not distributing) modified copies of WvDial, because the rules aren't
+quite as simple as I've made them sound.
+
+
+Compiling and Installing WvDial
+===============================
+
+If you are not using our pre-compiled Debian package, you will need to
+compile WvDial yourself.  This is not too difficult as long as you have a
+few things installed on your Linux system:
+
+	- pppd 2.2.0f or 2.3.5, with the pppd program preferably 
+		at /usr/sbin/pppd.
+
+	- gcc 2.7.2 or higher, with g++ (but you don't necessarily need
+		libg++ or libstdc++, as WvDial doesn't need them)
+
+	- GNU make; you may need version 3.75 or higher, I'm not sure.
+
+	- The WvStreams library (REALLY IMPORTANT: STOP RIGHT NOW if you
+	  don't have this, and go download it from http://open.nit.ca/download)
+
+Almost any halfway modern Linux system should have all of these. The last is
+available from http://open.nit.ca/download/
+
+Building WvDial is a simple matter.  First, check the Makefile to see if
+everything looks okay to you.  By default, wvdial and wvdialconf will
+install in /usr/local/bin with their man pages in /usr/local/man/man1. 
+That's probably right for most systems.
+
+To build and install WvDial, then:
+	make
+	make install
+
+Assuming you don't have any compile errors (and really, you shouldn't,
+right?) you now have an installed WvDial system.
+
+
+Configuring for the First Time
+==============================
+
+Again Debian users have a nice soft fuzzy warm cushion to land on: when
+installing the WvDial package, Debian's "dpkg" automatically runs wvdialconf
+and asks all the right questions to get you going.
+
+If you compiled manually, you have to go through a little bit more trouble
+-- but don't worry, not that much.
+
+The first thing to do is have wvdialconf detect your modem and create your
+initial configuration.  'su' to root and type the following:
+	wvdialconf /etc/wvdial.conf
+
+If all goes well, your modem will be detected and its configuration stored
+in /etc/wvdial.conf.  If it doesn't work, all is not lost but you will have
+to build the configuration completely by yourself.  Read the wvdial(1) man
+page ("man wvdial") for more information about that.
+
+In any case, if your modem is not detected or the detection sequence
+confuses you in some way, let us know by sending an e-mail message to
+wvdial@worldvisions.ca -- this is supposed to be a stable release, but
+everybody knows that doesn't really mean anything.  Things could still go
+wrong, and we really want to know if they do.  Remember, if we don't know 
+there's a problem, we can't fix it.
+
+On my computer the modem detection sequence looks like this:
+	
+	Scanning your serial ports for a modem.
+	
+	modemscan<Info>: Ignoring ttyS0 because /dev/mouse is a link to it.
+	ttyS1<*1>: AT -- AT -- AT -- nothing.
+	ttyS2<*1>: AT -- OK
+	ttyS2<*1>: ATZ -- OK
+	ttyS2<*1>: ATQ0 -- OK
+	ttyS2<*1>: ATQ0 V1 -- OK
+	ttyS2<*1>: ATQ0 V1 E1 -- OK
+		[more init string testing]
+	ttyS2<*1>: Speed 2400: AT -- OK
+	ttyS2<*1>: Speed 4800: AT -- OK
+		[more baud rate testing]
+	ttyS2<*1>: Speed 230400: AT -- AT
+	ttyS2<*1>: Max speed is 115200; using 57600 to be safe.
+	ttyS2<*1>: ATQ0 V1 E1 S0=0 &C1 &D2 S11=55 -- OK
+	
+	Found 1 available modem; using /dev/ttyS2.
+	ttyS2<Info>: Speed 57600; init "ATQ0 V1 E1 S0=0 &C1 &D2 S11=55"
+
+wvdialconf will scan all your /dev/ttyS* serial ports *except* the
+/dev/mouse port (if you have a /dev/mouse link) because sometimes probing
+the mouse port can cause mouse problems.  In any case, try not to move your
+mouse while wvdialconf is probing and you should be safe.
+
+After wvdialconf runs successfully (ie., you receive a message like the one
+above) it writes your configuration to /etc/wvdial.conf, the filename you
+gave it on the command line.  My auto-generated wvdial.conf file looks like
+this:
+
+	[Dialer Defaults]
+	Modem = /dev/ttyS2
+	Baud = 57600
+	Init = ATZ
+	Init2 = ATQ0 V1 E1 S0=0 &C1 &D2 S11=55
+	; Phone = <Target Phone Number>
+	; Username = <Your Login Name>
+	; Password = <Your Password>
+
+After [Dialer Defaults], the first four lines have been autodetected for
+your system, so don't worry if they look a little different.
+
+The next three lines are commented out.  You need to edit the file to fill
+in the information about your Internet provider.  Here's a sample completed
+wvdial.conf file:
+
+	[Dialer Defaults]
+	Modem = /dev/ttyS2
+	Baud = 57600
+	Init = ATZ
+	Init2 = ATQ0 V1 E1 S0=0 &C1 &D2 S11=55
+	Phone = 555-4242
+	Username = apenwarr
+	Password = my-password
+
+This contains all the information needed to dial my favourite non-existent
+Internet provider.
+
+If you use more than one modem, dial-in account, Internet provider, init
+string, or anything, you can use additional "override" sections in
+wvdial.conf to support this.  See the wvdial(1) man page for more
+information.  (Type "man wvdial")
+
+
+Testing it for the First Time
+=============================
+
+Now you've compiled, installed, and configured WvDial.  Doesn't that make
+you mad at all the darn Debian users who didn't have to do any of this
+stuff?  Well, now you've caught up with them.  Sooner or later, everyone has
+to try dialing for the first time.
+
+To do this, type
+	wvdial
+(surprise!).
+	
+Unlike other ppp dialers you might have used, the wvdial program runs in the
+foreground and never exits until you disconnect or have some kind of fatal
+error.  You can also quit (and disconnect the phone, and clean up politely)
+by pressing CTRL-C.  I think this is more user-friendly, myself.  Of course
+if you want it to work like pppd you can always do it in the usual way:
+
+	wvdial >/var/log/wvdial.log 2>&1 &
+
+It is interesting to note that almost all of WvDial's functionality is found
+in a C++ class called WvDialer.  That means it's easy for a programmer to
+take WvDial and put in whatever kind of user interface he wants.  The
+"wvdial" program serves as a simple example.  So with WvDial, if someone
+(say) wanted to write an X-Windows dialup button bar, they could simply link
+in the C++ class and not have to worry about messy interactions with
+self-backgrounding pppd scripts and other gruesome stuff.
+
+Anyway, if you have any gripes about the way this works, let us know.  
+The more stuff you complain about, the more likely we are to do something 
+about it.
+
+
+Assuming it Worked...
+=====================
+
+If you ran wvdial and it connected to and logged into your Internet
+provider, you're in business.  If it said anything strange or confusing
+along the way, e-mail us anyway -- it could be the sign of a nasty problem
+hiding somewhere.
+
+
+Nah, it Didn't Work After All
+=============================
+
+Because WvDial has a pretty nasty bunch of heuristics included for dialing
+modems, finding login/password prompts, guessing at menu options and command
+prompts, and so on, it has been known to screw up on occasion.  If WvDial
+doesn't quite work for you, it's probably our fault, not yours!  It's
+difficult for us to guess typical login sequences for various ISP's, and 
+it's completely impossible for us to guess them all.  If WvDial doesn't seem
+to like your ISP, I've got some good news and some bad news for you.
+
+The bad news about WvDial versus 'chat' scripts:  if your chat script
+doesn't work, you can always fix it without doing any programming.  WvDial
+uses built-in intelligence, but if its intelligence fails, you're out of
+luck.
+
+And now the good news: E-mail us about the problem and we'll do our best to 
+help.  If we can do it, we want WvDial to work with nearly every ISP around, 
+without any special configuration.
+
+The most useful thing you can do for us is create a complete transcript
+of your wvdial session:
+	wvdial 2>&1 | tee wvdial.out
+
+Then e-mail the wvdial.out file to us along with your comments.  Similarly,
+if the problem is during the modem detection phase (ALL modems should be
+detected successfully in a working wvdialconf!) you can get a transcript
+like this:
+	wvdialconf /dev/null 2>&1 | tee wvdialconf.out
+
+And e-mail us wvdialconf.out.
+
+
+Concluding Notes
+================
+
+WvDial has support for switching easily between multiple Internet accounts:
+read the wvdial(1) man page for more information.
+
+For that matter, it would do you well to read the wvdial(1) and
+wvdialconf(1) man pages anyway. (Oh, and don't forget about wvdial.conf(5)
+too!)
+
+Even though this is supposed to be a stable release, there may still be bugs
+in this thing.  Tell us about them, every last one.  Send us e-mail at:
+		wvdial@nit.ca
+
+Or better yet, why not send your comments to the WvDial Mailing List, at:
+		wvdial-list@lists.nit.ca
+
+There is a (currently cheesy) web page for wvdial at:
+		http://open.nit.ca/wvdial/
+
+...have fun with it!
+
+Remember:
+	It's only big and scary looking if you look too closely.
