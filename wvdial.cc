@@ -141,7 +141,7 @@ int main( int argc, char ** argv )
     while( !want_to_die && dialer.isok() 
 	  && dialer.status() != WvDialer::Idle ) {
 	dialer.select( 100 );
-	dialer.execute();
+	dialer.callback();
 	
 	if (dialer.weird_pppd_problem) {
 	    dialer.weird_pppd_problem = false;
