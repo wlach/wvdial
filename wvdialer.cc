@@ -32,8 +32,6 @@ static char *	dial_responses[] = {
 	"no carrier",
 	"no dialtone",
 	"no dial tone",
-/*	"no answer", don't enable it, means wvdial.dod will stop */
-/* If you get this it's a bug from your provider, not in linux   */
 	"busy",
 	"delayed",
 	"error",
@@ -48,9 +46,6 @@ static char *	prompt_strings[] = {
 	"!}!",
 	NULL
 };
-
-int	phnum_count = 0;
-int	phnum_max = 0;
 
 static int messagetail_pid = 0;
 
@@ -193,11 +188,22 @@ bool WvDialer::dial()
 	return( false );
 
     phnum_max = 0;
-    if( options.phnum1.len() ) { phnum_max++;
-      if( options.phnum2.len() ) { phnum_max++;
-        if( options.phnum3.len() ) { phnum_max++;
-          if( options.phnum4.len() ) { phnum_max++;
-    } } } }
+    if( options.phnum1.len() ) 
+    { 
+	phnum_max++;
+        if( options.phnum2.len() ) 
+	{ 
+	    phnum_max++;
+            if( options.phnum3.len() ) 
+	    { 
+		phnum_max++;
+          	if( options.phnum4.len() ) 
+		{ 
+		    phnum_max++;
+    		}
+	    }
+	}
+    }
 
     // we need to re-init the modem if we were online before.
     if( been_online && !init_modem() )
@@ -224,7 +230,8 @@ void WvDialer::hangup()
     if( !chat_mode )
       pppd_watch( 250 );
     
-    if( stat != Idle ) {
+    if( stat != Idle ) 
+    {
 	time_t 	now;
 	time( &now );
 	log( "Disconnecting at %s", ctime( &now ) );
@@ -237,15 +244,11 @@ void WvDialer::hangup()
 	stat = Idle;
     }
 
-    if (messagetail_pid > 0) {
-	//log("Killing child pid: %s\n", WvString(messagetail_pid));
+    if (messagetail_pid > 0) 
+    {
 	kill(messagetail_pid, 15);
-	//if (errno) {
-	 //   err("Huh, kill(%s,15): %s\n", WvString(messagetail_pid), strerror(errno));
-//	}
 	messagetail_pid = 0;
     }
-	//log("child pid: %s\n", WvString(messagetail_pid));
 }
 
 bool WvDialer::pre_select( SelectInfo& si )
@@ -326,26 +329,20 @@ void WvDialer::pppd_watch( int ms )
 {
   // see if pppd has a message, analyse it and output to log
   
-  if( pppd_log != NULL && pppd_log->isok() ) {
+    if( pppd_log != NULL && pppd_log->isok() ) 
+    {
     
-    char *line;
+    	char *line;
     
-    do {
-      
-      line = pppd_log->getline( ms );
-      if( line != NULL ) {
-	char *buffer1 = pppd_mon.analyse_line( line );
-	if( buffer1 != NULL && buffer1[0] != '\0' ) {
-	  char buffer2[ strlen( buffer1 ) + 10 ];
-	  sprintf( buffer2, "pppd: %s\n", buffer1 );
-	  log( WvLog::Notice, buffer2 );
-	  flush( STDOUT_FILENO ); // kinternet needs this
-	}
-      }
-      
-    } while( line != NULL );
-    
-  }
+    	while ( (line = pppd_log->getline( ms )) );
+    	{
+	    WvString buffer1(pppd_mon.analyse_line( line ));
+	    if (!!buffer1)
+	    {
+	    	log("pppd: %s\n",buffer1);
+    	    }
+        }
+    }
 }
 
 
@@ -660,7 +657,7 @@ bool WvDialer::init_modem()
 	// Send up to nine init strings, in order.
 	int	init_count;
 	for( init_count=1; init_count<=9; init_count++ ) {
-	    WvString *	this_str;
+	    WvString *this_str;
 	    switch( init_count ) {
 	        case 1:    this_str = &options.init1;	break;
 	    	case 2:    this_str = &options.init2;	break;
@@ -747,16 +744,21 @@ void WvDialer::async_dial()
         switch( phnum_count ) 
 	{  
             case 0:     
-		this_str = &options.phnum;      break;
+		this_str = &options.phnum;
+		break;
             case 1:     
-		this_str = &options.phnum1;     break;
+		this_str = &options.phnum1;
+		break;
             case 2:     
-		this_str = &options.phnum2;     break;
+		this_str = &options.phnum2;     
+		break;
             case 3:     
-		this_str = &options.phnum3;     break;
+		this_str = &options.phnum3;     
+		break;
             case 4:
             default:
-                this_str = &options.phnum4;     break;
+                this_str = &options.phnum4;     
+		break;
         }
 
 	WvString s( "%s%s%s%s%s\r", options.dial_cmd,
@@ -1018,12 +1020,11 @@ void WvDialer::start_ppp()
       exit( EXIT_FAILURE );
     }
     pppd_log = new WvStream( pppd_msgfd[0] );
-    char buffer1[20];
-    sprintf( buffer1, "%d", pppd_msgfd[1] );
+    WvString buffer1("%s", pppd_msgfd[1] );
     
     
     // open a pipe to pass password to pppd
-    char buffer2[20] = "";
+    WvString buffer2;
     if( options.password != NULL && options.password[0] != '\0' ) {
       if( pipe( pppd_passwdfd ) == -1 ) {
 	err("pipe failed: %s\n", strerror(errno) );
@@ -1031,7 +1032,7 @@ void WvDialer::start_ppp()
       }
       ::write( pppd_passwdfd[1], (const char *) options.password, options.password.len() );
       ::close( pppd_passwdfd[1] );
-      sprintf( buffer2, "%d", pppd_passwdfd[0] );
+      buffer2.append("%d", pppd_passwdfd[0] );
     }
     
     
@@ -1054,7 +1055,7 @@ void WvDialer::start_ppp()
 	options.new_pppd &&
 	options.idle_seconds >= 0 ? (const char *)idle_seconds	   : NULL, 
 	"logfd", buffer1,
-	buffer2[0] != '\0' ? "passwordfd" : NULL, buffer2[0] != '\0' ? buffer2 : NULL,
+	!!buffer2 ? "passwordfd" : NULL, !!buffer2 ? (const char *)buffer2 : NULL,
 	NULL
     };
     
@@ -1103,9 +1104,7 @@ void WvDialer::start_ppp()
     ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
 			   modem, modem, modem );
 
-    char buffer3[20];
-    sprintf( buffer3, "%d", ppp_pipe->getpid() );
-    log( WvLog::Notice, "pid of pppd: %s\n", buffer3 );
+    log( WvLog::Notice, "pid of pppd: %s\n", ppp_pipe->getpid() );
 
     stat 	 = Online;
     been_online  = true;

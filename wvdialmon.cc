@@ -92,13 +92,6 @@ char *WvDialMon::analyse_line(const char *line)
 {
     regmatch_t rm[1];
     
-#if 0
-    char tmp[ strlen( line ) + 10 ];
-    sprintf( tmp, "* %s *\n", line );
-    log( tmp );
-#endif
-    
-    
     // PAP stuff
     // 
     if (strstr(line, "AuthReq") != NULL)
