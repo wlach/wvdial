@@ -5,6 +5,7 @@
  * WvDial configuration utility.  Generates a basic wvdial.conf file.
  */
 #include "wvmodemscan.h"
+#include "wvfile.h"
 #include "wvconf.h"
 #include <ctype.h>
 

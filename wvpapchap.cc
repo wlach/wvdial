@@ -7,7 +7,7 @@
  */
 
 #include "wvpapchap.h"
-
+#include "wvfile.h"
 #include <assert.h>
 #include <ctype.h>
 #include <sys/stat.h>
