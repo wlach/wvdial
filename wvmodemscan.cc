@@ -310,7 +310,7 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 
 char *WvModemScan::is_isdn() const
 {
-    if (!identifier.str[0])
+    if (!identifier.str)
     	return NULL;
 
     if (identifier == "3C882")		// 3Com Impact IQ
@@ -325,7 +325,7 @@ char *WvModemScan::is_isdn() const
 static int fileselect(const struct dirent *e)
 {
     return !strncmp(e->d_name, "ttyS", 4);     // serial
-       // (no intenral ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
+       // (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
 }
 
 
