@@ -415,8 +415,13 @@ void WvDialer::load_options()
     }
 
     // Support Init, as well as Init1, to make old WvDial people happy.
-    options.init1 = cfg.fuzzy_get( *sect_list, "Init",
-                        cfg.get( d, "Init", options.init1 ) );
+    const char *newopt = cfg.fuzzy_get( *sect_list, "Init",
+	                        cfg.get( d, "Init", NULL ) );
+    if (newopt)
+    {
+	options.init1 = newopt;
+	options.init1.unique();
+    }
 }
 
 bool WvDialer::init_modem()
