@@ -172,26 +172,7 @@ void WvModemScan::execute()
 	    // using the absolute maximum baud rate confuses many slower modems
 	    // in obscure ways; step down one.
 	    baud = modem->speed(baud);
-	    debug("Max speed is %s; ", baud);
-	    if (is_isdn())
-	    {
-		modem->speed(115200);
-	    	baud = modem->getspeed();
-	    	debug("using %s for ISDN modem.\n", baud);
-	    }
-	    else
-	    {
-		if (modem->getspeed() < 115200)
-		{
-		    // (baud - 1) will resolve to next lower rate
-		    baud = modem->speed(baud - 1);
-		    debug("using %s to be safe.\n", baud);
-		}
-		else
-		{
-		    debug("that should be safe.\n");
-		}
-	    }
+	    debug("Max speed is %s; that should be safe.\n", baud);
 	    
 	    stage++;
 	    status[stage] = Worked;
