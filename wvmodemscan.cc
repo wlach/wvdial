@@ -329,8 +329,10 @@ static int fileselect(const struct dirent *e)
 }
 
 
-static int filesort(const struct dirent **e1, const struct dirent **e2)
+static int filesort(const void *_e1, const void *_e2)
 {
+    dirent const * const *e1 = (dirent const * const *)_e1;
+    dirent const * const *e2 = (dirent const * const *)_e2;
     const char *p1, *p2;
     int diff;
     
