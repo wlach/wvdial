@@ -1,19 +1,20 @@
 ifeq ($(TOPDIR),)
   TOPDIR=.
-  PKGINC=/usr/include/wvstreams /usr/local/include/wvstreams
-  LIBS := $(LIBS) \
-		$(shell $(CC) -lsupc++ 2>&1 | grep -q "undefined reference" \
-			&& echo " -lsupc++")
+  prefix=/usr/local
+  WVSTREAMS_LIB=$(prefix)/lib
+  WVSTREAMS_SRC=.
+  WVSTREAMS_INC=$(prefix)/include/wvstreams
+  WVSTREAMS_BIN=$(prefix)/bin
+else
+ XPATH=..
 endif
 
-PREFIX=/usr/local
-BINDIR=${PREFIX}/bin
-MANDIR=${PREFIX}/share/man
+BINDIR=${prefix}/bin
+MANDIR=${prefix}/share/man
 PPPDIR=/etc/ppp/peers
 
 include $(TOPDIR)/wvrules.mk
 
-XPATH=.. ../wvstreams/include $(PKGINC)
 
 default: all papchaptest
 all: wvdial.a wvdial wvdialconf pppmon
