@@ -1260,7 +1260,7 @@ void WvDialer::start_ppp()
     ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
 			   modem, modem, modem );
 
-    log( WvLog::Notice, "pid of pppd: %s\n", ppp_pipe->getpid() );
+    log( WvLog::Notice, "Pid of pppd: %s\n", ppp_pipe->getpid() );
 
     stat 	 = Online;
     been_online  = true;
