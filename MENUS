@@ -56,3 +56,6 @@ Choice>
 Enter hostname (e.g. shell3.ba) with no password, or your SLIP/PPP login:
 
 
+options are: P FOR PPP, R FOR SHELL
+
+
