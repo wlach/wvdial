@@ -140,15 +140,17 @@ bool WvDialer::dial()
     if( stat != Idle )
 	return( false );
 
-    stat = Dial;
-    connect_attempts = 1;
-    dial_stat = 0;
-    brain->reset();
-    
     // we need to re-init the modem if we were online before.
     if( been_online && !init_modem() )
 	stat = ModemError;
-
+    else
+    {
+	stat = Dial;
+	connect_attempts = 1;
+	dial_stat = 0;
+	brain->reset();
+    }
+    
     return( true );
 }
 
