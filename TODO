@@ -8,20 +8,13 @@ a message to wvdial-list-request@worldvisions.ca with the subject
 WvDial
 ------
 - "Command>" should be a prompt (Janis in London)
-- start PPP when you get an IP address string
 - 1ms-lag-mode for wvmodem
-- try harder with max speed detection (some modems just don't work at the
-   max baud rate!)
 - mention /etc/wvdial.conf, /dev/ttyS*, and pap-secrets file permissions
 - allow passing of options on the command line:  if it has an '=' sign,
 	assume it's a configuration setting.
 - find pppd in PATH, don't assume /usr/sbin/pppd
 - blank lines count as prompts (sometimes?)
-- portability: #ifdef's around B57600 and higher?
 - create a pidfile in /var/run/wvdial.pid
-- don't open terminals that are already in use, even if they don't have
-  lockfiles?  How can we determine that?
-- include a sample wvdial.conf file.
 - split the debian postinst script out, so that non-debian users get the
 	convenient setup prompts
 - go to background automatically when starting pppd (watch out with the
@@ -36,6 +29,4 @@ WvDial
 WvDial - docs
 ------
 - how to disable call waiting (insert *70, in the phone number)
-- ask users to send /var/log/pppd if it doesn't work
-- make sure /etc/ppp/options has no nasties (modem name, phone #, etc)
 - split wvdial.1 man page into wvdial.1 and wvdial.conf.5

@@ -27,10 +27,12 @@ void check_ppp_options()
 	    continue;
 	
 	// but baud rates and tty names are not!
+	// a 'connect' line is usually bad too.
 	if (isdigit(line[0])
 	    || !strncmp(line, "/dev", 4)
 	    || !strncmp(line, "tty",  3) 
-	    || !strncmp(line, "cua",  3))
+	    || !strncmp(line, "cua",  3)
+	    || !strncmp(line, "connect", 7))
 	{
 	    fprintf(stderr,
 		"\n*** WARNING!  Line \"%s\"\n"

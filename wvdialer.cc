@@ -69,6 +69,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = fa
     auto_reconnect_delay = 0;
     auto_reconnect_at    = 0;
     connected_at         = 0;
+    weird_pppd_problem   = false;
     
     sect_list = _sect_list;
     chat_mode = _chat_mode;
@@ -299,6 +300,13 @@ void WvDialer::execute()
 	    hangup();
 	    delete( modem );
 	    modem = NULL;
+	    
+	    if( time( NULL ) - connected_at < 45 ) {
+		weird_pppd_problem = true;
+	    } else {
+		weird_pppd_problem = false;
+	    }
+		
 
 	    // check to see if we're supposed to redial automatically soon.
 	    if( options.auto_reconnect && isok() ) {
@@ -523,7 +531,7 @@ void WvDialer::async_dial()
 	return;
     case 0:	// CONNECT
 	if( options.stupid_mode == true ) {
-	    log( "Carrier detected.  Starting ppp.\n" );
+	    log( "Carrier detected.  Starting PPP immediately.\n" );
 	    start_ppp();
 	} else {
 	    log( "Carrier detected.  Waiting for prompt.\n" );

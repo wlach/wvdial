@@ -86,6 +86,7 @@ int main( int argc, char ** argv )
     WvSyslog		*syslog = NULL;
     WvConf		cfg( "/etc/wvdial.conf" );
     WvStringList	*sections = new WvStringList;
+    WvLog		log( "WvDial", WvLog::Debug );
 
     bool chat_mode = false;
     
@@ -131,6 +132,13 @@ int main( int argc, char ** argv )
 	  && dialer.status() != WvDialer::Idle ) {
 	dialer.select( 100 );
 	dialer.execute();
+	
+	if (dialer.weird_pppd_problem) {
+	    dialer.weird_pppd_problem = false;
+	    log(WvLog::Warning,
+		"pppd error!  Look at files in /var/log for an "
+		"explanation.\n");
+	}
     }
 
     dialer.hangup();

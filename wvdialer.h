@@ -72,6 +72,7 @@ public:
     virtual bool isok() const;
 
     int	   connect_attempts;
+    bool   weird_pppd_problem;
     int	   dial_stat;
     char * connect_status() const;
 
