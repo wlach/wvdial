@@ -167,7 +167,7 @@ void WvModemScan::execute()
 	// if we try 2*baud three times without success, or setting 2*baud
 	// results in a lower setting than 1*baud, we have reached the
 	// top speed of the modem or the serial port, respectively.
-	if (tries >= 3 || modem->speed() < baud)
+	if (tries >= 3 || modem->getspeed() <= baud)
 	{
 	    // using the absolute maximum baud rate confuses many slower modems
 	    // in obscure ways; step down one.
@@ -175,22 +175,21 @@ void WvModemScan::execute()
 	    debug("Max speed is %s; ", baud);
 	    if (is_isdn())
 	    {
-	    	//if (modem->speed() != 230400)		// FIXME
-	    	    modem->speed(115200);
-	    	baud = modem->speed();
-	    	debug ("using %s for ISDN modem.\n", baud);
+		modem->speed(115200);
+	    	baud = modem->getspeed();
+	    	debug("using %s for ISDN modem.\n", baud);
 	    }
 	    else
 	    {
-		if (modem->speed() < 115200)
+		if (modem->getspeed() < 115200)
 		{
-		    // baud - 1 will resolve to next lower rate
+		    // (baud - 1) will resolve to next lower rate
 		    baud = modem->speed(baud - 1);
 		    debug("using %s to be safe.\n", baud);
 		}
 		else
 		{
-		    debug("assuming %s is safe.\n", baud);
+		    debug("that should be safe.\n");
 		}
 	    }
 	    
@@ -199,15 +198,15 @@ void WvModemScan::execute()
 	    break;
 	}
 	
-	debug("Speed %s: ", modem->speed());
-
+	debug("Speed %s: ", modem->getspeed());
+	
 	if (!doresult("AT\r", 500) || status[stage] == Fail)
 	{
 	    tries++;
 	}
 	else // got a response
 	{
-	    baud *= 2;
+	    baud = modem->getspeed();
 	    tries = 0;
 	    // next time through we try a faster speed
 	}

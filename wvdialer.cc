@@ -379,7 +379,7 @@ void WvDialer::load_options()
     	{ "Baud",            NULL, &options.baud,          "", DEFAULT_BAUD },
     	{ "Carrier Check",   NULL, &options.carrier_check, "", true         },
     	{ "Stupid Mode",     NULL, &options.stupid_mode,   "", false        },
-    	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", false	    },
+    	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", true         },
     	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", true	    },
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };

@@ -6,6 +6,39 @@
  */
 #include "wvmodemscan.h"
 #include "wvconf.h"
+#include <ctype.h>
+
+
+void check_ppp_options()
+{
+    WvFile file("/etc/ppp/options", O_RDONLY);
+    char *line;
+    
+    while ((line = file.getline(0)) != NULL)
+    {
+	line = trim_string(line);
+	
+	// comments and blank lines are ignored
+	if (line[0] == '#'  ||  !line[0])
+	    continue;
+	
+	// IP addresses are allowed
+	if (strchr(line, '.') || strchr(line, ':'))
+	    continue;
+	
+	// but baud rates and tty names are not!
+	if (isdigit(line[0])
+	    || !strncmp(line, "/dev", 4)
+	    || !strncmp(line, "tty",  3) 
+	    || !strncmp(line, "cua",  3))
+	{
+	    fprintf(stderr,
+		"\n*** WARNING!  Line \"%s\"\n"
+		"   in /etc/ppp/options may conflict with wvdial!\n\n", line);
+	}
+    }
+}
+
 
 int main(int argc, char **argv)
 {
@@ -29,11 +62,16 @@ int main(int argc, char **argv)
     
     if (l.count() < 1)
     {
-	fprintf(stderr, "\n\nSorry, no modem was detected! "
-		"Is it in use by another program?\n\n"
-		"If your modem is correctly installed and should have "
-		"been located,\nplease send mail to "
-		"wvdial@worldvisions.ca.\n");
+	fprintf(stderr,
+	  "\n\n"
+	  "Sorry, no modem was detected!  "
+	    "Is it in use by another program?\n"
+	  "Did you configure it properly with setserial?\n\n"
+		
+	  "Please read the FAQ at http://www.worldvisions.ca/wvdial/\n\n"
+		
+	  "If you still have problems, send mail to "
+	    "wvdial-list@worldvisions.ca.\n");
 	return 1;
     }
     
@@ -59,6 +97,8 @@ int main(int argc, char **argv)
 	cfg.set(s, "; Username", "<Your Login Name>");
     if (!cfg.get(s, "Password"))
 	cfg.set(s, "; Password", "<Your Password>");
+    
+    check_ppp_options();
     
     return 0;
 }
