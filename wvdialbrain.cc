@@ -45,7 +45,7 @@ void WvDialBrain::reset()
 }
 
 const char * WvDialBrain::guess_menu( char * buf )
-/******************************************/
+/************************************************/
 // Searches buf for signs of intelligence, and tries to guess how to
 // start PPP on the remote side.  Good for terminal servers with menus,
 // prompts, and (hopefully) whatever else.
@@ -84,7 +84,7 @@ const char * WvDialBrain::guess_menu( char * buf )
 }
 
 const char * WvDialBrain::check_prompt( const char * buffer )
-/*****************************************************/
+/***********************************************************/
 {
     WvString tprompt;
     
@@ -174,7 +174,8 @@ bool WvDialBrain::is_prompt( const char * c,
 		if ( !prompt_response[0] )
 		    return( false ); // last line was empty: not a prompt
 		else
-		    return( true ); // we have a guess, so use it anyway
+		    continue; // we have a guess, so use it anyway, IF the
+                              // last non-blank line was a prompt.
 	    }
 	    if( strchr( prompt_punct, *cptr ) )
 		return( true );  // first non-whitespace was punctuation! good.
