@@ -688,7 +688,8 @@ void WvDialer::async_waitprompt()
 
     if( options.carrier_check == true ) {
 	if( !modem || !modem->carrier() ) {
-	    stat = ModemError;
+	    err( "Connected, but carrier signal lost!  Retrying...\n" );
+	    stat = PreDial2;
     	    return;
 	}
     }
