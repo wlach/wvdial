@@ -690,10 +690,10 @@ int WvDialer::wait_for_modem( char * 	strs[],
 {
     off_t	onset;
     char *	soff;
-    int		result;
+    int		result = -1;
     int		len;
     const char *ppp_marker = NULL;
-    
+
     while( modem->select( timeout ) ) {
 	last_rx = time( NULL );
     	onset = offset;
@@ -717,18 +717,6 @@ int WvDialer::wait_for_modem( char * 	strs[],
 
 	strlwr( buffer + onset );
 
-	// Search the buffer for a valid menu option...
-	// If guess_menu returns an offset, we zap everything before it in
-	// the buffer.  This prevents finding the same menu option twice.
-	// ... but don't do this in the Dial state, because the CONNECT line
-	// is all we care about.  Is there a nicer way to do this?
-	if (stat != WaitDial)
-	{
-	    ppp_marker = brain->guess_menu( buffer );
-	    if( ppp_marker != NULL )
-		memset( buffer, ' ', ppp_marker-buffer );
-	}
-	
 	// Now we can search using strstr.
 	for( result = 0; strs[ result ] != NULL; result++ ) {
 	    len = strlen( strs[ result ] );
@@ -740,21 +728,34 @@ int WvDialer::wait_for_modem( char * 	strs[],
 		memmove( buffer, soff + len,
 			 offset - (int)( soff+len - buffer ) );
 		offset -= (int)( soff+len - buffer );
-		return( result );
+		break;
 	    }
 	}
+	
+	if (strs[ result ] == NULL)
+	    result = -1;
 
-	// Looks like we did not find anything.  Is the buffer full yet?
+	// Search the buffer for a valid menu option...
+	// If guess_menu returns an offset, we zap everything before it in
+	// the buffer.  This prevents finding the same menu option twice.
+	ppp_marker = brain->guess_menu( buffer );
+	if( ppp_marker != NULL )
+	    memset( buffer, ' ', ppp_marker-buffer );
+	
+	// Looks like we didn't find anything.  Is the buffer full yet?
 	if( offset == INBUF_SIZE ) {
 	    // yes, move the second half to the first half for next time.
 	    memmove( buffer, buffer + INBUF_SIZE/2,
 		     INBUF_SIZE - INBUF_SIZE/2 );
 	    offset = INBUF_SIZE/2;
 	}
+	
+	if (result != -1)
+	    break;
     }
     
     buffer[ offset ] = 0;
-    return( -1 ); // timeout
+    return( result ); // -1 == timeout
 }
 
 int WvDialer::async_wait_for_modem( char * strs[], bool neednl, bool verbose )
