@@ -164,15 +164,15 @@ void WvModemScan::execute()
 	modem->drain();
 	modem->speed(baud*2);
 
-	// if we try 2*baud five times without success, or setting 2*baud
+	// if we try 2*baud three times without success, or setting 2*baud
 	// results in a lower setting than 1*baud, we have reached the
 	// top speed of the modem or the serial port, respectively.
 	if (tries >= 3 || modem->speed() < baud)
 	{
-	    // using the absolute maximum baud rate confuses many modems
+	    // using the absolute maximum baud rate confuses many slower modems
 	    // in obscure ways; step down one.
-	    modem->speed(baud);
-	    debug("Max speed is %s; ", modem->speed());
+	    baud = modem->speed(baud);
+	    debug("Max speed is %s; ", baud);
 	    if (is_isdn())
 	    {
 	    	//if (modem->speed() != 230400)		// FIXME
@@ -182,9 +182,16 @@ void WvModemScan::execute()
 	    }
 	    else
 	    {
-		modem->speed(baud / 2);
-		baud = modem->speed(); // get correct value!
-		debug("using %s to be safe.\n", baud);
+		if (modem->speed() < 115200)
+		{
+		    // baud - 1 will resolve to next lower rate
+		    baud = modem->speed(baud - 1);
+		    debug("using %s to be safe.\n", baud);
+		}
+		else
+		{
+		    debug("assuming %s is safe.\n", baud);
+		}
 	    }
 	    
 	    stage++;
@@ -349,14 +356,15 @@ static int filesort(const void *_e1, const void *_e2)
 void WvModemScanList::setup()
 {
     struct dirent **namelist;
-    struct stat mouse;
-    int num, count, statresponse;
+    struct stat mouse, modem;
+    int num, count, mousestat, modemstat;
     
     log = new WvLog("Port Scan", WvLog::Debug);
     thisline = -1;
     printed = false;
     
-    statresponse = stat("/dev/mouse", &mouse);
+    mousestat = stat("/dev/mouse", &mouse);
+    modemstat = stat("/dev/modem", &modem);
     num = scandir("/dev", &namelist, fileselect, filesort);
     
     if (num < 0)
@@ -369,15 +377,20 @@ void WvModemScanList::setup()
 	// mouse response!  (We are careful to put things back when done,
 	// but X seems to still get confused.)  Anyway the mouse is seldom
 	// a modem.
-	if (statresponse==0 && mouse.st_ino == (ino_t)namelist[count]->d_ino)
+	if (mousestat==0 && mouse.st_ino == (ino_t)namelist[count]->d_ino)
 	{
 	    log->print("\nIgnoring %s because /dev/mouse is a link to it.\n",
 		       namelist[count]->d_name);
 	    continue;
 	}
 	
-	append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
-	       true);
+	// bump /dev/modem to the top of the list, if it exists
+	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino)
+	    append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
+		   true);
+	else
+	    append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
+		   true);
     }
     
     while (--num >= 0)
