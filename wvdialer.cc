@@ -379,7 +379,7 @@ void WvDialer::execute()
 	break;
     case WaitAnything:
 	// we allow some time after connection for silly servers/modems.
-	if( modem->select( 500 ) ) 
+	if( modem->select( 500, true, false ) ) 
 	{
 	    // if any data comes in at all, switch to impatient mode.
 	    stat = WaitPrompt;
@@ -726,7 +726,7 @@ bool WvDialer::init_modem()
 	
 	// make modem happy
 	modem->print( "\r\r\r\r\r" );
-	while( modem->select( 100 ) )
+	while( modem->select( 100, true, false ) )
 	    modem->drain();
 	
 	// Send up to nine init strings, in order.
@@ -1339,7 +1339,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
     int		len;
     const char *ppp_marker = NULL;
 
-    while( modem->select( timeout ) ) 
+    while( modem->select( timeout, true, false ) ) 
     {
 	last_rx = time( NULL );
 	onset = offset;
@@ -1347,7 +1347,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	
 	// make sure we do not split lines TOO arbitrarily, or the
 	// logs will look bad.
-	while( offset < INBUF_SIZE && modem->select( 100 ) )
+	while( offset < INBUF_SIZE && modem->select( 100, true, false ) )
 	    offset += modem->read( buffer + offset, INBUF_SIZE - offset );
 	
 	// Make sure there is a NULL on the end of the buffer.

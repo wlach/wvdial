@@ -416,7 +416,7 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 	return 0;
     }
     
-    while (modem->select(msec))
+    while (modem->select(msec, true, false))
     {
 	amt = modem->read(cptr, size-1);
 	cptr[amt] = 0;
