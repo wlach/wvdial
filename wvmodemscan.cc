@@ -500,7 +500,8 @@ static int filesort(const void *_e1, const void *_e2)
 }
 
 
-WvModemScanList::WvModemScanList() : log("Port Scan", WvLog::Debug)
+WvModemScanList::WvModemScanList(WvStringParm _exception) 
+    : log("Modem Port Scan", WvLog::Debug)
 {
     struct dirent **namelist;
     struct stat mouse, modem;
@@ -530,16 +531,25 @@ WvModemScanList::WvModemScanList() : log("Port Scan", WvLog::Debug)
 	    continue;
 	}
 	
+	if (!!_exception && !strcmp(_exception, namelist[count]->d_name))
+	{
+	    log("\nIgnoring %s because I've been told to ignore it.\n",
+		namelist[count]->d_name);
+	    continue;
+	}
+	
 	// bump /dev/modem to the top of the list, if it exists
 	// and also use /dev/modem as the device name which will be used later
 	// so PCMCIA can change it where it has detected a serial port and
 	// wvdial will follow without the need for another wvdialconf call.
-	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino) {
+	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino) 
+	{
 	    log("\nScanning %s first, /dev/modem is a link to it.\n",
 		       namelist[count]->d_name);
 	    prepend(new WvModemScan(WvString("%s", namelist[count]->d_name), true),
 		   true);
-	} else
+	} 
+	else
 	    append(new WvModemScan(WvString("%s", namelist[count]->d_name), false),
 		   true);
     }

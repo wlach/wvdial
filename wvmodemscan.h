@@ -79,7 +79,7 @@ class WvModemScanList : public WvModemScanListBase
     int thisline;
     bool printed;
 public:
-    WvModemScanList();
+    WvModemScanList(WvStringParm _exception = WvString::null);
     
     void execute();
     bool isdone();
