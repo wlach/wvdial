@@ -82,7 +82,7 @@ int main( int argc, char ** argv )
 
     WvDialLogger 	rc;
     WvConf		cfg( "/etc/wvdial.conf" );
-    WvStringList	sections;
+    WvStringList	*sections = new WvStringList;
     
     signal( SIGTERM, signalhandler );
     signal( SIGINT, signalhandler );
@@ -106,10 +106,10 @@ int main( int argc, char ** argv )
 		print_help();
 		return( 1 );
 	    }
-    	    sections.append( new WvString( "Dialer %s", argv[i] ), true );
+    	    sections->append( new WvString( "Dialer %s", argv[i] ), true );
     	}
     } else {
-	sections.append( new WvString( "Dialer Defaults" ), true);
+	sections->append( new WvString( "Dialer Defaults" ), true);
     }
     
     WvDialer dialer( cfg, sections );

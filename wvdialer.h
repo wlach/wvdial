@@ -42,7 +42,7 @@ class WvDialer : public WvStreamClone
 /***********************************/
 {
 public:
-    WvDialer( WvConf &cfg, WvStringList &sect_list );
+    WvDialer( WvConf &_cfg, WvStringList *_sect_list );
     virtual ~WvDialer();
 
     WvModem *	modem;
@@ -109,6 +109,8 @@ public:
 
 private:
     WvDialBrain *	brain;
+    WvConf &		cfg;
+    WvStringList *	sect_list;
     
     bool		been_online;
     time_t		connected_at;
@@ -127,7 +129,7 @@ private:
     int			prompt_tries;
     WvString		prompt_response;
 
-    void		load_options( WvConf& cfg, WvStringList& sect_list );
+    void		load_options();
     
     bool		init_modem();
     void		async_dial();

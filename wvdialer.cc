@@ -51,10 +51,11 @@ static char *	prompt_strings[] = {
 //       WvDialer Public Functions
 //**************************************************
 
-WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
+WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list )
 /********************************************************/
 : WvStreamClone( (WvStream **)&modem ),
-    log( "WvDial", WvLog::Debug ), err( log.split( WvLog::Error ) ),
+    cfg(_cfg), log( "WvDial", WvLog::Debug ),
+    err( log.split( WvLog::Error ) ),
     modemrx( "Modem", WvLog::Debug )
 {
     modem 		 = NULL;
@@ -69,10 +70,12 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
     auto_reconnect_at    = 0;
     connected_at         = 0;
     
+    sect_list = _sect_list;
+    
     log( "WvDial: Internet dialer version " WVDIAL_VER_STRING "\n" );
 
     // Ensure all sections in sect_list actually exist, warning if not.
-    WvStringList::Iter	iter( sect_list );
+    WvStringList::Iter	iter( *sect_list );
     for( iter.rewind(); iter.next(); ) {
     	if( cfg[iter] == NULL ) {
     	    err( WvLog::Warning,
@@ -83,13 +86,8 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
 
     // Activate the brain and read configuration.
     brain = new WvDialBrain( this );
-    load_options( cfg, sect_list );
 
-    if( !options.modem[0] ) {
-	err( "Configuration does not specify a valid modem device.\n" );
-    	stat = ModemError;
-	return; // if we get this error, we already have a problem.
-    }
+    // init_modem() reads the config options.  It MUST run here!
     
     if( !init_modem() )
     {
@@ -108,6 +106,8 @@ WvDialer::~WvDialer()
 	delete modem;
     if( brain )
     	delete brain;
+    if( sect_list )
+	delete sect_list;
 }
 
 bool WvDialer::dial()
@@ -344,7 +344,7 @@ void WvDialer::execute()
 //       WvDialer Private Functions
 //**************************************************
 
-void WvDialer::load_options( WvConf& cfg, WvStringList& sect_list )
+void WvDialer::load_options()
 /*****************************************************************/
 {
     OptInfo opts[] = {
@@ -387,12 +387,12 @@ void WvDialer::load_options( WvConf& cfg, WvStringList& sect_list )
     	if( opts[i].str_member == NULL ) {
     	    // it's an int/bool option.
     	    *( opts[i].int_member ) =
-    	    		cfg.fuzzy_get( sect_list, opts[i].name,
+    	    		cfg.fuzzy_get( *sect_list, opts[i].name,
     	    		    cfg.get( d, opts[i].name, opts[i].int_default ) );
     	} else {
     	    // it's a string option.
     	    *( opts[i].str_member ) = 
-    	    		cfg.fuzzy_get( sect_list, opts[i].name, 
+    	    		cfg.fuzzy_get( *sect_list, opts[i].name, 
     	    		    cfg.get( d, opts[i].name, opts[i].str_default ) );
     	}
     }
@@ -402,10 +402,18 @@ bool WvDialer::init_modem()
 /*************************/
 {
     int	received;
+    
+    load_options();
 
-    // Open the modem...
     if( modem ) delete modem;
     
+    if( !options.modem[0] ) {
+	err( "Configuration does not specify a valid modem device.\n" );
+    	stat = ModemError;
+	return( false ); // if we get this error, we already have a problem.
+    }
+
+    // Open the modem...
     modem = new WvModem( options.modem, options.baud );
     if( !modem->isok() ) {
 	err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
