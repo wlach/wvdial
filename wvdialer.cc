@@ -226,11 +226,7 @@ bool WvDialer::dial()
 void WvDialer::hangup()
 /*********************/
 {
-    if( ppp_pipe ) 
-    {
-    	ppp_pipe->release();
-	ppp_pipe = NULL;
-    }
+    RELEASE(ppp_pipe);
     
     if( !chat_mode )
       pppd_watch( 250 );
@@ -795,8 +791,8 @@ void WvDialer::del_modem()
     if (modem)
     {
 	modem->hangup();
-	modem->release();
-	cloned = modem = NULL;
+	RELEASE(modem);
+	cloned = NULL;
     }
 }
 
