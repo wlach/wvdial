@@ -71,6 +71,9 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode = fa
     connected_at         = 0;
     weird_pppd_problem   = false;
     
+    // tell wvstreams we need our own subtask
+    uses_continue_select = true;
+    
     sect_list = _sect_list;
     chat_mode = _chat_mode;
     
@@ -406,6 +409,7 @@ void WvDialer::load_options()
     	    *( opts[i].str_member ) = 
     	    		cfg.fuzzy_get( *sect_list, opts[i].name, 
     	    		    cfg.get( d, opts[i].name, opts[i].str_default ) );
+	    opts[i].str_member->unique();
     	}
     }
 }
@@ -492,7 +496,7 @@ void WvDialer::async_dial()
 
     if( stat == PreDial2 ) {
     	// Wait for three seconds and then go to PreDial1.
-    	usleep( 3 * 1000 * 1000 );
+    	continue_select(3000);
     	stat = PreDial1;
     	return;
     }
@@ -501,7 +505,7 @@ void WvDialer::async_dial()
 	// Hit enter a few times.
 	for( int i=0; i<3; i++ ) {
 	    modem->write( "\r", 1 );
-	    usleep( 500 * 1000 );
+	    continue_select(500);
 	}
 	stat = Dial;
 	return;
@@ -546,7 +550,7 @@ void WvDialer::async_dial()
 	stat = PreDial1;
 	connect_attempts++;
 	dial_stat = 2;
-	sleep( 2 );
+	continue_select(2000);
 	return;
     case 2:	// NO DIALTONE
     case 3:	// NO DIAL TONE
@@ -560,7 +564,7 @@ void WvDialer::async_dial()
 	stat = PreDial1;
 	connect_attempts++;
 	dial_stat = 4;
-	sleep( 2 );
+	continue_select(2000);
 	return;
     case 5:	// ERROR
 	err( "Invalid dial command.\n" );
