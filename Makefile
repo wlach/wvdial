@@ -21,9 +21,7 @@ all: wvdial.a wvdial wvdialconf pppmon
 wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 	wvdialmon.o
 
-LIBS += -L../wvstreams -lwvutils -lwvstreams -luniconf
-
-wvdial wvdialconf papchaptest pppmon: wvdial.a
+wvdial wvdialconf papchaptest pppmon: wvdial.a $(LIBUNICONF)
 
 install-bin: all
 	[ -d ${BINDIR}      ] || install -d ${BINDIR}
