@@ -310,8 +310,9 @@ const char *WvModemScan::is_isdn() const
 
 static int fileselect(const struct dirent *e)
 {
-    return !strncmp(e->d_name, "ttyS", 4);     // serial
-       // (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
+    return !strncmp(e->d_name, "ttyS", 4)      	// serial
+       || !strncmp(e->d_name, "ttyLT", 5);		// Lucent WinModem
+	// (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
 }
 
 

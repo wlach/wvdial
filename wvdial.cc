@@ -89,6 +89,7 @@ int main( int argc, char ** argv )
     WvStringList	*sections = new WvStringList;
     WvLog		log( "WvDial", WvLog::Debug );
     char *		homedir = getenv("HOME");
+    int			haveconfig = 1;
 
     bool chat_mode = false;
     
@@ -96,20 +97,21 @@ int main( int argc, char ** argv )
     signal( SIGINT, signalhandler );
     signal( SIGHUP, signalhandler );
     
-    if( !cfg.isok() || !cfg.isclean() ) {
-	return( 1 );
-    }
-    
-    if (homedir)
-    {
-	WvString rcfile("%s/.wvdialrc", homedir);
-	
-	if (!access(rcfile, F_OK))
-	    cfg.load_file(rcfile);
-    }
 
     if( argc > 1 ) {
     	for( int i=1; i < argc; i++ ) {
+	    if( !strcmp( argv[i], "--config" ) ) {
+
+		if (!access(argv[++i < argc ? i : i-1 ],F_OK)) {
+		    haveconfig = 0;
+		    cfg.load_file(WvString(argv[i]));
+		    continue;
+		} else {
+		    log("Error: --config requires an argument\n");
+		    print_help();
+		    return 1;			    
+		}
+	    }
 	    if( !strcmp( argv[i], "--chat" ) ) {
 		syslog = new WvSyslog( "WvDial", false, WvLog::Debug2, 
 				       WvLog::Debug2 );
@@ -118,21 +120,36 @@ int main( int argc, char ** argv )
 	    }
 	    if( !strcmp( argv[i], "--help" ) ) {
 	    	print_help();
-	    	return( 1 );
+	    	return 1;
 	    }
 	    else if( !strcmp( argv[i], "--version" ) ) {
 	    	print_version();
-	    	return( 1 );
+	    	return 1;
 	    }
 	    else if( argv[i][0] == '-' ) {
 		print_help();
-		return( 1 );
+		return 1;
 	    }
     	    sections->append( new WvString( "Dialer %s", argv[i] ), true );
     	}
     } else {
 	sections->append( new WvString( "Dialer Defaults" ), true);
     }
+
+    if( !haveconfig)
+	if (homedir)
+        {
+	    WvString rcfile("%s/.wvdialrc", homedir);
+	
+	    if (!access(rcfile, F_OK))
+	       cfg.load_file(rcfile);
+        }
+
+    if( !cfg.isok() || !cfg.isclean() ) {
+	    return 1;
+    }
+    
+
     
     WvDialer dialer( cfg, sections, chat_mode );
 	
