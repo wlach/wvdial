@@ -85,7 +85,7 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
     brain = new WvDialBrain( this );
     load_options( cfg, sect_list );
 
-    if( !options.modem.str[0] ) {
+    if( !options.modem[0] ) {
 	err( "Configuration does not specify a valid modem device.\n" );
     	stat = ModemError;
 	return; // if we get this error, we already have a problem.
@@ -122,17 +122,17 @@ bool WvDialer::dial()
     	return( false );
     }
 
-    if( !options.phnum.str[0] ) {
+    if( !options.phnum[0] ) {
 	err( "Configuration does not specify a valid phone number.\n" );
     	stat = OtherError;
     }
 
-    if( !options.login.str[0] ) {
+    if( !options.login[0] ) {
 	err( "Configuration does not specify a valid login name.\n" );
     	stat = OtherError;
     }
 
-    if( !options.password.str[0] ) {
+    if( !options.password[0] ) {
 	err( "Configuration does not specify a valid password.\n" );
     	stat = OtherError;
     }
@@ -403,7 +403,7 @@ bool WvDialer::init_modem()
 
     // Open the modem...
     if( !modem ) {
-	modem = new WvModem( options.modem.str, options.baud );
+	modem = new WvModem( options.modem, options.baud );
 	if( !modem->isok() ) {
 	    err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
     	    return( false );
@@ -433,7 +433,7 @@ bool WvDialer::init_modem()
             default:
 	               this_str = &options.init9;	break;
     	}
-    	if( this_str->str[0] ) {
+    	if( !! *this_str ) {
     	    modem->print( "%s\r", *this_str );
     	    log( "Sending: %s\n", *this_str );
 
@@ -451,7 +451,7 @@ bool WvDialer::init_modem()
 
     // If we're using an ISDN modem, allow one second for the SPID
     // settings to kick in.  It dials so fast anyway that no one will care.
-    if( options.isdn.str[0] )
+    if( options.isdn[0] )
 	sleep( 1 );
     
     // Everything worked fine.
@@ -563,20 +563,20 @@ void WvDialer::start_ppp()
     WvString	addr_colon( "%s:", options.force_addr );
 
     char *argv[] = {
-	options.where_pppd.str,
+	options.where_pppd,
 	"modem",
 	"crtscts",
 	"defaultroute",
 	"usehostname",
 	"-detach",
-	"user", options.login.str,
-	options.force_addr.str[0] ? addr_colon.str : "noipdefault",
+	"user", options.login,
+	options.force_addr[0] ? (char *)addr_colon : "noipdefault",
 	options.new_pppd ? "call" : NULL, 
 	options.new_pppd ? "wvdial" : NULL,
 	NULL
     };
 
-    if( access( options.where_pppd.str, X_OK ) != 0 ) {
+    if( access( options.where_pppd, X_OK ) != 0 ) {
         err( "Unable to run %s.\n", options.where_pppd );
         err( "Check permissions, or specify a \"PPPD Path\" option "
              "in wvdial.conf.\n" );

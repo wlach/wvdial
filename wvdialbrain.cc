@@ -95,7 +95,7 @@ char * WvDialBrain::check_prompt( const char * buffer )
 
     } else if( is_login_prompt( buffer ) ) {
     	// We have a login prompt, so send a suitable response.
-    	char * send_this = dialer->options.login.str;
+    	char * send_this = dialer->options.login;
     	dialer->log( "Looks like a login prompt.\n"
     		     "Sending: %s\n", send_this );
     	dialer->reset_offset();
@@ -109,7 +109,7 @@ char * WvDialBrain::check_prompt( const char * buffer )
     	prompt_tries++;
     	sent_login = 1;	// yes, we've sent a password:
     			// assume we've sent username too.
-    	return( dialer->options.password.str );
+    	return( dialer->options.password );
 
     } else if( is_welcome_msg( buffer ) ) {
     	dialer->log( "Looks like a welcome message.\n" );
@@ -121,7 +121,7 @@ char * WvDialBrain::check_prompt( const char * buffer )
     	    return( NULL );	// figure it out next time
     	}
 
-    	if( !prompt_response.str[0] )
+    	if( !prompt_response[0] )
     	    prompt_response = dialer->options.default_reply;	// wild guess
 
     	dialer->log( "Hmm... a prompt.  Sending \"%s\".\n",
@@ -129,7 +129,7 @@ char * WvDialBrain::check_prompt( const char * buffer )
     	dialer->reset_offset();
     	prompt_tries++;
 
-    	return( prompt_response.str );
+    	return( prompt_response );
 
     } else {
     	// not a prompt at all!
@@ -164,7 +164,7 @@ bool WvDialBrain::is_prompt( const char * c,
     if( !promptstring ) {
 	for( cptr = c + strlen( c ) - 1; cptr >= c; cptr-- ) {
 	    if( isnewline( *cptr ) ) {
-		if ( !prompt_response.str[0] )
+		if ( !prompt_response[0] )
 		    return( false ); // last line was empty: not a prompt
 		else
 		    return( true ); // we have a guess, so use it anyway
@@ -244,16 +244,16 @@ bool WvDialBrain::is_login_prompt( const char * buf )
     	    is_prompt( buf, "user.id", true ) ||
     	    is_prompt( buf, "signon" ) ||
     	    is_prompt( buf, "sign.on", true ) ||
-    	    ( dialer->options.login_prompt.str[0] &&
-    	      is_prompt( buf, dialer->options.login_prompt.str ) ) );
+    	    ( dialer->options.login_prompt[0] &&
+    	      is_prompt( buf, dialer->options.login_prompt ) ) );
 }
 
 bool WvDialBrain::is_password_prompt( const char * buf )
 /******************************************************/
 {
     return( is_prompt( buf, "password" ) ||
-      ( dialer->options.pass_prompt.str[0] &&
-        is_prompt( buf, dialer->options.pass_prompt.str ) ) );
+      ( dialer->options.pass_prompt[0] &&
+        is_prompt( buf, dialer->options.pass_prompt ) ) );
 }
 
 bool WvDialBrain::is_welcome_msg( const char * buf )
@@ -530,10 +530,10 @@ void WvDialBrain::set_prompt_response( char * str )
 {
     WvString	n;
 
-    if( strcmp( str, prompt_response.str ) ) {
+    if( strcmp( str, prompt_response ) ) {
 	n.setsize( strlen( str ) + 1 );
-	strcpy( n.str, str );
-	n.str[ strlen( str ) ] = '\0';
+	strcpy( n, str );
+	n[ strlen( str ) ] = '\0';
 
     	dialer->log( "Found a good menu option: \"%s\".\n", n );
     	prompt_response = n;

@@ -43,14 +43,14 @@ int main(int argc, char **argv)
     WvModemScan &m = *i.data();
     WvString fn = m.filename(), init = m.initstr();
     
-    fprintf(stderr, "\nFound a modem on %s.\n", fn.str);
+    fprintf(stderr, "\nFound a modem on %s.\n", (char *)fn);
     
     WvConf cfg(argv[1]);
     static char s[]="Dialer Defaults";
-    cfg.set(s, "Modem", fn.str);
+    cfg.set(s, "Modem", fn);
     cfg.set(s, "Baud", m.maxbaud());
     cfg.set(s, "Init1", "ATZ");
-    cfg.set(s, "Init2", init.str);
+    cfg.set(s, "Init2", init);
 
     // insert some entries to let people know what they need to edit
     if (!cfg.get(s, "Phone"))

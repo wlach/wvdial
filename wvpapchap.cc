@@ -21,19 +21,19 @@ void WvPapChap::put_secret( WvString username, WvString password,
 			    WvString remote )
 /*******************************************/
 {
-    assert( remote.str[0] );
+    assert( remote[0] );
 
     // PAP secrets:
     nuke_contents();
     load_file( PAP_SECRETS );
-    do_secret( username.str, password.str, remote.str );
+    do_secret( username, password, remote );
     if( write_file( PAP_SECRETS ) == false )
 	pap_success = false;
 
     // CHAP secrets:
     nuke_contents();
     load_file( CHAP_SECRETS );
-    do_secret( username.str, password.str, remote.str );
+    do_secret( username, password, remote );
     if( write_file( CHAP_SECRETS ) == false )
 	chap_success = false;
 }
@@ -87,7 +87,7 @@ bool WvPapChap::write_file( char * filename )
 
     WvStringList::Iter	iter( contents );
     for( iter.rewind(); iter.next(); )
-    	file.print( "%s\n", iter.data()->str );
+    	file.print( "%s\n", *iter.data() );
 
     file.close();
     return( true );
@@ -110,13 +110,13 @@ void WvPapChap::do_secret( char * username, char * password, char * remote )
     iter.next();
     while( iter.cur() ) {
     	// Is this line a comment?
-    	if( iter.data()->str[0] == '#' ) {
+    	if( (*iter.data())[0] == '#' ) {
     	    iter.next();
     	    continue;
     	}
 
     	// Is the line blank?
-    	char * p = iter.data()->str;
+    	char * p = *iter.data();
     	do 
     	    p++;
     	while( *p != '\0' && isspace( *p ) );

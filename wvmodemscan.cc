@@ -64,7 +64,7 @@ WvString WvModemScan::initstr() const
 {
     WvString s;
     s.setsize(100);
-    strcpy(s.str, "AT");
+    strcpy(s, "AT");
     
     for (int i = 0; i < NUM_STAGES; i++)
     {
@@ -75,11 +75,11 @@ WvString WvModemScan::initstr() const
 	if ((commands[i][0]=='Z' || commands[i][0]=='I') && status[i] != Test)
 	    continue;
 	
-	strcat(s.str, commands[i]);
-	strcat(s.str, " ");
+	strcat(s, commands[i]);
+	strcat(s, " ");
     }
     
-    return trim_string(s.str);
+    return trim_string(s);
 }
 
 
@@ -91,7 +91,7 @@ void WvModemScan::execute()
     {
     case Startup:
 	assert(!modem);
-	modem = new WvModem(file.str, baud);
+	modem = new WvModem(file, baud);
 	modem->die_fast = true;
 	if (!modem->isok())
 	{
@@ -235,7 +235,7 @@ bool WvModemScan::doresult(const WvString &s, int msec)
     usleep(50 * 1000); // delay a bit after emptying the buffer
     modem->write(s);
 
-    debug("%s -- ", trim_string(s.str));
+    debug("%s -- ", trim_string(s));
     
     len = coagulate(buf, sizeof(buf), msec);
 
@@ -310,13 +310,13 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 
 char *WvModemScan::is_isdn() const
 {
-    if (!identifier.str)
+    if (!identifier)
     	return NULL;
 
     if (identifier == "3C882")		// 3Com Impact IQ
-    	return identifier.str;
+    	return identifier;
     if (identifier == "960")		// Motorola BitSurfr
-    	return identifier.str;
+    	return identifier;
 
     return NULL;
 }	
@@ -424,11 +424,11 @@ void WvModemScanList::execute()
 	if (!printed)
 	{
 	    const WvString &f = s->filename();
-	    const char *cptr = strrchr(f.str, '/');
+	    const char *cptr = strrchr(f, '/');
 	    if (cptr)
 		cptr++;
 	    else
-		cptr = f.str;
+		cptr = f;
 
 	    if (!strncmp(cptr, "tty", 3))
 		cptr += 3;
