@@ -562,7 +562,7 @@ void WvDialer::start_ppp()
 {
     WvString	addr_colon( "%s:", options.force_addr );
 
-    char *argv[] = {
+    char const *argv[] = {
 	options.where_pppd,
 	"modem",
 	"crtscts",
@@ -570,7 +570,7 @@ void WvDialer::start_ppp()
 	"usehostname",
 	"-detach",
 	"user", options.login,
-	options.force_addr[0] ? (char *)addr_colon : "noipdefault",
+	options.force_addr[0] ? (const char *)addr_colon : "noipdefault",
 	options.new_pppd ? "call" : NULL, 
 	options.new_pppd ? "wvdial" : NULL,
 	NULL
@@ -612,7 +612,7 @@ void WvDialer::async_waitprompt()
 /*******************************/
 {
     int		received;
-    char *	prompt_response;
+    const char *prompt_response;
 
     if( options.carrier_check == true ) {
 	if( !modem || !modem->carrier() ) {
@@ -689,7 +689,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	// Search the buffer for a valid menu option...
 	// If guess_menu returns an offset, we zap everything before it in
 	// the buffer.  This prevents finding the same menu option twice.
-	char *	ppp_marker = brain->guess_menu( buffer );
+	const char *ppp_marker = brain->guess_menu( buffer );
 	if( ppp_marker != NULL )
 	    memset( buffer, ' ', ppp_marker-buffer );
 	

@@ -44,8 +44,8 @@ public:
 
     void		reset();
 
-    char *		check_prompt( const char * buffer );
-    char *		guess_menu( char * buf );
+    const char *	check_prompt( const char * buffer );
+    const char *	guess_menu( char * buf );
 
 private:
     WvDialer *		dialer;

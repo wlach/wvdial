@@ -47,7 +47,7 @@ public:
     bool isok() const;
 
     // is this an isdn modem?  Returns modem identifier if so.
-    char *is_isdn() const;
+    const char *is_isdn() const;
 
     // continue the probe where we left off
     void execute();

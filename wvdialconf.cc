@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     WvModemScan &m = i;
     WvString fn = m.filename(), init = m.initstr();
     
-    fprintf(stderr, "\nFound a modem on %s.\n", (char *)fn);
+    fprintf(stderr, "\nFound a modem on %s.\n", (const char *)fn);
     
     WvConf cfg(argv[1]);
     static char s[]="Dialer Defaults";

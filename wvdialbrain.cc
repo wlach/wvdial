@@ -44,7 +44,7 @@ void WvDialBrain::reset()
     prompt_response = "";
 }
 
-char * WvDialBrain::guess_menu( char * buf )
+const char * WvDialBrain::guess_menu( char * buf )
 /******************************************/
 // Searches buf for signs of intelligence, and tries to guess how to
 // start PPP on the remote side.  Good for terminal servers with menus,
@@ -83,7 +83,7 @@ char * WvDialBrain::guess_menu( char * buf )
     	return( NULL );
 }
 
-char * WvDialBrain::check_prompt( const char * buffer )
+const char * WvDialBrain::check_prompt( const char * buffer )
 /*****************************************************/
 {
     // If we've been here too many times, or too long ago, just give up and
@@ -95,7 +95,7 @@ char * WvDialBrain::check_prompt( const char * buffer )
 
     } else if( is_login_prompt( buffer ) ) {
     	// We have a login prompt, so send a suitable response.
-    	char * send_this = dialer->options.login;
+    	const char * send_this = dialer->options.login;
     	dialer->log( "Looks like a login prompt.\n"
     		     "Sending: %s\n", send_this );
     	dialer->reset_offset();
@@ -532,8 +532,8 @@ void WvDialBrain::set_prompt_response( char * str )
 
     if( strcmp( str, prompt_response ) ) {
 	n.setsize( strlen( str ) + 1 );
-	strcpy( n, str );
-	n[ strlen( str ) ] = '\0';
+	strcpy( n.edit(), str );
+	n.edit()[ strlen( str ) ] = '\0';
 
     	dialer->log( "Found a good menu option: \"%s\".\n", n );
     	prompt_response = n;

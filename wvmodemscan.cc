@@ -64,7 +64,7 @@ WvString WvModemScan::initstr() const
 {
     WvString s;
     s.setsize(100);
-    strcpy(s, "AT");
+    strcpy(s.edit(), "AT");
     
     for (int i = 0; i < NUM_STAGES; i++)
     {
@@ -75,11 +75,11 @@ WvString WvModemScan::initstr() const
 	if ((commands[i][0]=='Z' || commands[i][0]=='I') && status[i] != Test)
 	    continue;
 	
-	strcat(s, commands[i]);
-	strcat(s, " ");
+	strcat(s.edit(), commands[i]);
+	strcat(s.edit(), " ");
     }
     
-    return trim_string(s);
+    return trim_string(s.edit());
 }
 
 
@@ -226,16 +226,17 @@ void WvModemScan::execute()
 }
 
 
-bool WvModemScan::doresult(const WvString &s, int msec)
+bool WvModemScan::doresult(const WvString &_s, int msec)
 {
     char buf[1024], *cptr;
     size_t len;
+    WvString s(_s);
     
     modem->drain();
     usleep(50 * 1000); // delay a bit after emptying the buffer
     modem->write(s);
 
-    debug("%s -- ", trim_string(s));
+    debug("%s -- ", trim_string(s.edit()));
     
     len = coagulate(buf, sizeof(buf), msec);
 
@@ -308,7 +309,7 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 }
 
 
-char *WvModemScan::is_isdn() const
+const char *WvModemScan::is_isdn() const
 {
     if (!identifier)
     	return NULL;
