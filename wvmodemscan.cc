@@ -417,13 +417,13 @@ void WvModemScanList::execute()
     i.rewind();
     if (!i.next()) return; // note: the first next() is the _first_ item!
     
-    WvModemScan *s = i.data();
+    WvModemScan &s(i);
     
-    if (!s->isok())
+    if (!s.isok())
     {
 	if (!printed)
 	{
-	    const WvString &f = s->filename();
+	    const WvString &f = s.filename();
 	    const char *cptr = strrchr(f, '/');
 	    if (cptr)
 		cptr++;
@@ -445,9 +445,9 @@ void WvModemScanList::execute()
     }
     else
     {
-	s->execute();
+	s.execute();
 	
-	if (s->isok())
+	if (s.isok())
 	    printed = true;
     }
 	    
@@ -462,7 +462,7 @@ bool WvModemScanList::isdone()
     
     i.rewind();
     if (i.next())
-	return i.data()->isdone();
+	return i().isdone();
     else
 	return true; // empty list, so we are done!
 }

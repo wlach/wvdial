@@ -87,7 +87,7 @@ bool WvPapChap::write_file( char * filename )
 
     WvStringList::Iter	iter( contents );
     for( iter.rewind(); iter.next(); )
-    	file.print( "%s\n", *iter.data() );
+    	file.print( "%s\n", iter );
 
     file.close();
     return( true );
@@ -110,13 +110,13 @@ void WvPapChap::do_secret( char * username, char * password, char * remote )
     iter.next();
     while( iter.cur() ) {
     	// Is this line a comment?
-    	if( (*iter.data())[0] == '#' ) {
+    	if( iter()[0] == '#' ) {
     	    iter.next();
     	    continue;
     	}
 
     	// Is the line blank?
-    	char * p = *iter.data();
+    	char * p = iter();
     	do 
     	    p++;
     	while( *p != '\0' && isspace( *p ) );
