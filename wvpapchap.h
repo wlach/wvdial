@@ -9,11 +9,7 @@
 #ifndef __WVPAPCHAP_H
 #define __WVPAPCHAP_H
 
-#ifdef USE_WVCONFEMU
-# include "wvconfemu.h"
-#else
-# include "wvconf.h"
-#endif
+#include "wvconfemu.h"
 #include "wvlinklist.h"
 #include "wvstring.h"
 

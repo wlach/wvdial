@@ -79,7 +79,7 @@ int main( int argc, char ** argv )
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
 #ifdef USE_WVCONFEMU
-    UniConfRoot uniconf;
+    UniConfRoot uniconf("temp:");
     WvConf cfg(uniconf);
 #else
     WvConf		cfg("/dev/null");

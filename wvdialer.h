@@ -12,11 +12,7 @@
 #include <termios.h>
 
 #include "strutils.h"
-#ifdef USE_WVCONFEMU
-# include "wvconfemu.h"
-#else
-# include "wvconf.h"
-#endif
+#include "wvconfemu.h"
 #include "wvlog.h"
 #include "wvmodem.h"
 #include "wvpapchap.h"
