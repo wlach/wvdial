@@ -42,4 +42,4 @@ private:
 		    const char * remote );
 };
 
-#endif __WVPAPCHAP_H
+#endif // __WVPAPCHAP_H
