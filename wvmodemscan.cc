@@ -355,7 +355,7 @@ void WvModemScan::execute()
 }
 
 
-bool WvModemScan::doresult(const WvString &_s, int msec)
+bool WvModemScan::doresult(WvStringParm _s, int msec)
 {
     char buf[1024], *cptr;
     size_t len;
@@ -579,7 +579,7 @@ void WvModemScanList::execute()
     {
 	if (!printed)
 	{
-	    const WvString &f = s.filename();
+	    WvStringParm f = s.filename();
 	    const char *cptr = strrchr(f, '/');
 	    if (cptr)
 		cptr++;

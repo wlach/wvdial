@@ -34,7 +34,7 @@ private:
     WvModem *modem;
     bool broken;
     
-    bool doresult(const WvString &s, int msec);
+    bool doresult(WvStringParm s, int msec);
     size_t coagulate(char *buf, size_t size, int msec);
 	
 public:
@@ -59,7 +59,7 @@ public:
 
     // after a probe finishes (isdone()==true) these functions return
     // the final status info for the device.
-    const WvString &filename() const
+    WvStringParm filename() const
         { return file; }
     int maxbaud() const
         { return baud; }
