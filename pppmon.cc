@@ -12,6 +12,7 @@
 #include <wvstream.h>
 
 #include "wvdialmon.h"
+#include "wvfork.h"
 
 
 WvStream *pppd_log = NULL;	// to read messages of pppd
@@ -54,7 +55,7 @@ int main( int argc, char ** argv )
   
 
   // fork and exec pppd
-  pid_t pid = fork();
+  pid_t pid = wvfork();
   
   if( pid == (pid_t) 0 ) {	// we are the child
     argv_ppp[argc_ppp] = NULL;
