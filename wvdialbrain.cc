@@ -28,7 +28,8 @@ WvDialBrain::WvDialBrain( WvDialer * a_dialer )
 /*********************************************/
 : dialer( a_dialer )
 {
-    reset();
+  saw_first_compuserve_prompt = 0;
+  reset();
 }
 
 WvDialBrain::~WvDialBrain()
@@ -96,23 +97,57 @@ const char * WvDialBrain::check_prompt( const char * buffer )
     		"Starting pppd and hoping for the best.\n" );
     	dialer->start_ppp();
 
-    } else if( is_login_prompt( buffer ) ) {
+    } else if( dialer->options.compuserve && is_compuserve_prompt( buffer )) {
     	// We have a login prompt, so send a suitable response.
-    	const char * send_this = dialer->options.login;
-    	dialer->log( "Looks like a login prompt.\n"
+    	const char * send_this = "CIS";
+    	dialer->log( "Looks like a Compuserve host name prompt.\n"
     		     "Sending: %s\n", send_this );
+	saw_first_compuserve_prompt++;
+	saw_first_compuserve_prompt++;
     	dialer->reset_offset();
     	prompt_tries++;
 	return( send_this );
 
+    } else if( dialer->options.compuserve 
+	       && !saw_first_compuserve_prompt && is_login_prompt ( buffer )) {
+    	// We have a login prompt, so send a suitable response.
+    	const char * send_this = "cisv1";
+    	dialer->log( "Looks like a Compuserve New login prompt.\n"
+    		     "Sending: %s\n", send_this );
+    	dialer->reset_offset();
+    	prompt_tries++;
+	saw_first_compuserve_prompt++;
+	return( send_this );
+
+    } else if( is_login_prompt( buffer ) ) {
+    	// We have a login prompt, so send a suitable response.
+    	WvString login = dialer->options.login;
+	if (dialer->options.compuserve &&
+	    strstr (dialer->options.login, "/noint") == 0) {
+	   login = WvString("%s%s", login, "/noint/go:pppconnect");
+	}
+    	dialer->log( "Looks like a login prompt.\n"
+    		     "Sending: %s\n", login );
+    	dialer->reset_offset();
+    	prompt_tries++;
+	return( login );
+
     } else if( is_password_prompt( buffer ) ) {
-    	// We have a password prompt, so send a suitable resonse.
-    	dialer->log( "Looks like a password prompt.\nSending: (password)\n" );
+        const char *passwd = 0;
+        if (dialer->options.compuserve && saw_first_compuserve_prompt == 1) {
+	  passwd = "classic";
+	  dialer->log( "Looks like a Compuserve classic password prompt.\nSending: classic\n" );
+	  saw_first_compuserve_prompt++;
+        } else {
+	  // We have a password prompt, so send a suitable resonse.
+	  dialer->log( "Looks like a password prompt.\nSending: (password)\n" );
+	}
     	dialer->reset_offset();
     	prompt_tries++;
     	sent_login = 1;	// yes, we've sent a password:
     			// assume we've sent username too.
-    	return( dialer->options.password );
+	if (!passwd) passwd = dialer->options.password;
+    	return( passwd );
 
     } else if( is_welcome_msg( buffer ) ) {
     	dialer->log( "Looks like a welcome message.\n" );
@@ -250,6 +285,7 @@ bool WvDialBrain::is_login_prompt( const char * buf )
     return( is_prompt( buf, "login" ) ||
     	    is_prompt( buf, "name" )  ||
     	    is_prompt( buf, "user" ) ||
+    	    is_prompt( buf, "id" ) ||
     	    is_prompt( buf, "userid" ) ||
     	    is_prompt( buf, "user.id", true ) ||
     	    is_prompt( buf, "signon" ) ||
@@ -257,6 +293,12 @@ bool WvDialBrain::is_login_prompt( const char * buf )
     	    is_prompt( buf, "usuario", false ) ||
     	    ( dialer->options.login_prompt[0] &&
     	      is_prompt( buf, dialer->options.login_prompt ) ) );
+}
+
+bool WvDialBrain::is_compuserve_prompt( const char * buf )
+/***************************************************/
+{
+    return( is_prompt( buf, "host name" ));
 }
 
 bool WvDialBrain::is_password_prompt( const char * buf )

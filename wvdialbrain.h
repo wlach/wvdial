@@ -46,6 +46,7 @@ public:
 
     const char *	check_prompt( const char * buffer );
     const char *	guess_menu( char * buf );
+    int                 saw_first_compuserve_prompt;
 
 private:
     WvDialer *		dialer;
@@ -59,6 +60,7 @@ private:
 				   const char * promptstring = NULL,
 				   bool	        dots_wild    = false );
     bool		is_login_prompt( const char * buf );
+    bool		is_compuserve_prompt( const char * buf );
     bool		is_password_prompt( const char * buf );
     bool		is_welcome_msg( const char * buf );
 

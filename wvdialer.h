@@ -19,6 +19,7 @@
 #include "wvdialbrain.h"
 #include "wvpipe.h"
 #include "wvstreamclone.h"
+#include "wvdialmon.h"
 
 #define INBUF_SIZE	1024
 #define DEFAULT_BAUD	57600U
@@ -58,6 +59,10 @@ public:
     */
     bool check_attempts_exceeded(int connect_attempts);
 
+    void	pppd_watch( int w );
+    
+    int         ask_password();
+    
     enum Status {
 	Idle,
 	ModemError,
@@ -79,7 +84,6 @@ public:
     virtual bool isok() const;
 
     int	   connect_attempts;
-    bool   weird_pppd_problem;
     int	   dial_stat;
     char * connect_status() const;
     bool   init_modem();
@@ -113,18 +117,38 @@ public:
     	WvString	password;
     	WvString	pass_prompt;
     	WvString	where_pppd;
+	WvString	pppd_option;
     	WvString	force_addr;
     	WvString	remote;
     	WvString	default_reply;
-    	WvString	isdn;
-    	int		carrier_check;
-    	int		stupid_mode;
+        WvString        country;
+        WvString        provider;
+        WvString        product;
+        WvString        homepage;
+        WvString        dialmessage1;
+        WvString        dialmessage2;
+        WvString        dnstest1, dnstest2;
+        int             carrier_check;
+       	int		stupid_mode;
     	int		new_pppd;
     	int		auto_reconnect;
     	int		abort_on_busy;
     	int		abort_on_no_dialtone;
         int             dial_attempts;
+        int             compuserve;
+        int             tonline;
+        int             auto_dns;
+        int             check_dns;
+        int             check_dfr;
+        int             idle_seconds;
+        int             isdn;
+        int             ask_password;
+
     } options;
+
+     
+    WvDialMon pppd_mon;               // class to analyse messages of pppd
+     
 
 private:
     WvDialBrain *	brain;
@@ -171,6 +195,14 @@ private:
 
     // Called from WvDialBrain::guess_menu()
     bool 	is_pending() { return( modem->select( 1000 ) ); }
+
+    // These are used to read the messages of pppd
+    int pppd_msgfd[2];		// two fd of the pipe
+    WvStream *pppd_log;		// to read messages of pppd
+    
+    // These are used to pipe the password to pppd
+    int pppd_passwdfd[2];	// two fd of the pipe
+    
 };
 
 #endif // __DIALER_H

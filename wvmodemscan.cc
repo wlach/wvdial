@@ -15,17 +15,30 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
+WvString isdn_init;
+bool     default_asyncmap = false;
 
 // startup at atz atq0 atv1 ate1 ats0 carrier dtr fastdial
 // baudstep reinit done
 static char *commands[WvModemScan::NUM_STAGES] = {
     NULL, "Q0 V1 E1", "Z", "S0=0",
-    "&C1", "&D2", "S11=55", "+FCLASS=0", NULL,
+    "&C1", "&D2", "+FCLASS=0", NULL,
     NULL, "", NULL
 };
 
+static int baudcheck[6] = {
+	2400,
+	4800,
+	9600,
+	19200,
+	115200,
+	0
+};
 
-WvModemScan::WvModemScan(const char *devname)
+static int default_baud =   baudcheck[0];
+static int isdn_speed   = 115200;
+
+WvModemScan::WvModemScan(const char *devname, bool is_modem_link)
 	: debug(devname, WvLog::Debug)
 {
     stage = Startup;
@@ -36,7 +49,8 @@ WvModemScan::WvModemScan(const char *devname)
     else
 	file = WvString("/dev/%s", devname);
     
-    baud = 1200;
+    use_modem_link = is_modem_link;
+    baud = default_baud;
     modem = NULL;
     tries = 0;
     broken = false;
@@ -53,6 +67,11 @@ WvModemScan::~WvModemScan()
 }
 
 
+bool WvModemScan::use_default_asyncmap() const
+{
+    return default_asyncmap;
+}
+
 bool WvModemScan::isok() const
 {
     return !broken;
@@ -63,6 +82,9 @@ bool WvModemScan::isok() const
 WvString WvModemScan::initstr() const
 {
     char s[200];
+
+    if (isdn_init)
+	return (isdn_init.unique());
 
     strcpy(s, "AT");
     
@@ -113,21 +135,61 @@ void WvModemScan::execute()
     case ATS0:
     case Carrier:
     case DTR:
-    case FastDial:
     case FCLASS:
     case Reinit:
 	assert(modem);
 	status[stage] = Test;
-	if ( !doresult(WvString("%s\r", initstr()), stage==ATZ ? 3000 : 500)
-	    || ((stage <= ATZ || stage == Reinit) && status[stage]==Fail) )
-	{
-	    tries++;
-	    
-	    if (tries >= 3)
-	    {
-		debug("nothing.\n");
-		broken = true;
+	if (!strncmp(file, "/dev/ircomm", 11)) {
+	    while (baudcheck[tries+1] <= 9600 && baudcheck[tries+1] != 0) {
+		tries++;
 	    }
+	    if (baudcheck[tries] > 19200 || baudcheck[tries] == 0) {
+		broken = true;
+		debug("failed at 9600 and 19200 baud.\n");
+		return;
+	    }
+	    baud = modem->speed(baudcheck[tries]);
+	}
+	if ( !doresult(WvString("%s\r", initstr()), stage==ATZ ? 3000 : 500)
+	    || ((stage <= AT || stage == Reinit) && status[stage]==Fail) )
+	{
+	    int old_baud = baud;
+	    tries++;
+	    //modem->drain();
+	    //modem->speed(baud*2);
+	    //baud = modem->speed(baud);
+	    if (baudcheck[tries] == 0) {
+		broken = true;
+		debug("and failed too at %s, giving up.\n",
+			WvString(isdn_speed));
+		// Go back to default_baud:
+		modem->speed(default_baud);
+	    	baud = modem->getspeed();
+	    } else
+	        if (strncmp(file, "/dev/ircomm", 11))
+	        debug("failed with %s baud, next try: %s baud\n",
+			old_baud,
+			baud = modem->speed(baudcheck[tries]));
+			//baud = modem->speed(baud*2));
+#if 0	    
+	    if (tries >= 4)
+	    {
+		if (baud == default_baud) {
+			debug("nothing at %s baud,\n", WvString(default_baud));
+			// Ok, then let's try ISDN speed for ISDN TAs:
+			modem->speed(isdn_speed);
+	    		baud = modem->getspeed();
+	    		tries = 0;
+		} else {
+			// Ok, we tried default_baud and ISDN speed, give up:
+			broken = true;
+			debug("nor at %s.\n", WvString(isdn_speed));
+			// Go back to default_baud:
+			modem->speed(default_baud);
+	    		baud = modem->getspeed();
+		}
+	    }
+#endif
 	    
 	    // else try again shortly
 	}
@@ -155,6 +217,91 @@ void WvModemScan::execute()
 	{
 	    if (is_isdn())
 	    	debug("Looks like an ISDN modem.\n");
+
+	    if (!strncmp(identifier, "Hagenuk", 7)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI1\r"), 500)) 
+		    if (!strncmp(identifier, "Speed Dragon", 12)
+		    ||  !strncmp(identifier, "Power Dragon", 12)) {
+		    	isdn_init = "ATB8";
+		    	modem_name = WvString("Hagenuk %s", identifier);
+		    }
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "346900", 6)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI3\r"), 500))
+		    if (!strncmp(identifier, "3Com U.S. Robotics ISDN",23)) {
+			isdn_init = "AT*PPP=1";
+			modem_name = identifier;
+		    }
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "SP ISDN", 7)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI4\r"), 500))
+		    if (!strncmp(identifier, "Sportster ISDN TA", 17)) {
+			isdn_init = "ATB3";
+			modem_name = identifier;
+		    }
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "\"Version", 8)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI6\r"), 500))
+			modem_name = identifier;
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "644", 3)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI6\r"), 500))
+			if (!strncmp(identifier, "ELSA MicroLink ISDN", 19)) {
+				isdn_init = "AT$IBP=HDLCP";
+				modem_name = identifier;
+				default_asyncmap = true;
+			}
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "643", 3)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI6\r"), 500))
+			if (!strncmp(identifier, "MicroLink ISDN/TLV.34", 21)) {
+				isdn_init = "AT\\N10%P1";
+				modem_name = identifier;
+			}
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "ISDN TA", 6)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI5\r"), 500))
+			if (strstr(identifier, ";ASU")) {
+				isdn_init = "ATB40";
+				modem_name = "ASUSCOM ISDNLink TA";
+			}
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "128000", 6)) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI3\r"), 500))
+			if (!strncmp(identifier, "Lasat Speed", 11)) {
+				isdn_init = "AT\\P1&B2X3";
+				modem_name = identifier;
+			}
+	        status[stage] = Worked;
+	    } else if (!strncmp(identifier, "28642", 5) // Elite 2864I
+	    	||     !strncmp(identifier, "1281", 4)  // Omni TA128 USA
+	    	||     !strncmp(identifier, "1282", 4)  // Omni TA128 DSS1
+	    	||     !strncmp(identifier, "1283", 4)  // Omni TA128 1TR6
+	    	||     !strncmp(identifier, "1291", 4)  // Omni.Net USA
+	    	||     !strncmp(identifier, "1292", 4)  // Omni.Net DSS1
+	    	||     !strncmp(identifier, "1293", 4)  // Omni.Net 1TR6
+		) {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI1\r"), 500))
+		    if (!strncmp(identifier, "Elite 2864I", 11)
+		    ||  !strncmp(identifier, "ZyXEL omni", 10)) {
+		    	isdn_init = "AT&O2B40";
+		    	if (strncmp(identifier, "ZyXEL", 5))
+		            modem_name = WvString("ZyXEL %s", identifier);
+		    	else
+		    	    modem_name = identifier;
+		    }
+	        status[stage] = Worked;
+	    }
+
 	    tries = 0;
 	    stage++;
 	}
@@ -291,6 +438,9 @@ size_t WvModemScan::coagulate(char *buf, size_t size, int msec)
 
 const char *WvModemScan::is_isdn() const
 {
+    if (isdn_init)
+	return isdn_init;
+
     if (!identifier)
     	return NULL;
 
@@ -311,7 +461,11 @@ const char *WvModemScan::is_isdn() const
 static int fileselect(const struct dirent *e)
 {
     return !strncmp(e->d_name, "ttyS", 4)      	// serial
-       || !strncmp(e->d_name, "ttyLT", 5);		// Lucent WinModem
+       || !strncmp(e->d_name, "ttyLT", 5)	// Lucent WinModem
+       || !strncmp(e->d_name, "ttyACM", 6)      // USB acm Modems
+       || !strncmp(e->d_name, "ttyUSB", 6)      // Modems on USB RS232
+       || !strncmp(e->d_name, "ircomm", 6);     // Handys over IrDA
+
 	// (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
 }
 
@@ -327,6 +481,14 @@ static int filesort(const void *_e1, const void *_e2)
     {
 	if (!isdigit(*p1) || !isdigit(*p2))
 	{
+	    // Scan i (ircomm*) after t (tty*):
+	    if (*p1 == 'i' && *p2 == 't')
+		return(1);
+	    // Scan A (ttyACM*) after S (ttyS*):
+	    if (*p1 == 'A' && *p2 == 'S')
+		return(1);
+	    if (*p1 == 'S' && *p2 == 'A')
+		return(-1);
 	    diff = *p1 - *p2;
 	    if (diff) return diff;
 	}
@@ -372,11 +534,16 @@ void WvModemScanList::setup()
 	}
 	
 	// bump /dev/modem to the top of the list, if it exists
-	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino)
-	    prepend(new WvModemScan(WvString("%s", namelist[count]->d_name)),
-		    true);
-	else
-	    append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
+	// and also use /dev/modem as the device name which will be used later
+	// so PCMCIA can change it where it has detected a serial port and
+	// wvdial will follow without the need for another wvdialconf call.
+	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino) {
+	    log->print("\nScanning %s first, /dev/modem is a link to it.\n",
+		       namelist[count]->d_name);
+	    prepend(new WvModemScan(WvString("%s", namelist[count]->d_name), true),
+		   true);
+	} else
+	    append(new WvModemScan(WvString("%s", namelist[count]->d_name), false),
 		   true);
     }
     
@@ -391,6 +558,7 @@ void WvModemScanList::shutdown()
     delete log;
 }
 
+bool ready = false;
 
 // we used to try to scan all ports simultaneously; unfortunately, this
 // caused problems when people had "noncritical" IRQ conflicts (ie. two
@@ -447,10 +615,23 @@ void WvModemScanList::execute()
 	    printed = true;
     }
 	    
-    if (isdone())
+    if (s.isdone()) {
 	log->write("\n", 1);
+	ready = true;
+#if 0
+        for (i.rewind(); i.next(); )
+		if (!i().isdone()) 
+			i.unlink();
+#endif
+    }
+
 }
 
+
+bool WvModemScanList::isready()
+{
+    return ready;
+}
 
 bool WvModemScanList::isdone()
 {

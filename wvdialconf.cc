@@ -60,8 +60,11 @@ int main(int argc, char **argv)
     fprintf(stderr, "Scanning your serial ports for a modem.\n\n");
     
     WvModemScanList l;
-    while (!l.isdone())
+    while (!l.isdone()) {
 	l.execute();
+	if (l.isready())
+		break;
+    }
     
     if (l.count() < 1)
     {
@@ -84,14 +87,30 @@ int main(int argc, char **argv)
     WvModemScan &m = i;
     WvString fn = m.filename(), init = m.initstr();
     
-    fprintf(stderr, "\nFound a modem on %s.\n", (const char *)fn);
-    
+    fprintf(stderr, "\nFound %s on %s",
+        m.is_isdn() ? "an ISDN TA" :
+        strncmp("/dev/ttyACM",fn,11) ? "a modem" : "an USB modem", (const char *)fn);
+    if (m.use_modem_link) {
+        fprintf(stderr, ", using link /dev/modem in config.\n");
+        fn = "/dev/modem";
+    } else {
+        fprintf(stderr, ".\n");    
+    }
     WvConf cfg(argv[1],660); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
     cfg.setint(s, "Baud", m.maxbaud());
-    cfg.set(s, "Init1", "ATZ");
+    cfg.set(s, "Init1", m.is_isdn() ? "AT&F" : "ATZ");
     cfg.set(s, "Init2", init);
+    cfg.set(s, "ISDN",  m.use_default_asyncmap() ? "1" : "0");
+    cfg.set(s, "Modem Name",  m.modem_name ? (const char *)m.modem_name : "");
+    cfg.set(s, "Modem Type",  m.is_isdn() ? "ISDN Terminal Adapter" :
+            strncmp("/dev/ttyACM",fn,11) ? "Analog Modem" : "USB Modem");  
+ 
+    if (m.modem_name)
+        fprintf(stderr, "Config for %s written to %s.\n", (const char *)m.modem_name, argv[1]);
+    else
+        fprintf(stderr, "Modem configuration written to %s.\n", argv[1]);
 
     // insert some entries to let people know what they need to edit
     if (!cfg.get(s, "Phone"))

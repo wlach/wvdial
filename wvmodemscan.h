@@ -19,7 +19,7 @@ class WvModemScan
 {
 public:
     enum Stage { Startup=0, AT, ATZ, ATS0, 
-			Carrier, DTR, FastDial, FCLASS, GetIdent,
+			Carrier, DTR, FCLASS, GetIdent,
 			BaudStep, Reinit, Done, NUM_STAGES };
     
 private:
@@ -38,9 +38,12 @@ private:
     size_t coagulate(char *buf, size_t size, int msec);
 	
 public:
-    WvModemScan(const char *devname);
+    WvModemScan(const char *devname, bool is_modem_link);
     ~WvModemScan();
     
+    WvString modem_name;
+    bool use_modem_link;
+
     // check probe status
     bool isdone() const
 	{ return stage == Done; }
@@ -48,6 +51,8 @@ public:
 
     // is this an isdn modem?  Returns modem identifier if so.
     const char *is_isdn() const;
+
+    bool use_default_asyncmap() const;
 
     // continue the probe where we left off
     void execute();
@@ -74,6 +79,7 @@ DeclareWvList2(WvModemScan,
 	       void shutdown();
 	       void execute();
 	       bool isdone();
+	       bool isready();
 	       );
 
 

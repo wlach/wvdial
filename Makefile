@@ -4,14 +4,16 @@ include $(TOPDIR)/wvrules.mk
 XPATH=.. ../wvstreams/include $(PKGINC)
 
 default: all papchaptest
-all: wvdial.a wvdial wvdialconf
+all: wvdial.a wvdial wvdialconf pppmon
 
-wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o
+wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
+	wvdialmon.o
 
 LIBS = -L../wvstreams -lwvutils -lwvstreams
 
 wvdial wvdialconf papchaptest atztest: wvdial.a
 
-clean:
-	rm -f wvdial wvdialconf papchaptest atztest *.o *.a
+pppmon: pppmon.o wvdial.a
 
+clean:
+	rm -f wvdial wvdialconf wvdialmon papchaptest pppmon atztest *.o *.a

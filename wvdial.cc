@@ -92,7 +92,8 @@ int main( int argc, char ** argv )
     int			haveconfig = 1;
 
     bool chat_mode = false;
-    
+    bool write_syslog = true;
+
     signal( SIGTERM, signalhandler );
     signal( SIGINT, signalhandler );
     signal( SIGHUP, signalhandler );
@@ -113,10 +114,12 @@ int main( int argc, char ** argv )
 		}
 	    }
 	    if( !strcmp( argv[i], "--chat" ) ) {
-		syslog = new WvSyslog( "WvDial", false, WvLog::Debug2, 
-				       WvLog::Debug2 );
 		chat_mode = true;
 		continue;
+	    }
+	    if( !strcmp( argv[i], "--no-syslog" ) ) {
+	        write_syslog = false;
+	        continue;
 	    }
 	    if( !strcmp( argv[i], "--help" ) ) {
 	    	print_help();
@@ -151,22 +154,26 @@ int main( int argc, char ** argv )
     
 
     
+    if (chat_mode && write_syslog) {
+      char buf[32];
+      snprintf (buf, 32, "wvdial[%d]", getpid());
+      syslog = new WvSyslog( buf, false, WvLog::Debug2,
+			     WvLog::Debug2 );
+    }
+    
     WvDialer dialer( cfg, sections, chat_mode );
-	
+    
+    if( !chat_mode )
+      if( dialer.isok() && dialer.options.ask_password )
+	dialer.ask_password();
+    
     if( dialer.dial() == false )
-	return  1;
-	
+      return  1;
+    
     while( !want_to_die && dialer.isok() 
 	  && dialer.status() != WvDialer::Idle ) {
 	dialer.select( 100 );
 	dialer.callback();
-	
-	if (dialer.weird_pppd_problem) {
-	    dialer.weird_pppd_problem = false;
-	    log(WvLog::Warning,
-		"pppd error!  Look at files in /var/log for an "
-		"explanation.\n");
-	}
     }
 
     int retval;

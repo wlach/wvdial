@@ -32,7 +32,10 @@ static char *	dial_responses[] = {
 	"no carrier",
 	"no dialtone",
 	"no dial tone",
+/*	"no answer", don't enable it, means wvdial.dod will stop */
+/* If you get this it's a bug from your provider, not in linux   */
 	"busy",
+	"delayed",
 	"error",
 	"voice",
 	"fclass",
@@ -49,6 +52,7 @@ static char *	prompt_strings[] = {
 int	phnum_count = 0;
 int	phnum_max = 0;
 
+static int messagetail_pid = 0;
 
 //**************************************************
 //       WvDialer Public Functions
@@ -63,6 +67,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 {
     modem 		 = NULL;
     ppp_pipe 		 = NULL;
+    pppd_log		 = NULL;
     been_online 	 = false;
     stat 		 = Idle;
     offset 		 = 0;
@@ -72,7 +77,6 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     auto_reconnect_delay = 0;
     auto_reconnect_at    = 0;
     connected_at         = 0;
-    weird_pppd_problem   = false;
     phnum_count = 0;
     phnum_max = 0;      
     // tell wvstreams we need our own subtask
@@ -118,6 +122,28 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 	stat = ModemError;
 	return;
     }
+
+    if (options.provider.len()) {
+	log( WvLog::Notice, "Dialing %s %s.\n",
+		options.provider,
+		options.product);
+    }
+    if (options.homepage.len()) {
+        log( WvLog::Notice, "Homepage of %s: %s\n",
+		options.provider.len() ? (const char *)options.provider : "this provider",
+		options.homepage);
+    }
+
+    if( options.auto_reconnect && options.idle_seconds > 0) {
+    	err( WvLog::Notice,
+	    "Idle Seconds = %s, disabling automatic reconnect.\n",
+				WvString(options.idle_seconds));
+        options.auto_reconnect = false;
+    }
+    
+    pppd_mon.setdnstests (options.dnstest1, options.dnstest2);
+    pppd_mon.setcheckdns (options.check_dns);
+    pppd_mon.setcheckdfr (options.check_dfr);
 }
 
 WvDialer::~WvDialer()
@@ -125,6 +151,8 @@ WvDialer::~WvDialer()
 {
     if( ppp_pipe )
 	delete ppp_pipe;
+    if( pppd_log )
+        delete pppd_log;
     if( modem )
 	delete modem;
     if( brain )
@@ -192,7 +220,10 @@ void WvDialer::hangup()
     	delete ppp_pipe;
 	ppp_pipe = NULL;
     }
-
+    
+    if( !chat_mode )
+      pppd_watch( 250 );
+    
     if( stat != Idle ) {
 	time_t 	now;
 	time( &now );
@@ -205,6 +236,16 @@ void WvDialer::hangup()
 	}
 	stat = Idle;
     }
+
+    if (messagetail_pid > 0) {
+	//log("Killing child pid: %s\n", WvString(messagetail_pid));
+	kill(messagetail_pid, 15);
+	//if (errno) {
+	 //   err("Huh, kill(%s,15): %s\n", WvString(messagetail_pid), strerror(errno));
+//	}
+	messagetail_pid = 0;
+    }
+	//log("child pid: %s\n", WvString(messagetail_pid));
 }
 
 bool WvDialer::pre_select( SelectInfo& si )
@@ -228,8 +269,10 @@ bool WvDialer::isok() const
 {
     bool b = ( !modem || modem->isok() )
 	&& stat != ModemError && stat != OtherError;
+    /*
     if (!b)
 	fprintf( stderr, "Returning not ok!!\n" );
+    */
     return( b );
 }
 
@@ -277,6 +320,35 @@ char * WvDialer::connect_status() const
     return( msg );
 }
 
+
+void WvDialer::pppd_watch( int ms )
+/*********************************/
+{
+  // see if pppd has a message, analyse it and output to log
+  
+  if( pppd_log != NULL && pppd_log->isok() ) {
+    
+    char *line;
+    
+    do {
+      
+      line = pppd_log->getline( ms );
+      if( line != NULL ) {
+	char *buffer1 = pppd_mon.analyse_line( line );
+	if( buffer1 != NULL && buffer1[0] != '\0' ) {
+	  char buffer2[ strlen( buffer1 ) + 10 ];
+	  sprintf( buffer2, "pppd: %s\n", buffer1 );
+	  log( WvLog::Notice, buffer2 );
+	  flush( STDOUT_FILENO ); // kinternet needs this
+	}
+      }
+      
+    } while( line != NULL );
+    
+  }
+}
+
+
 void WvDialer::execute()
 /**********************/
 {
@@ -288,6 +360,9 @@ void WvDialer::execute()
     	return;
 
     last_execute = time( NULL );
+    
+    if( !chat_mode )
+      pppd_watch( 100 );
     
     switch( stat ) {
     case Dial:
@@ -318,31 +393,81 @@ void WvDialer::execute()
 	assert( !chat_mode );
     	// If already online, we only need to make sure pppd is still there.
 	if( ppp_pipe && ppp_pipe->child_exited() ) {
+	    int pppd_exit_status = ppp_pipe->exit_status();
 	    if( ppp_pipe->child_killed() ) {
 		log( WvLog::Error, "PPP was killed! (signal = %s)\n",
 		      ppp_pipe->exit_status() );
-	    } else {
-		log( WvLog::Error, "PPP daemon has died! (exit code = %s)\n",
-		      ppp_pipe->exit_status() );
 	    }
-	    
-	    // set up to dial again, if it is requested.
+
 	    // we must delete the WvModem object so it can be recreated
 	    // later; starting pppd seems to screw up the file descriptor.
 	    hangup();
 	    delete( modem );
 	    modem = NULL;
 	    
-	    if( time( NULL ) - connected_at < 45 ) {
-		weird_pppd_problem = true;
+	    time_t call_duration = time( NULL ) - connected_at;
+	    
+	    if( pppd_mon.auth_failed() ) {
+	      log("Authentication error.\n"
+		  "We failed to authenticate ourselves to the peer.\n"
+		  "Maybe bad account or password?\n" );
 	    } else {
-		weird_pppd_problem = false;
+		WvString msg = "";
+		switch (pppd_exit_status) {
+		case  2: msg = "pppd options error"; break;
+		case  3: msg = "No root priv error"; break;
+		case  4: msg = "No ppp module error"; break;
+		case 10: msg = "PPP negotiation failed"; break;
+		case 11: msg = "Peer didn't authenticatie itself"; break;
+		case 12: msg = "Link idle: Idle Seconds reached."; break;
+		case 13: msg = "Connect time limit reached."; break;
+		case 14: msg = "Callback negotiated, call should come back.";
+		case 15: msg = "Lack of LCP echo responses"; break;
+		case 17: msg = "Loopback detected"; break;
+		case 19: msg = "Authentication error.\n"
+			"We failed to authenticate ourselves to the peer.\n"
+			"Maybe bad account or password?";
+		}
+		if (msg.len()) {
+		    // Note: exit code = %s is parsed by kinternet:
+		    log("The PPP daemon has died: %s (exit code = %s)\n",
+			msg, pppd_exit_status);
+		    log("man pppd explains pppd error codes in more detail.\n");
+    		    err(WvLog::Notice, "I guess that's it for now, exiting\n");
+		    if (pppd_exit_status == 12 && options.auto_reconnect)
+    			err(WvLog::Notice, "Idle parameter is passed to pppd\n"
+			     "If you don't want an idle timeout per default,\n"
+			     "comment out the idle parameter in /etc/ppp/options\n");
+		    if (pppd_exit_status == 15) {
+		        log("Provider is overloaded(often the case) or line problem.\n");
+		    }
+        	    options.auto_reconnect = false;
+		}
+		msg = "";
+		switch (pppd_exit_status) {
+		case  1: msg = "Fatal pppd error"; break;
+		case  5: msg = "pppd received a signal"; break;
+		case  6: msg = "Serial port lock failed"; break;
+		case  7: msg = "Serial port open failed"; break;
+		case  8: msg = "Connect script failed"; break;
+		case  9: msg = "Pty program error"; break;
+		case 16: msg = "A modem hung up the phone"; break;
+		case 18: msg = "The init script failed"; break;
+		}
+		if (msg.len()) {
+		    log("The PPP daemon has died: %s (exit code = %s)\n",
+			msg, pppd_exit_status);
+		    log("man pppd explains pppd error codes in more detail.\n");
+		    log(WvLog::Notice, "Try again and look into /var/log/messages "
+			"and the wvdial and pppd man pages for more information.\n");
+		} else
+		    log(WvLog::Notice, "The PPP daemon has died. (exit code = %s)\n",
+			pppd_exit_status);
 	    }
-		
-
+	    
 	    // check to see if we're supposed to redial automatically soon.
 	    if( options.auto_reconnect && isok() ) {
-		if( time( NULL ) - connected_at >= 45 )
+		if( call_duration >= 45 )
 		    // Connection was more than 45 seconds, so reset the
 		    // "exponential backup timer".
 		    auto_reconnect_delay = 0;
@@ -415,10 +540,18 @@ void WvDialer::load_options()
     	{ "Password",        &options.password,     NULL, "",               0 },
     	{ "Password Prompt", &options.pass_prompt,  NULL, "",               0 },
     	{ "PPPD Path",       &options.where_pppd,   NULL, "/usr/sbin/pppd", 0 },
+        { "PPPD Option",     &options.pppd_option,  NULL, "",		    0 },
     	{ "Force Address",   &options.force_addr,   NULL, "",               0 },
     	{ "Remote Name",     &options.remote,       NULL, "*",              0 },
     	{ "Default Reply",   &options.default_reply,NULL, "ppp",	    0 },
-    	{ "ISDN",	     &options.isdn,	    NULL, "",		    0 },
+        { "Country",         &options.country,      NULL, "",		    0 },
+        { "Provider",        &options.provider,     NULL, "",		    0 },
+        { "Product",         &options.product,      NULL, "",		    0 },
+        { "Homepage",        &options.homepage,     NULL, "",		    0 },
+        { "DialMessage1",    &options.dialmessage1, NULL, "",		    0 },
+        { "DialMessage2",    &options.dialmessage2, NULL, "",		    0 },
+        { "DNS Test1",       &options.dnstest1,     NULL, "www.suse.de",    0 },
+        { "DNS Test2",       &options.dnstest2,     NULL, "www.suse.com",   0 },
 
     // int/bool options
     	{ "Baud",            NULL, &options.baud,          "", DEFAULT_BAUD },
@@ -429,6 +562,15 @@ void WvDialer::load_options()
         { "Dial Attempts",   NULL, &options.dial_attempts, "", 0            },
     	{ "Abort on Busy",   NULL, &options.abort_on_busy, "", false	    },
     	{ "Abort on No Dialtone", NULL, &options.abort_on_no_dialtone, "", true },
+        { "Compuserve",      NULL, &options.compuserve,    "", false        },
+        { "Tonline",         NULL, &options.tonline,       "", false        },
+        { "Auto DNS",        NULL, &options.auto_dns,      "", true         },
+        { "Check DNS",       NULL, &options.check_dns,     "", true         },
+        { "Check Def Route", NULL, &options.check_dfr,     "", true         },
+        { "Idle Seconds",    NULL, &options.idle_seconds,  "", 0            },
+        { "ISDN",            NULL, &options.isdn,          "", false        },
+        { "Ask Password",    NULL, &options.ask_password,  "", false        },
+
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
 
@@ -479,9 +621,29 @@ bool WvDialer::init_modem()
 	if( modem ) delete modem;
 	
 	// Open the modem...
-	if( chat_mode )
-	    modem = new WvModemBase( STDIN_FILENO );
-	else
+	if( chat_mode ) {
+	    int flags = fcntl( STDIN_FILENO, F_GETFL );
+	    if( ( flags & O_ACCMODE ) == O_RDWR ) {
+		modem = new WvModemBase( STDIN_FILENO );
+	    } else {
+		// The following is needed for diald.
+		// Stdin is not opened for read/write.
+		::close( STDIN_FILENO );
+		if( getenv( "MODEM" ) == NULL ) {
+		    err( "stdin not read/write and $MODEM not set\n" );
+		    exit( 1 );
+		}
+		// Try to open device $MODEM.
+		flags &= !O_ACCMODE;
+		flags |= O_RDWR;
+		int tty = ::open( getenv( "MODEM" ), flags );
+		if( tty == -1 ) {
+		    err( "can't open %s: %m\n", getenv( "MODEM" ) );
+		    exit( 1 );
+		}
+		modem = new WvModemBase( tty );
+	    }
+	} else
 	    modem = new WvModem( options.modem, options.baud );
 	if( !modem->isok() ) {
 	    err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
@@ -519,7 +681,20 @@ bool WvDialer::init_modem()
 		received = wait_for_modem( init_responses, 5000, true );
 		switch( received ) {
 		case -1:
-		    err( "Modem not responding.\n" );
+		    modem->print( "ATQ0\r" );
+		    log( "Sending: ATQ0\n" );
+		    received = wait_for_modem( init_responses, 500, true );
+		    modem->print( "%s\r", *this_str );
+		    log( "Re-Sending: %s\n", *this_str );
+		    received = wait_for_modem( init_responses, 5000, true );
+		    switch( received ) {
+			case -1:
+			    err( "Modem not responding.\n" );
+			    return( false );
+			case 1:
+			    err( "Bad init string.\n" );
+			    return( false );
+		    }
 		    goto end_outer;
 		case 1:
 		    err( "Bad init string.\n" );
@@ -528,11 +703,6 @@ bool WvDialer::init_modem()
 	    }
 	}
 
-	// If we're using an ISDN modem, allow one second for the SPID
-	// settings to kick in.  It dials so fast anyway that no one will care.
-	if( options.isdn[0] )
-	    sleep( 1 );
-	
 	// Everything worked fine.
 	log( "Modem initialized.\n" );
 	return( true );
@@ -589,7 +759,7 @@ void WvDialer::async_dial()
                 this_str = &options.phnum4;     break;
         }
 
-	WvString s( "%s %s%s%s%s\r", options.dial_cmd,
+	WvString s( "%s%s%s%s%s\r", options.dial_cmd,
 				 options.dial_prefix,
 				 !options.dial_prefix ? "" : ",",
 				 options.areacode,
@@ -621,9 +791,39 @@ void WvDialer::async_dial()
 	}
 	return;
     case 0:	// CONNECT
-	if( options.stupid_mode == true ) {
+
+        /*
+        if( chat_mode ) {
+	  if( options.ask_password ) {
+	    err( "Error: dial on demand does not work with option Ask Password = 1\n" );
+	    exit( 1 );
+	  }
+	  
+	  if( getuid() != 0 ) {
+	    err( "Hint: if authentication does not work, start wvdial.dod once as user root\n" );
+	  }
+	  
+	  WvPapChap papchap;
+	  papchap.put_secret( options.login, options.password, options.remote );
+	  if( getuid() == 0 ) {
+	    if( papchap.isok_pap() == false ) {
+	      err("Warning: Could not modify %s: %s\n",PAP_SECRETS, strerror(errno));
+	    }
+	    if( papchap.isok_chap() == false ) {
+	      err("Warning: Could not modify %s: %s\n",CHAP_SECRETS, strerror(errno));
+	    }
+	  }
+	}
+        */
+	
+      	if( options.stupid_mode == true || options.tonline == true ) {
+	  if( chat_mode ) {
+	    log( "Carrier detected.  Chatmode finished.\n" );
+	    exit( 0 );
+	  } else {
 	    log( "Carrier detected.  Starting PPP immediately.\n" );
 	    start_ppp();
+	  }
 	} else {
 	    log( "Carrier detected.  Waiting for prompt.\n" );
 	    stat = WaitAnything;
@@ -746,26 +946,125 @@ bool WvDialer::check_attempts_exceeded(int no_of_attempts)
 	}
 }
 
+
+
+static int
+set_echo( int desc, int value )
+{
+  struct termios settings;
+  
+  if( isatty( desc ) != 1 )
+    return 0;
+  
+  if( tcgetattr (desc, &settings) < 0 ) {
+    perror ("error in tcgetattr");
+    return 0;
+  }
+  
+  if( value )
+    settings.c_lflag |= ECHO;
+  else
+    settings.c_lflag &= ~ECHO;
+  
+  if( tcsetattr (desc, TCSANOW, &settings) < 0 ) {
+    perror ("error in tcgetattr");
+    return 0;
+  }
+  
+  return 1;
+}
+
+
+int WvDialer::ask_password()
+/**************************/
+{
+  char tmp[60];
+  
+  fprintf( stdout, "Please enter password (or empty password to stop):\n" );
+  fflush( stdout );		// kinternet needs this
+  
+  set_echo( STDOUT_FILENO, 0 );
+  fgets( tmp, 50, stdin );
+  set_echo( STDOUT_FILENO, 1 );
+  
+  if( tmp[ strlen(tmp)-1 ] == '\n' )
+    tmp[ strlen(tmp)-1 ] = '\0';
+  
+  options.password = tmp;
+  options.password.unique();
+  
+  return 1;
+}
+
+
 void WvDialer::start_ppp()
 /************************/
 {
     if( chat_mode ) exit(0); // pppd is already started...
 
     WvString	addr_colon( "%s:", options.force_addr );
+    WvString	speed( options.baud );
+    WvString	idle_seconds( options.idle_seconds );
 
-    char const *argv[] = {
-	options.where_pppd,
+    const char *dev_str = (const char *)options.modem;
+    if (!(strncmp(options.modem, "/dev/", 5)))
+	dev_str += 5;
+    
+    
+    // open a pipe to access the messages of pppd
+    if( pipe( pppd_msgfd ) == -1 ) {
+      fprintf( stderr, "pipe failed: %s\n", strerror(errno) );
+      exit( EXIT_FAILURE );
+    }
+    pppd_log = new WvStream( pppd_msgfd[0] );
+    char buffer1[20];
+    sprintf( buffer1, "%d", pppd_msgfd[1] );
+    
+    
+    // open a pipe to pass password to pppd
+    char buffer2[20] = "";
+    if( options.password != NULL && options.password[0] != '\0' ) {
+      if( pipe( pppd_passwdfd ) == -1 ) {
+	fprintf( stderr, "pipe failed: %s\n", strerror(errno) );
+	exit( EXIT_FAILURE );
+      }
+      ::write( pppd_passwdfd[1], (const char *) options.password, options.password.len() );
+      ::close( pppd_passwdfd[1] );
+      sprintf( buffer2, "%d", pppd_passwdfd[0] );
+    }
+    
+    
+    char const *argv_raw[] = {
+        options.where_pppd,
+	speed,
 	"modem",
 	"crtscts",
 	"defaultroute",
 	"usehostname",
 	"-detach",
+	"call", "wvdial",
 	"user", options.login,
 	options.force_addr[0] ? (const char *)addr_colon : "noipdefault",
-	options.new_pppd ? "call" : NULL, 
-	options.new_pppd ? "wvdial" : NULL,
+	options.new_pppd && options.auto_dns ? "usepeerdns"	   : NULL,
+	options.new_pppd && options.isdn     ? "default-asyncmap"  : NULL,
+	options.new_pppd && options.pppd_option[0] ? (const char *) options.pppd_option : NULL,
+	options.new_pppd &&
+	options.idle_seconds >= 0 ? "idle"			   : NULL, 
+	options.new_pppd &&
+	options.idle_seconds >= 0 ? (const char *)idle_seconds	   : NULL, 
+	"logfd", buffer1,
+	buffer2[0] != '\0' ? "passwordfd" : NULL, buffer2[0] != '\0' ? buffer2 : NULL,
 	NULL
     };
+    
+    /* Filter out NULL holes in the raw argv list: */
+    char const *argv[sizeof(argv_raw)];
+    int argv_index = 0;
+    for (unsigned int i = 0; i < sizeof(argv_raw)/sizeof(char *); i++) {
+	if (argv_raw[i])
+            argv[argv_index++] = argv_raw[i];
+    }
+    argv[argv_index] = NULL;
 
     if( access( options.where_pppd, X_OK ) != 0 ) {
         err( "Unable to run %s.\n", options.where_pppd );
@@ -773,26 +1072,39 @@ void WvDialer::start_ppp()
              "in wvdial.conf.\n" );
     	return;
     }
-
-    WvPapChap	papchap;
-    papchap.put_secret( options.login, options.password, options.remote );
-    if( papchap.isok_pap() == false ) {
-    	err( "Warning: Could not modify %s: %s\n"
-    	     "--> PAP (Password Authentication Protocol) may be flaky.\n",
-    	     PAP_SECRETS, strerror( errno ) );
-    }
-    if( papchap.isok_chap() == false ) {
-    	err( "Warning: Could not modify %s: %s\n"
-    	     "--> CHAP (Challenge Handshake) may be flaky.\n",
-	     CHAP_SECRETS, strerror( errno ) );
+    
+    if (options.dialmessage1.len() || options.dialmessage2.len()) {
+        log( WvLog::Notice, "\
+==========================================================================\n");
+        log( WvLog::Notice, "> %s\n", options.dialmessage1);
+        if (options.dialmessage2.len())
+            log( WvLog::Notice, "> %s\n", options.dialmessage2);
+        log( WvLog::Notice, "\
+==========================================================================\n");
+        if (options.homepage.len())
+            log( WvLog::Notice, "Homepage of %s: %s\n",
+		options.provider.len() ? (const char *)options.provider : "this provider",
+		options.homepage);
     }
 
     time_t	now;
     time( &now );
     log( WvLog::Notice, "Starting pppd at %s", ctime( &now ) );
+    
+// sig11 in here:
+//    unsigned int i = 0;
+//    WvString pppd_args( "%s", argv[i++] );
+//    for (; i < sizeof(argv)/sizeof(char *); i++) {
+//    	pppd_args = WvString( "%s %s", pppd_args, argv[i] );
+//    }
+//    log("pppd args: %s\n", pppd_args);
 
     ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
 			   modem, modem, modem );
+
+    char buffer3[20];
+    sprintf( buffer3, "%d", ppp_pipe->getpid() );
+    log( WvLog::Notice, "pid of pppd: %s\n", buffer3 );
 
     stat 	 = Online;
     been_online  = true;
@@ -902,8 +1214,10 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	// If guess_menu returns an offset, we zap everything before it in
 	// the buffer.  This prevents finding the same menu option twice.
 	ppp_marker = brain->guess_menu( buffer );
-	if( ppp_marker != NULL )
-	    memset( buffer, ' ', ppp_marker-buffer );
+	if (strs != dial_responses) {
+		if( ppp_marker != NULL )
+		    memset( buffer, ' ', ppp_marker-buffer );
+	}
 	
 	// Looks like we didn't find anything.  Is the buffer full yet?
 	if( offset == INBUF_SIZE ) {
