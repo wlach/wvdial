@@ -4,9 +4,11 @@
  *
  * WvDial configuration utility.  Generates a basic wvdial.conf file.
  */
-#include "wvmodemscan.h"
+#include "uniconfroot.h"
+#include "wvconfemu.h"
 #include "wvfile.h"
-#include "wvconf.h"
+#include "wvmodemscan.h"
+#include "wvstrutils.h"
 #include <ctype.h>
 
 
@@ -91,7 +93,8 @@ int main(int argc, char **argv)
     } else {
         wvcon->print(".\n");    
     }
-    WvConf cfg(argv[1],0660); // Create it read/write owner and group only
+    UniConfRoot uni(WvString("ini:%s", argv[1]), 0660);
+    WvConfEmu cfg(uni); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
     cfg.setint(s, "Baud", m.maxbaud());
