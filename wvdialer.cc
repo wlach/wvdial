@@ -75,7 +75,8 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
     WvStringList::Iter	iter( sect_list );
     for( iter.rewind(); iter.next(); ) {
     	if( cfg.get_section( iter.data()->str ) == NULL ) {
-    	    err( "Warning: section [%s] does not exist in wvdial.conf.\n",
+    	    err( WvLog::Warning,
+		 "Warning: section [%s] does not exist in wvdial.conf.\n",
     	    	 iter.data()->str );
     	}
     }
