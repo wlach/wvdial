@@ -386,8 +386,8 @@ void WvModemScanList::setup()
 	
 	// bump /dev/modem to the top of the list, if it exists
 	if (modemstat==0 && modem.st_ino == (ino_t)namelist[count]->d_ino)
-	    append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
-		   true);
+	    prepend(new WvModemScan(WvString("%s", namelist[count]->d_name)),
+		    true);
 	else
 	    append(new WvModemScan(WvString("%s", namelist[count]->d_name)),
 		   true);
