@@ -31,8 +31,9 @@ WvDial
 - create config file 0600!!
 - if pppd dies "too quickly", suggest to the user that /var/log/ppp.log,
 	daemon.log, etc may contain the answers to the problem.
-
-
+- '@' is a prompt string :)  (MSN)
+- try simply "AT" (3 retries) after finding max baud rate, rather than going
+	directly to retry the full init string.
 
 WvDial - docs
 ------
