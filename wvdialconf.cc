@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     
     fprintf(stderr, "\nFound a modem on %s.\n", (const char *)fn);
     
-    WvConf cfg(argv[1]);
+    WvConf cfg(argv[1],660); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
     cfg.setint(s, "Baud", m.maxbaud());
