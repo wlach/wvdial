@@ -61,7 +61,7 @@ WvModemScan::~WvModemScan()
 	debug(WvLog::Info, "Speed %s; init \"%s\"\n", maxbaud(), initstr());
     
     if (modem)
-	delete modem;
+	modem->release();
 }
 
 
@@ -378,7 +378,7 @@ void WvModemScan::execute()
     if (stage == Done) // we just incremented stage number to Done
     {
 	if (modem)
-	    delete modem;
+	    modem->release();
 	modem = NULL;
     }
 }

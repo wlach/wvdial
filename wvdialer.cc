@@ -154,9 +154,9 @@ WvDialer::~WvDialer()
     terminate_continue_select();
 
     if( ppp_pipe )
-	delete ppp_pipe;
+	ppp_pipe->release();
     if( pppd_log )
-        delete pppd_log;
+        pppd_log->release();
     if( brain )
     	delete brain;
 }
@@ -233,7 +233,7 @@ void WvDialer::hangup()
 {
     if( ppp_pipe ) 
     {
-    	delete ppp_pipe;
+    	ppp_pipe->release();
 	ppp_pipe = NULL;
     }
     
@@ -801,7 +801,7 @@ void WvDialer::del_modem()
     if (modem)
     {
 	modem->hangup();
-	delete modem;
+	modem->release();
 	cloned = modem = NULL;
     }
 }
