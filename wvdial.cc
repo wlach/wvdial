@@ -12,6 +12,7 @@
 #include "wvlog.h"
 #include "wvlogrcv.h"
 #include "wvsyslog.h"
+#include "wvcrash.h"
 
 #include <signal.h>
 #include <sys/wait.h>
@@ -82,14 +83,14 @@ int main( int argc, char ** argv )
     UniConfRoot uniconf("temp:");
     WvConf cfg(uniconf);
 #else
-    WvConf		cfg("/dev/null");
+    WvConf		    cfg("/dev/null");
 #endif
     WvStringList	sections;
     WvStringList	cmdlineopts;
-    WvLog		log( "WvDial", WvLog::Debug );
+    WvLog		    log( "WvDial", WvLog::Debug );
     WvString		homedir = getenv("HOME");
-    int			haveconfig = 0;
-    int			havecmdlineopts = 0;
+    int			    haveconfig = 0;
+    int			    havecmdlineopts = 0;
     
     bool chat_mode = false;
     bool write_syslog = true;
@@ -99,78 +100,80 @@ int main( int argc, char ** argv )
     signal( SIGHUP, signalhandler );
     
     
-    if( argc > 1 ) {
-	for( int i=1; i < argc; i++ ) 
+    if( argc > 1 ) 
 	{
-	    if( !strcmp( argv[i], "--config" ) ) 
-	    {	
-		if (!access(argv[++i < argc ? i : i-1 ],F_OK)) 
+		for( int i=1; i < argc; i++ ) 
 		{
-		    haveconfig = 1;
-		    cfg.load_file(WvString(argv[i]));
-		    continue;
-		} 
-		else 
-		{
-		    log("Error: --config requires a valid argument\n");
-		    print_help();
-		    return 1;			    
-		}
-	    }
-            if( strchr( argv[i], '=' ) ) {
+			if( !strcmp( argv[i], "--config" ) ) 
+			{	
+				if (!access(argv[++i < argc ? i : i-1 ],F_OK)) 
+				{
+					haveconfig = 1;
+					cfg.load_file(WvString(argv[i]));
+					continue;
+				} 
+				else 
+				{
+					log("Error: --config requires a valid argument\n");
+					print_help();
+					return 1;			    
+				}
+			}
+            if( strchr( argv[i], '=' ) ) 
+			{
                 havecmdlineopts = 1;
                 cmdlineopts.append(new WvString(argv[i]),true);
                 continue;
             }
-	    if( !strcmp( argv[i], "--chat" ) ) 
-	    {
-		chat_mode = true;
-		continue;
-	    }
-	    if( !strcmp( argv[i], "--no-syslog" ) ) 
-	    {
-	        write_syslog = false;
-	        continue;
-	    }
-	    if( !strcmp( argv[i], "--help" ) ) 
-	    {
-		print_help();
-		return 1;
-	    }
-	    else if( !strcmp( argv[i], "--version" ) ) 
-	    {
-		print_version();
-		return 1;
-	    }
-	    else if( argv[i][0] == '-' ) 
-	    {
-		print_help();
-		return 1;
-	    }
-	    sections.append( new WvString( "Dialer %s", argv[i] ), true );
-	}
+			if( !strcmp( argv[i], "--chat" ) ) 
+			{
+				chat_mode = true;
+				continue;
+			}
+			if( !strcmp( argv[i], "--no-syslog" ) ) 
+			{
+				write_syslog = false;
+				continue;
+			}
+			if( !strcmp( argv[i], "--help" ) ) 
+			{
+				print_help();
+				return 1;
+			}
+			else if( !strcmp( argv[i], "--version" ) ) 
+			{
+				print_version();
+				return 1;
+			}
+			else if( argv[i][0] == '-' ) 
+			{
+				print_help();
+				return 1;
+			}
+			sections.append( new WvString( "Dialer %s", argv[i] ), true );
+		}
     } 
     else 
     {
-	sections.append( new WvString( "Dialer Defaults" ), true);
+		sections.append( new WvString( "Dialer Defaults" ), true);
     }
     
     if( !haveconfig)
     {
-	// Load the system file first...
-	WvString stdconfig("/etc/wvdial.conf");
-	
-	if (!access(stdconfig, F_OK))
-	    cfg.load_file(stdconfig);
-
-	// Then the user specific one...
-	if (homedir)
+		// Load the system file first...
+		WvString stdconfig("/etc/wvdial.conf");
+		
+		if (!access(stdconfig, F_OK))
+			cfg.load_file(stdconfig);
+		
+		// Then the user specific one...
+		if (homedir)
         {
-	    WvString rcfile("%s/.wvdialrc", homedir);
-	    
-	    if (!access(rcfile, F_OK))
-		cfg.load_file(rcfile);
-	}
+			WvString rcfile("%s/.wvdialrc", homedir);
+			
+			if (!access(rcfile, F_OK))
+				cfg.load_file(rcfile);
+		}
     }
     
     // Inject all of the command line options on into the cfg file in a new
@@ -182,12 +185,12 @@ int main( int argc, char ** argv )
         {
             char *name = i().edit();
             char *value = strchr(name,'=');
-	    
+			
             // Value should never be null since it can't get into the list
             // if it doesn't have an = in i()
             // 
             *value = 0;
-	    value++;
+			value++;
             name = trim_string(name);
             value = trim_string(value);
             cfg.set("Command-Line",name,value);
@@ -197,47 +200,47 @@ int main( int argc, char ** argv )
     
     if( !cfg.isok() ) 
     {
-	return 1;
+		return 1;
     }
     
     if (chat_mode && write_syslog) 
     {
-	WvString buf("wvdial[%s]", getpid());
-	syslog = new WvSyslog( buf, false, WvLog::Debug2,
-			       WvLog::Debug2 );
+		WvString buf("wvdial[%s]", getpid());
+		syslog = new WvSyslog( buf, false, WvLog::Debug2,
+							   WvLog::Debug2 );
     }
     
-    WvDialer dialer( cfg, &sections, chat_mode );
+    WvDialer dialer(cfg, &sections, chat_mode);
     
-    if( !chat_mode )
-	if( dialer.isok() && dialer.options.ask_password )
-	    dialer.ask_password();
+    if (!chat_mode)
+		if (dialer.isok() && dialer.options.ask_password)
+			dialer.ask_password();
     
-    if( dialer.dial() == false )
-	return  1;
+    if (dialer.dial() == false)
+		return  1;
     
-    while( !want_to_die && dialer.isok() 
-	   && dialer.status() != WvDialer::Idle ) 
+    while (!want_to_die && dialer.isok() 
+		   && dialer.status() != WvDialer::Idle) 
     {
-	dialer.select( 100 );
-	dialer.callback();
+		dialer.select(100);
+		dialer.callback();
     }
     
     int retval;
     
     if ((dialer.status() != WvDialer::Idle) || !dialer.isok()) 
     {
-	retval = 1;
+		retval = 1;
     } 
     else 
     {
-	retval = 0;
+		retval = 0;
     }
     
     dialer.hangup();
     
     if( syslog )
-	delete syslog;
+		delete syslog;
     
     return( retval );
 }
