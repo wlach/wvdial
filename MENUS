@@ -76,3 +76,9 @@ La Groupe Videotron Ltee., Services PC
     2. Resume a Dialup Session             5. Start a CSlip Session
     3. Start a Slip Session
 Your Choice ?
+
+
+
+Doesn't work:
+	prompts that are followed immediately by CRLF, then wait on a blank
+	line.
