@@ -8,7 +8,7 @@ all: wvdial.a wvdial wvdialconf
 
 wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o
 
-LIBS = -L../wvstreams -lwvutils -lwvstreams -lwvcrypto
+LIBS = -L../wvstreams -lwvutils -lwvstreams
 
 wvdial wvdialconf papchaptest atztest: wvdial.a
 
