@@ -33,7 +33,7 @@ binary-arch: build
 	$(MAKE) PREFIX=`pwd`/debian/tmp/usr \
 		PPPDIR=`pwd`/debian/tmp/etc/ppp/peers \
 		install-bin
-	#cp debian/pon.wvdial debian/poff.wvdial debian/tmp/usr/bin/
+	cp debian/pon.wvdial debian/poff.wvdial debian/tmp/usr/bin/
 	dh_installdocs
 	dh_installman
 	dh_installchangelogs -k CHANGES
