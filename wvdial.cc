@@ -89,7 +89,7 @@ int main( int argc, char ** argv )
     WvStringList	sections;
     WvStringList	cmdlineopts;
     WvLog		log( "WvDial", WvLog::Debug );
-    char *		homedir = getenv("HOME");
+    WvString		homedir = getenv("HOME");
     int			haveconfig = 0;
     int			havecmdlineopts = 0;
     
@@ -114,7 +114,7 @@ int main( int argc, char ** argv )
 		} 
 		else 
 		{
-		    log("Error: --config requires an argument\n");
+		    log("Error: --config requires a valid argument\n");
 		    print_help();
 		    return 1;			    
 		}

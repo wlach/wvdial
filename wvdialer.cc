@@ -84,8 +84,10 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 
     // Ensure all sections in sect_list actually exist, warning if not.
     WvStringList::Iter	iter( *sect_list );
-    for( iter.rewind(); iter.next(); ) {
-    	if( cfg[*iter] == NULL ) {
+    for( iter.rewind(); iter.next(); ) 
+    {
+    	if( cfg[*iter] == NULL ) 
+        {
     	    err( WvLog::Warning,
 		 "Warning: section [%s] does not exist in wvdial.conf.\n",
     	    	 *iter );
@@ -94,10 +96,12 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
  
    // Ensure all inherited sections exist, warning if not.
     WvConfigSectionList::Iter iter2 (cfg);
-    for (iter2.rewind(); iter2.next();) { 
+    for (iter2.rewind(); iter2.next();) 
+    { 
         WvConfigSection & sect2 = *iter2;
         WvConfigEntry * entry = sect2["Inherits"];
-        if (entry) {
+        if (entry) 
+        {
             WvString inherits = entry->value;
             if (cfg[inherits] == NULL)
                 err( WvLog::Warning,  
@@ -118,7 +122,8 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 	return;
     }
 
-    if (options.provider.len()) {
+    if (options.provider.len()) 
+    {
 	log( WvLog::Notice, "Dialing %s %s.\n",
 		options.provider,
 		options.product);
@@ -129,7 +134,8 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 		options.homepage);
     }
 
-    if( options.auto_reconnect && options.idle_seconds > 0) {
+    if( options.auto_reconnect && options.idle_seconds > 0) 
+    {
     	err( WvLog::Notice,
 	    "Idle Seconds = %s, disabling automatic reconnect.\n",
 				WvString(options.idle_seconds));
@@ -161,23 +167,27 @@ bool WvDialer::dial()
     if( stat == Online )
     	return( true );
 	
-    if( stat != Idle ) {
+    if( stat != Idle ) 
+    {
 	// (error message has already been printed elsewhere)
     	// err( "Modem is not ready to dial.\n" );
     	return( false );
     }
 
-    if( !options.phnum[0] ) {
+    if( !options.phnum[0] ) 
+    {
 	err( "Configuration does not specify a valid phone number.\n" );
     	stat = OtherError;
     }
 
-    if( !options.login[0] ) {
+    if( !options.login[0] ) 
+    {
 	err( "Configuration does not specify a valid login name.\n" );
     	stat = OtherError;
     }
 
-    if( !options.password[0] ) {
+    if( !options.password[0] ) 
+    {
 	err( "Configuration does not specify a valid password.\n" );
     	stat = OtherError;
     }
@@ -220,7 +230,8 @@ bool WvDialer::dial()
 void WvDialer::hangup()
 /*********************/
 {
-    if( ppp_pipe ) {
+    if( ppp_pipe ) 
+    {
     	delete ppp_pipe;
 	ppp_pipe = NULL;
     }
@@ -674,7 +685,8 @@ bool WvDialer::init_modem()
 	// the buffer is empty.
 	offset = 0;
     
-	if( modem ) delete modem;
+	if( modem ) 
+	    delete modem;
 	
 	// Open the modem...
 	if( chat_mode ) 
@@ -1044,9 +1056,9 @@ void WvDialer::async_dial()
     }
 }
 
-//This Function checks whether the connection attempts exceeded the Attempts value set in wvdial.conf
 
 bool WvDialer::check_attempts_exceeded(int no_of_attempts)
+/********************************************************/
 {
     if(no_of_attempts > options.dial_attempts)
     {
@@ -1060,8 +1072,8 @@ bool WvDialer::check_attempts_exceeded(int no_of_attempts)
 }
 
 
-
 static int set_echo( int desc, int value )
+/****************************************/
 {
     struct termios settings;
     
