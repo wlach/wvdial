@@ -38,7 +38,7 @@ private:
     size_t coagulate(char *buf, size_t size, int msec);
 	
 public:
-    WvModemScan(const char *devname, bool is_modem_link);
+    WvModemScan(WvStringParm devname, bool is_modem_link);
     ~WvModemScan();
     
     WvString modem_name;

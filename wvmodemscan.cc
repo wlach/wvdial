@@ -36,7 +36,7 @@ static int baudcheck[6] = {
 static int default_baud =   baudcheck[0];
 static int isdn_speed   = 115200;
 
-WvModemScan::WvModemScan(const char *devname, bool is_modem_link)
+WvModemScan::WvModemScan(WvStringParm devname, bool is_modem_link)
 	: debug(devname, WvLog::Debug)
 {
     stage = Startup;
@@ -137,48 +137,54 @@ void WvModemScan::execute()
     case Reinit:
 	assert(modem);
 	status[stage] = Test;
-	if (!strncmp(file, "/dev/ircomm", 11)) {
-	    while (baudcheck[tries+1] <= 9600 && baudcheck[tries+1] != 0) {
+	if (!strncmp(file, "/dev/ircomm", 11)) 
+	{
+	    while (baudcheck[tries+1] <= 9600 && baudcheck[tries+1] != 0) 
 		tries++;
-	    }
-	    if (baudcheck[tries] > 19200 || baudcheck[tries] == 0) {
+
+	    if (baudcheck[tries] > 19200 || baudcheck[tries] == 0) 
+	    {
 		broken = true;
 		debug("failed at 9600 and 19200 baud.\n");
 		return;
 	    }
 	    baud = modem->speed(baudcheck[tries]);
 	}
-	if ( !doresult(WvString("%s\r", initstr()), stage==ATZ ? 3000 : 500)
-	    || ((stage <= AT || stage == Reinit) && status[stage]==Fail) )
+	if (!doresult(WvString("%s\r", initstr()), stage==ATZ ? 3000 : 500)
+	    || ((stage <= AT || stage == Reinit) && status[stage]==Fail))
 	{
 	    int old_baud = baud;
 	    tries++;
 	    //modem->drain();
 	    //modem->speed(baud*2);
 	    //baud = modem->speed(baud);
-	    if (baudcheck[tries] == 0) {
+	    if (baudcheck[tries] == 0) 
+	    {
 		broken = true;
 		debug("and failed too at %s, giving up.\n",
 			WvString(isdn_speed));
 		// Go back to default_baud:
 		modem->speed(default_baud);
 	    	baud = modem->getspeed();
-	    } else
-	        if (strncmp(file, "/dev/ircomm", 11))
+	    } 
+	    else if (strncmp(file, "/dev/ircomm", 11))
 	        debug("failed with %s baud, next try: %s baud\n",
-			old_baud,
-			baud = modem->speed(baudcheck[tries]));
-			//baud = modem->speed(baud*2));
+		      old_baud,
+		      baud = modem->speed(baudcheck[tries]));
+	            //baud = modem->speed(baud*2));
 #if 0	    
 	    if (tries >= 4)
 	    {
-		if (baud == default_baud) {
+		if (baud == default_baud) 
+		{
 			debug("nothing at %s baud,\n", WvString(default_baud));
 			// Ok, then let's try ISDN speed for ISDN TAs:
 			modem->speed(isdn_speed);
 	    		baud = modem->getspeed();
 	    		tries = 0;
-		} else {
+		} 
+		else 
+		{
 			// Ok, we tried default_baud and ISDN speed, give up:
 			broken = true;
 			debug("nor at %s.\n", WvString(isdn_speed));
@@ -202,7 +208,7 @@ void WvModemScan::execute()
 	assert(modem);
 	status[stage] = Test;
 	debug("Modem Identifier: ");
-	if ( !doresult(WvString("ATI\r"), 500) || (status[stage]==Fail) )
+	if (!doresult(WvString("ATI\r"), 500) || (status[stage]==Fail))
 	{
 	    tries++;
 
@@ -216,90 +222,115 @@ void WvModemScan::execute()
 	    if (is_isdn())
 	    	debug("Looks like an ISDN modem.\n");
 
-	    if (!strncmp(identifier, "Hagenuk", 7)) {
+	    if (!strncmp(identifier, "Hagenuk", 7)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI1\r"), 500)) 
 		    if (!strncmp(identifier, "Speed Dragon", 12)
-		    ||  !strncmp(identifier, "Power Dragon", 12)) {
+		    ||  !strncmp(identifier, "Power Dragon", 12)) 
+		    {
 		    	isdn_init = "ATB8";
 		    	modem_name = WvString("Hagenuk %s", identifier);
 		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "346900", 6)) {
+	    } 
+	    else if (!strncmp(identifier, "346900", 6)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI3\r"), 500))
-		    if (!strncmp(identifier, "3Com U.S. Robotics ISDN",23)) {
+		    if (!strncmp(identifier, "3Com U.S. Robotics ISDN",23)) 
+		    {
 			isdn_init = "AT*PPP=1";
 			modem_name = identifier;
 		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "SP ISDN", 7)) {
+	    } 
+	    else if (!strncmp(identifier, "SP ISDN", 7)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI4\r"), 500))
-		    if (!strncmp(identifier, "Sportster ISDN TA", 17)) {
+		    if (!strncmp(identifier, "Sportster ISDN TA", 17)) 
+		    {
 			isdn_init = "ATB3";
 			modem_name = identifier;
 		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "\"Version", 8)) {
+	    } 
+	    else if (!strncmp(identifier, "\"Version", 8)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI6\r"), 500))
+		    modem_name = identifier;
+	        status[stage] = Worked;
+	    } 
+	    else if (!strncmp(identifier, "644", 3)) 
+	    {
+	        status[stage] = Test;
+		if (doresult(WvString("ATI6\r"), 500))
+		    if (!strncmp(identifier, "ELSA MicroLink ISDN", 19)) 
+		    {
+			isdn_init = "AT$IBP=HDLCP";
 			modem_name = identifier;
+			default_asyncmap = true;
+		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "644", 3)) {
+	    } 
+	    else if (!strncmp(identifier, "643", 3)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI6\r"), 500))
-			if (!strncmp(identifier, "ELSA MicroLink ISDN", 19)) {
-				isdn_init = "AT$IBP=HDLCP";
-				modem_name = identifier;
-				default_asyncmap = true;
-			}
+		    if (!strncmp(identifier, "MicroLink ISDN/TLV.34", 21)) 
+		    {
+			isdn_init = "AT\\N10%P1";
+			modem_name = identifier;
+		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "643", 3)) {
-	        status[stage] = Test;
-		if (doresult(WvString("ATI6\r"), 500))
-			if (!strncmp(identifier, "MicroLink ISDN/TLV.34", 21)) {
-				isdn_init = "AT\\N10%P1";
-				modem_name = identifier;
-			}
-	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "ISDN TA", 6)) {
+	    } 
+	    else if (!strncmp(identifier, "ISDN TA", 6)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI5\r"), 500))
-			if (strstr(identifier, ";ASU")) {
-				isdn_init = "ATB40";
-				modem_name = "ASUSCOM ISDNLink TA";
-			}
+		    if (strstr(identifier, ";ASU")) 
+		    {
+			isdn_init = "ATB40";
+			modem_name = "ASUSCOM ISDNLink TA";
+		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "128000", 6)) {
+	    } 
+	    else if (!strncmp(identifier, "128000", 6)) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI3\r"), 500))
-			if (!strncmp(identifier, "Lasat Speed", 11)) {
-				isdn_init = "AT\\P1&B2X3";
-				modem_name = identifier;
-			}
+		    if (!strncmp(identifier, "Lasat Speed", 11)) 
+		    {
+			isdn_init = "AT\\P1&B2X3";
+			modem_name = identifier;
+		    }
 	        status[stage] = Worked;
-	    } else if (!strncmp(identifier, "28642", 5) // Elite 2864I
-	    	||     !strncmp(identifier, "1281", 4)  // Omni TA128 USA
-	    	||     !strncmp(identifier, "1282", 4)  // Omni TA128 DSS1
-	    	||     !strncmp(identifier, "1283", 4)  // Omni TA128 1TR6
-	    	||     !strncmp(identifier, "1291", 4)  // Omni.Net USA
-	    	||     !strncmp(identifier, "1292", 4)  // Omni.Net DSS1
-	    	||     !strncmp(identifier, "1293", 4)  // Omni.Net 1TR6
-		) {
+	    } 
+	    else if (!strncmp(identifier, "28642", 5) // Elite 2864I
+		     || !strncmp(identifier, "1281", 4)  // Omni TA128 USA
+		     || !strncmp(identifier, "1282", 4)  // Omni TA128 DSS1
+		     || !strncmp(identifier, "1283", 4)  // Omni TA128 1TR6
+		     || !strncmp(identifier, "1291", 4)  // Omni.Net USA
+		     || !strncmp(identifier, "1292", 4)  // Omni.Net DSS1
+		     || !strncmp(identifier, "1293", 4)  // Omni.Net 1TR6
+		     ) 
+	    {
 	        status[stage] = Test;
 		if (doresult(WvString("ATI1\r"), 500))
 		    if (!strncmp(identifier, "Elite 2864I", 11)
-		    ||  !strncmp(identifier, "ZyXEL omni", 10)) {
-		    	isdn_init = "AT&O2B40";
-		    	if (strncmp(identifier, "ZyXEL", 5))
+			|| !strncmp(identifier, "ZyXEL omni", 10)) 
+		    {
+			isdn_init = "AT&O2B40";
+			if (strncmp(identifier, "ZyXEL", 5))
 		            modem_name = WvString("ZyXEL %s", identifier);
-		    	else
-		    	    modem_name = identifier;
+			else
+			    modem_name = identifier;
 		    }
 	        status[stage] = Worked;
 	    }
-
+	    
 	    tries = 0;
 	    stage++;
 	}
@@ -506,6 +537,7 @@ WvModemScanList::WvModemScanList(WvStringParm _exception)
     struct dirent **namelist;
     struct stat mouse, modem;
     int num, count, mousestat, modemstat;
+    WvString exception;
     
     thisline = -1;
     printed = false;
@@ -516,6 +548,10 @@ WvModemScanList::WvModemScanList(WvStringParm _exception)
     
     if (num < 0)
 	return;
+    
+    // there shouldn't be a /dev/
+    if (!!_exception)
+	exception = strrchr(_exception, '/') + 1;
     
     for (count = 0; count < num; count++)
     {
@@ -531,7 +567,7 @@ WvModemScanList::WvModemScanList(WvStringParm _exception)
 	    continue;
 	}
 	
-	if (!!_exception && !strcmp(_exception, namelist[count]->d_name))
+	if (!!exception && !strcmp(exception, namelist[count]->d_name))
 	{
 	    log("\nIgnoring %s because I've been told to ignore it.\n",
 		namelist[count]->d_name);
@@ -553,7 +589,7 @@ WvModemScanList::WvModemScanList(WvStringParm _exception)
 	    append(new WvModemScan(WvString("%s", namelist[count]->d_name), false),
 		   true);
     }
-    
+
     while (--num >= 0)
 	free(namelist[num]);
     free(namelist);
