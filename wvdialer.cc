@@ -57,7 +57,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 : WvStreamClone( (WvStream **)&modem ),
     cfg(_cfg), log( "WvDial", WvLog::Debug ),
     err( log.split( WvLog::Error ) ),
-    modemrx( "Modem", WvLog::Debug )
+    modemrx( "WvDial Modem", WvLog::Debug )
 {
     modem 		 = NULL;
     ppp_pipe 		 = NULL;
