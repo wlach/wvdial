@@ -143,7 +143,7 @@ private:
 				      bool verbose = true);
     char	buffer[ INBUF_SIZE + 1 ];
     off_t	offset;
-    void	reset_offset() { offset = 0; buffer[0] = 0; }
+    void	reset_offset();
 
     // Called from WvDialBrain::guess_menu()
     bool 	is_pending() { return( modem->select( 1000 ) ); }

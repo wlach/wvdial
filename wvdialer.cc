@@ -727,3 +727,9 @@ int WvDialer::async_wait_for_modem( char * strs[], bool neednl, bool verbose )
     return( wait_for_modem( strs, 10, neednl, verbose ) );
 }
 
+
+void WvDialer::reset_offset()
+{
+    offset = 0;
+    buffer[0] = 0;
+}

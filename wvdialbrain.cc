@@ -162,8 +162,12 @@ bool WvDialBrain::is_prompt( const char * c,
     // prompt if the last line ends in punctuation and no newline.
     if( !promptstring ) {
 	for( cptr = c + strlen( c ) - 1; cptr >= c; cptr-- ) {
-	    if( isnewline( *cptr ) )
-		return( false ); // so the last line was empty: not a prompt
+	    if( isnewline( *cptr ) ) {
+		if ( !prompt_response.str[0] )
+		    return( false ); // last line was empty: not a prompt
+		else
+		    return( true ); // we have a guess, so use it anyway
+	    }
 	    if( strchr( prompt_punct, *cptr ) )
 		return( true );  // first non-whitespace was punctuation! good.
 	    if ( !isspace( *cptr ) )
@@ -489,7 +493,7 @@ void WvDialBrain::set_prompt_response( char * str )
 
     	dialer->log( "Found a good menu option: \"%s\".\n", n );
     	prompt_response = n;
-    	dialer->reset_offset();
+    	// dialer->reset_offset();
     }
 }
 
