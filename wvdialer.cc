@@ -396,6 +396,7 @@ void WvDialer::load_options()
     	{ "Stupid Mode",     NULL, &options.stupid_mode,   "", false        },
     	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", true         },
     	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", true	    },
+        { "Dial Attempts",   NULL, &options.dial_attempts, "", 0            },
     	{ "Abort on Busy",   NULL, &options.abort_on_busy, "", false	    },
     	{ "Abort on No Dialtone", NULL, &options.abort_on_no_dialtone, "", true },
     	{ NULL,		     NULL, NULL,                   "", 0            }
@@ -555,6 +556,7 @@ void WvDialer::async_dial()
     }
 
     received = async_wait_for_modem( dial_responses, true );
+    
     switch( received ) {
     case -1:	// nothing -- return control.
 	if( last_rx - time( NULL ) >= 60 ) {
@@ -562,6 +564,14 @@ void WvDialer::async_dial()
 	    stat = PreDial1;
 	    connect_attempts++;
 	    dial_stat = 1;
+	    
+	    //if Attempts in wvdial.conf is 0..dont do anything
+	    if(options.dial_attempts != 0){
+		    if(check_attempts_exceeded(connect_attempts)){
+			    hangup();
+		    }
+	    }
+
 	}
 	return;
     case 0:	// CONNECT
@@ -579,6 +589,14 @@ void WvDialer::async_dial()
 	connect_attempts++;
 	dial_stat = 2;
 	continue_select(2000);
+
+	//if Attempts in wvdial.conf is 0..dont do anything
+	if(options.dial_attempts != 0){
+		if(check_attempts_exceeded(connect_attempts)){
+			hangup();
+		}
+	}
+
 	return;
     case 2:	// NO DIALTONE
     case 3:	// NO DIAL TONE
@@ -590,6 +608,12 @@ void WvDialer::async_dial()
 	    stat = PreDial2;
 	    connect_attempts++;
 	    dial_stat = 3;
+            //if Attempts in wvdial.conf is 0..dont do anything
+            if(options.dial_attempts != 0){
+               if(check_attempts_exceeded(connect_attempts)){
+                       hangup();
+               }
+            }
 	}
 	return;
     case 4:	// BUSY
@@ -607,24 +631,58 @@ void WvDialer::async_dial()
     case 5:	// ERROR
 	err( "Invalid dial command.\n" );
 	stat = ModemError;
+        //if Attempts in wvdial.conf is 0..dont do anything
+        if(options.dial_attempts != 0){
+           if(check_attempts_exceeded(connect_attempts)){
+               hangup();
+           }
+        }
 	return;
     case 6:	// VOICE
     	log( "Voice line detected.  Trying again.\n" );
 	connect_attempts++;
 	dial_stat = 5;
     	stat = PreDial2;
+
+	//if Attempts in wvdial.conf is 0..dont do anything
+	if(options.dial_attempts != 0){
+		if(check_attempts_exceeded(connect_attempts)){
+			hangup();
+		}
+	}
+
     	return;
     case 7:	// FCLASS
     	log( "Fax line detected.  Trying again.\n" );
 	connect_attempts++;
 	dial_stat = 6;
     	stat = PreDial2;
-    	return;
+
+	//if Attempts in wvdial.conf is 0..dont do anything
+	if(options.dial_attempts != 0){
+		if(check_attempts_exceeded(connect_attempts)){
+			hangup();
+		}
+	}
+
+	return;
     default:
 	err( "Unknown dial response string.\n" );
 	stat = ModemError;
 	return;
     }
+}
+
+//This Function checks whether the connection attempts exceeded the Attempts value set in wvdial.conf
+
+bool WvDialer::check_attempts_exceeded(int no_of_attempts)
+{
+        if(no_of_attempts > options.dial_attempts){
+		log( WvLog::Warning, "Maximum Attempts Exceeded..Aborting!!\n" );
+		return true;
+	}else{
+		return false;
+	}
 }
 
 void WvDialer::start_ppp()

@@ -51,6 +51,13 @@ public:
     void	hangup();
     void	execute();
 
+    /*
+        *function to check whether attempts exceeded
+        *changed by Dushyanth Harinath on 2001-12-01
+        *mailto:dushy@symonds.net
+    */
+    bool check_attempts_exceeded(int connect_attempts);
+
     enum Status {
 	Idle,
 	ModemError,
@@ -112,6 +119,7 @@ public:
     	int		auto_reconnect;
     	int		abort_on_busy;
     	int		abort_on_no_dialtone;
+        int             dial_attempts;
     } options;
 
 private:
