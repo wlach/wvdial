@@ -674,7 +674,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	    offset += modem->read( buffer + offset, INBUF_SIZE - offset );
 
 	// Make sure there is a NULL on the end of the buffer.
-	buffer[ offset ] = 0;
+	buffer[ offset ] = '\0';
 
 	// Now turn all the NULLs in the middle of the buffer to spaces, for
 	// easier parsing.
@@ -727,9 +727,9 @@ int WvDialer::async_wait_for_modem( char * strs[], bool neednl, bool verbose )
     return( wait_for_modem( strs, 10, neednl, verbose ) );
 }
 
-
 void WvDialer::reset_offset()
+/***************************/
 {
     offset = 0;
-    buffer[0] = 0;
+    buffer[0] = '\0';
 }

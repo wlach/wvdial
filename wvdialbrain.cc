@@ -57,7 +57,8 @@ char * WvDialBrain::guess_menu( char * buf )
     char *	 nextline;
     BrainToken * tok;
 
-    while( ( cptr = strstr( buf, "ppp" ) ) != NULL ) {
+    while( strstr( buf, "ppp" ) != NULL ) {
+    	cptr = strstr( buf, "ppp" );
 	// pick out the beginning of the line containing "ppp"
 	for( line=cptr; line >= buf && !isnewline( *line ); line-- ) {}
 	line++;		// too far!
@@ -493,7 +494,6 @@ void WvDialBrain::set_prompt_response( char * str )
 
     	dialer->log( "Found a good menu option: \"%s\".\n", n );
     	prompt_response = n;
-    	// dialer->reset_offset();
     }
 }
 
