@@ -4,3 +4,8 @@ wvdialconf
 papchaptest
 pppmon
 *.libs
+
+ChangeLog
+wvrules.mk
+wvver.h
+
