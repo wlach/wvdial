@@ -304,9 +304,9 @@ void WvDialer::execute()
 		// exponentially back up...
 		auto_reconnect_delay *= 2;
 		if( auto_reconnect_delay == 0 )
-		    auto_reconnect_delay = 30;	  // start at 30 seconds
-		if( auto_reconnect_delay > 1800 )
-		    auto_reconnect_delay = 1800;  // no longer than 30 minutes
+		    auto_reconnect_delay = 5;	  // start at 5 seconds
+		if( auto_reconnect_delay > 600 )
+		    auto_reconnect_delay = 600;  // no longer than 10 minutes
 
 		auto_reconnect_at = time( NULL ) + auto_reconnect_delay;
 
