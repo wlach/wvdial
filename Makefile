@@ -1,5 +1,5 @@
-ifeq ($(TOPDIR),)                                                                              
-  TOPDIR=.       
+ifeq ($(TOPDIR),)
+  TOPDIR=.
   PKGINC=/usr/include/wvstreams /usr/local/include/wvstreams
   LIBS := $(LIBS) \
 		$(shell $(CC) -lsupc++ 2>&1 | grep -q "undefined reference" \
