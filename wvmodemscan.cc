@@ -461,7 +461,8 @@ static int fileselect(const struct dirent *e)
        || !strncmp(e->d_name, "ttyLT", 5)	// Lucent WinModem
        || !strncmp(e->d_name, "ttyACM", 6)      // USB acm Modems
        || !strncmp(e->d_name, "ttyUSB", 6)      // Modems on USB RS232
-       || !strncmp(e->d_name, "ircomm", 6);     // Handys over IrDA
+       || !strncmp(e->d_name, "ircomm", 6)      // Handys over IrDA
+       || !strncmp(e->d_name, "ttySL", 5);	// SmartLink WinModem
 
 	// (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
 }
