@@ -12,7 +12,7 @@ WvDial
 	- sometimes the login prompt takes a long time to answer.
 - mention /etc/wvdial.conf, /dev/ttyS*, and pap-secrets file permissions
 - allow passing of options on the command line:  if it has an '=' sign,
-	assume it's a configuration setting.
+	assume it's a configuration setting. - DONE version 1.5 (01/2002)
 - find pppd in PATH, don't assume /usr/sbin/pppd
 - blank lines count as prompts (sometimes?)
 - create a pidfile in /var/run/wvdial.pid

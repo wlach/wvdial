@@ -27,4 +27,4 @@ const char wvdial_help_text[] =
 "Specified sections are all read, with later ones overriding previous ones.\n"
 "Any options not in the listed sections are taken from [Dialer Defaults].\n"
 "\n"
-"Report bugs to wvdial@worldvisions.ca\n";
+"Report bugs to wvdial@nit.ca\n";
