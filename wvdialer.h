@@ -212,7 +212,7 @@ private:
    
     // These are used to read the messages of pppd
     int          pppd_msgfd[2];		// two fd of the pipe
-    WvStream     *pppd_log;		// to read messages of pppd
+    WvFDStream  *pppd_log;		// to read messages of pppd
    
     // These are used to pipe the password to pppd
     int          pppd_passwdfd[2];	// two fd of the pipe

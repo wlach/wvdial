@@ -13,6 +13,7 @@
 
 #include "wvdialmon.h"
 #include "wvfork.h"
+#include "wvfdstream.h"
 
 
 WvStream *pppd_log = NULL;	// to read messages of pppd
@@ -43,7 +44,7 @@ int main( int argc, char ** argv )
   argv_ppp[argc_ppp++] = "logfd";
   argv_ppp[argc_ppp++] = buffer;
   
-  pppd_log = new WvStream( pppd_msgfd[0] );
+  pppd_log = new WvFDStream( pppd_msgfd[0] );
   
   pppd_mon.setconnectmsg( "Connected..." );
   

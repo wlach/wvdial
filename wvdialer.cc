@@ -1143,7 +1143,7 @@ void WvDialer::start_ppp()
 	err("pipe failed: %s\n", strerror(errno) );
 	exit( EXIT_FAILURE );
     }
-    pppd_log = new WvStream( pppd_msgfd[0] );
+    pppd_log = new WvFDStream( pppd_msgfd[0] );
     WvString buffer1("%s", pppd_msgfd[1] );
     
     
@@ -1238,8 +1238,9 @@ void WvDialer::start_ppp()
              CHAP_SECRETS, strerror( errno ) );
     }
  
+    WvModemBase *modem = static_cast<WvModemBase*>(cloned);
     ppp_pipe = new WvPipe( argv[0], argv, false, false, false,
-			   cloned, cloned, cloned );
+			   modem, modem, modem );
 
     log( WvLog::Notice, "pid of pppd: %s\n", ppp_pipe->getpid() );
 
