@@ -71,7 +71,7 @@ public:
 // After an instance of the class has been created, run execute()
 // again and again until isdone()==true; then the contents of the list
 // is a set of all available modems, in the form of WvModemScan objects.
-DeclareWvList3(WvModemScan, WvModemScanListBase, );
+DeclareWvList2(WvModemScanListBase, WvModemScan);
 
 class WvModemScanList : public WvModemScanListBase
 {
