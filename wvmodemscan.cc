@@ -298,9 +298,12 @@ const char *WvModemScan::is_isdn() const
     	return identifier;
     if (identifier == "346800")		// USR ISDN TA
     	return identifier;
+
+#if 0 // this isn't nearly unique enough...
     if (identifier == "960")		// Motorola BitSurfr
     	return identifier;
-
+#endif
+    
     return NULL;
 }	
 

@@ -60,13 +60,14 @@ const char * WvDialBrain::guess_menu( char * buf )
     while( strstr( buf, "ppp" ) != NULL ) {
     	cptr = strstr( buf, "ppp" );
 	// pick out the beginning of the line containing "ppp"
-	for( line=cptr; line >= buf && !isnewline( *line ); line-- ) {}
+	for( line=cptr; line >= buf && !isnewline( *line ); line-- )
+	    ;
 	line++;		// too far!
 	
 	// find the beginning of the next line in the buffer, or the
 	// end of the buffer... so we know where to stop our searches.
 	for( nextline = line; *nextline && !isnewline( *nextline ); nextline++ )
-	    {}
+	    ;
     
 	buf = nextline; // now 'continue' will check the next line
 
@@ -248,6 +249,7 @@ bool WvDialBrain::is_login_prompt( const char * buf )
 {
     return( is_prompt( buf, "login" ) ||
     	    is_prompt( buf, "name" )  ||
+    	    is_prompt( buf, "user" ) ||
     	    is_prompt( buf, "userid" ) ||
     	    is_prompt( buf, "user.id", true ) ||
     	    is_prompt( buf, "signon" ) ||
@@ -374,11 +376,18 @@ void WvDialBrain::token_list_done( BrainToken * token_list )
 
 void WvDialBrain::guess_menu_guts( BrainToken * token_list )
 /**********************************************************/
-// There are three cases which may occur in a valid menu line.
+// There are some cases which may occur in a valid menu line.
 // Number 1 is of the form "P for PPP"
 // Number 2 is of the form "1 - start PPP"
 // Number 3 is of the form "(1) start PPP"
+// Number 4 has the form "1 blah blah PPP".  The first non-whitespace character
+//     is a number, followed by more whitespace.  We have to be paranoid here
+//     to avoid seeing phone numbers and such.
 // We check for these cases in order.
+//
+// Okay, fine.  This function now uses goto for no good reason.  So shoot me.
+// At least it doesn't randomly return from the middle of the function before
+// trying all the cases...
 {
     BrainToken *	lmarker = NULL;
     BrainToken *	rmarker = NULL;
@@ -392,8 +401,7 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     // we'll use it as a prompt response.  If it IS punctuation, but is NOT
     // a bracket, we'll take the thing before THAT even, and use it as a prompt
     // response.
-    tok = token_list;
-    for( ; tok != NULL; tok = tok->next ) {
+    for( tok = token_list; tok != NULL; tok = tok->next ) {
         bool failed = false;
     	if( tok->type == TOK_PUNCT )
     	    continue;
@@ -430,15 +438,14 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     // Find the first right-bracket on the line, and evaluate everything
     // before it.  Things that are allowed are numbers, and words other 
     // than "press" etc.
-    tok = token_list;
-    for( ; tok != NULL; tok = tok->next )
+    for( tok = token_list; tok != NULL; tok = tok->next )
     	if( tok->type == TOK_PUNCT )
     	    if( strchr( rbrackets, tok->tok_char ) ) {
     	    	rmarker = tok;	// leftmost right-bracket on this line.
     	    	break;
     	    }
     if( rmarker == NULL )
-    	return;		// no right-bracket on this line.
+	goto three;		// no right-bracket on this line.
 
     // Make sure "ppp" comes _AFTER_ the rmarker...  So that we don't respond
     // to "I like food (ppp is fun too)" or similar things.
@@ -446,11 +453,10 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     	if( tok->type == TOK_WORD && strcmp( tok->tok_str, "ppp" ) == 0 )
     	    break;
     if( tok == NULL )	// We did not find "ppp" after the rmarker
-    	return;
+    	goto three;
 
-    tok = token_list;
-    for( ; tok != rmarker; tok = tok->next ) {
-    	// If we find punctuation in here, then Case One is WRONG.
+    for( tok = token_list; tok != rmarker; tok = tok->next ) {
+    	// If we find punctuation in here, then Case Two is WRONG.
     	// Also, handles things like "Press 5" or "Type ppp" correctly.
     	// If there's more than one valid "thing", use the last one.
     	if( tok->type == TOK_PUNCT ) {
@@ -464,11 +470,12 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     	    	prompt_resp = tok->tok_str;
     }
 
-    if( prompt_resp != NULL ) {		// Case One was successful!
+    if( prompt_resp != NULL ) {		// Case Two was successful!
     	set_prompt_response( prompt_resp );
     	return;
     }
 
+three:
     /////////////// THIRD CASE
     // Find the first (and recursively innermost) matching pair of brackets.
     // For example: "This ('a', by the way) is what you type to start ppp."
@@ -480,9 +487,8 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     //
     // Nov 6/98: Ummmmm, does the above paragraph make sense?
     bool ready_to_break = false;
-    tok     		= token_list;
     rmarker 		= NULL;
-    for( ; tok != NULL; tok = tok->next ) {
+    for( tok = token_list; tok != NULL; tok = tok->next ) {
 
     	if( tok->type == TOK_PUNCT ) {
     	    if( strchr( lbrackets, tok->tok_char ) ) {
@@ -495,13 +501,12 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     	}
     }
     if( lmarker == NULL )
-    	return;		// no left-bracket on this line.
+	goto four;		// no left-bracket on this line.
 
     // Now find the matching bit of punctuation in the remainder.
     // Watch for useful words as we do it...
     index = strchr( lbrackets, lmarker->tok_char ) - lbrackets;
-    tok = lmarker->next;
-    for( ; tok != NULL; tok = tok->next ) {
+    for( tok = lmarker->next; tok != NULL; tok = tok->next ) {
     	if( tok->type == TOK_PUNCT ) {
     	    if( tok->tok_char == rbrackets[ index ] ) {
     	    	rmarker = tok;
@@ -515,7 +520,7 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     }
 
     if( rmarker == NULL )
-    	return;		// no corresponding right-bracket on this line.
+    	goto four;		// no corresponding right-bracket on this line.
 
     // Make sure "ppp" comes _AFTER_ the rmarker...  So that we don't respond
     // to "I like food (ppp is fun too)" or similar things.
@@ -523,13 +528,36 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     	if( tok->type == TOK_WORD && strcmp( tok->tok_str, "ppp" ) == 0 )
     	    break;
     if( tok == NULL )	// We did not find "ppp" after the rmarker
-    	return;
-
-    if( prompt_resp != NULL ) {		// Case Two was successful
-    	set_prompt_response( prompt_resp );
+	goto four;
+    
+    if( prompt_resp != NULL ) {		// Case Three was successful
+	set_prompt_response( prompt_resp );
     	return;
     }
-
+    
+four:    
+    /////////////// FOURTH CASE
+    // This is a catch-all for punctuationless menus of the form:
+    //       1   PPP
+    //       2   Quit
+    // Let's just assume the command is a single-digit number.  This should
+    // avoid accidentally parsing phone numbers or IP addresses.
+    lmarker = token_list;
+    if ( lmarker->type == TOK_NUMBER
+	 && lmarker->tok_str[0] && !lmarker->tok_str[1] )
+    {
+	for ( tok = token_list; tok != NULL; tok = tok->next )
+	    if (tok->type == TOK_WORD && strcmp( tok->tok_str, "ppp" ) == 0 )
+		break;
+	
+	if ( tok )
+	{
+	    set_prompt_response( lmarker->tok_str ); // Case Four worked!
+	    return;
+	}
+    }
+    
+    
     // Apparently this was not a valid menu option.  Oh well.
     return;
 }

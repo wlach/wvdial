@@ -67,11 +67,12 @@ static void print_help()
     printf( "\n%s", wvdial_help_text );
 }
 
-static void signalhandler( int parm )
+static void signalhandler( int signum )
 /***********************************/
 {
-    printf( "Caught signal #%d!  Attempting to exit gracefully...\n", parm );
+    printf( "Caught signal #%d!  Attempting to exit gracefully...\n", signum );
     want_to_die = true;
+    signal( signum, SIG_DFL );
 }
 
 
