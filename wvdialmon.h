@@ -15,7 +15,7 @@
 #include <string.h>
 #include <regex.h>
 
-#include "wvbuffer.h"
+#include "wvbuf.h"
 #include "wvstring.h"
 #include "wvlog.h"
 #include "strutils.h"
