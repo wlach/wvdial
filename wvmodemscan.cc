@@ -28,9 +28,7 @@ static char *commands[WvModemScan::NUM_STAGES] = {
 
 static int baudcheck[6] = {
 	2400,
-	4800,
 	9600,
-	19200,
 	115200,
 	0
 };
