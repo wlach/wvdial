@@ -1,0 +1,138 @@
+
+
+
+
+From Ave:
+	I think wvdial should try 'users' as a response once, then give up
+	and rever to 'ppp'.
+	
+	If "Default Reply" is set in the config file, it should override
+	any wvdial braininess.
+
+
+
+
+
+
+
+From worldvisions@worldvisions.ca Thu Mar 25 11:55:08 1999
+Received: from worldvisions by insight.worldvisions.ca with local (Exim 2.05 #1 (Debian))
+	id 10QDPQ-0007c0-00; Thu, 25 Mar 1999 11:55:08 -0500
+Received: from localhost [127.0.0.1] (apenwarr)
+	by insight.worldvisions.ca with esmtp (Exim 2.05 #1 (Debian))
+	id 10QDPQ-0007bu-00; Thu, 25 Mar 1999 11:55:08 -0500
+Received: from www1.bond.net
+	by fetchmail-4.6.4 POP3
+	for <worldvisions/localhost> (single-drop); Thu, 25 Mar 1999 11:55:08 EST
+Received: from ccshst09.cs.uoguelph.ca (ccshst09.cs.uoguelph.ca [131.104.96.18])
+	by www1.bond.net (8.9.3/8.9.3) with ESMTP id LAA14001
+	for <apenwarr@worldvisions.ca>; Thu, 25 Mar 1999 11:46:29 -0500 (EST)
+Received: from ccshst01 (ccshst01.cs.uoguelph.ca [131.104.96.14])
+	by ccshst09.cs.uoguelph.ca (8.8.6/8.8.6) with SMTP id LAA18089
+	for <apenwarr@worldvisions.ca>; Thu, 25 Mar 1999 11:51:28 -0500 (EST)
+Date: Thu, 25 Mar 1999 11:51:28 -0500 (EST)
+From: wfs <wstrong@uoguelph.ca>
+X-Sender: wstrong@ccshst01
+To: Avery Pennarun <apenwarr@worldvisions.ca>
+Subject: Re: adding a third propmt
+In-Reply-To: <19990324230103.D17057@worldvisions.ca>
+Message-ID: <Pine.HPP.3.95.990325114133.3856B-100000@ccshst01>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+X-UIDL: c7c66cc952a281b12245ba5bbb05f203
+Sender:  <worldvisions@worldvisions.ca>
+Status: RO
+Content-Length: 2377
+Lines: 90
+
+
+
+On Wed, 24 Mar 1999, Avery Pennarun wrote:
+
+> 
+> Could you send an exact copy of your wvdial output so I can see why it's
+> choosing the wrong prompt response?
+> 
+> 	wvdial 2>&1 | tee wvdial.out
+> 	
+> 
+
+Sure, I've included it below.  Thanks for the quick response, I was
+shocked.  Like I said, wvdial is excellent.  I've never seen an app,
+either under *nix or Windows that was able to not only locate the
+modem, but figure out the proper init and control strings.  Is wvdial
+standard with any linux distributions?  If not, it should be, and with
+Slak (but that's a rather biased opinion).
+
+Thank you again for getting back to me so quickly.  It would be great
+if I could use an app developed so close to home.
+Walter
+
+---------------------------
+wvdial.out
+
+--> WvDial: Internet dialer version 1.20
+--> Initializing modem.
+--> Sending: ATZ
+ATZ
+OK
+--> Sending: ATQ0 V1 E1 S0=0 &C1 &D2 S11=55 +FCLASS=0
+ATQ0 V1 E1 S0=0 &C1 &D2 S11=55 +FCLASS=0
+OK
+--> Modem initialized.
+--> Sending: ATDT 763-0250
+--> Waiting for carrier.
+ATDT 763-0250
+CONNECT 115200
+--> Carrier detected.  Waiting for prompt.
+Annex Command Line Interpreter   *   Copyright 1991 Xylogics, Inc.
+Checking authorization, Please wait...
+Annex username: 
+--> Looks like a login prompt.
+--> Sending: wstrong
+wstrong
+Annex password: 
+--> Looks like a password prompt.
+--> Sending: (password)
+Permission granted
+*-*-* 96070201
+[1b][H[1b][2J   Terminal Server Access to the University of Guelph HSNetwork.
+     
+*-*-*
+annex03:33: 
+  DOSMaslo Users: Type  services  to display a list of campus 
+          IT services
+  WinMaslo Users: Type  ppp  to complete connection
+annex03:33: 
+--> Found a good menu option: "users".
+--> Hmm... a prompt.  Sending "users".
+users
+CLI: Command not found.
+annex03:33: 
+--> Hmm... a prompt.  Sending "users".
+users
+CLI: Command not found.
+annex03:33: 
+--> Hmm... a prompt.  Sending "users".
+users
+CLI: Command not found.
+annex03:33: 
+--> Don't know what to do!  Starting pppd and hoping for the best.
+--> Starting pppd at Thu Mar 25 11:40:28 1999
+--> PPP daemon has died! (exit code = 0)
+--> Disconnecting at Thu Mar 25 11:40:32 1999
+--> Auto Reconnect will be attempted in 5 seconds
+--> Initializing modem.
+--> Sending: ATZ
+OK
+ATZ
+--> Sending: ATQ0 V1 E1 S0=0 &C1 &D2 S11=55 +FCLASS=0
+OK
+&C1 &D2 S11=55 +FCLASS=0
+--> Modem initialized.
+--------------------------------------------
+
+
+
+
+
