@@ -79,6 +79,13 @@ Your Choice ?
 
 
 
+For dialup-IP, type "PPP" or "SLIP" now.
+If you can't log in type "trouble".
+Which service, please?
+
+
+
+
 Doesn't work:
 	prompts that are followed immediately by CRLF, then wait on a blank
 	line.
