@@ -56,10 +56,9 @@ static int messagetail_pid = 0;
 WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 /***************************************************************************/
 : WvStreamClone( 0 ),
-	  cfg(_cfg), log( "WvDial", WvLog::Debug ),
-	  err( log.split( WvLog::Error ) ),
-	  modemrx( "WvDial Modem", WvLog::Debug ),
-	  cont(WvCallback<void*, void*>(this, &WvDialer::real_execute))
+    cfg(_cfg), log( "WvDial", WvLog::Debug ),
+    err( log.split( WvLog::Error ) ),
+    modemrx( "WvDial Modem", WvLog::Debug )
 {
     ppp_pipe 		 = NULL;
     pppd_log		 = NULL;
@@ -74,6 +73,8 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     connected_at         = 0;
     phnum_count = 0;
     phnum_max = 0;      
+    // tell wvstreams we need our own subtask
+    uses_continue_select = true;
 
     brain = NULL;
     modem = NULL;
@@ -151,6 +152,8 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
 WvDialer::~WvDialer()
 /*******************/
 {
+    terminate_continue_select();
+
     RELEASE(ppp_pipe);
     RELEASE(pppd_log);
     delete brain;
@@ -341,14 +344,15 @@ void WvDialer::pppd_watch( int ms )
 }
 
 
-void* WvDialer::real_execute(void* contdata)
+void WvDialer::execute()
+/**********************/
 {
     WvStreamClone::execute();
     
     // the modem object might not exist, if we just disconnected and are
     // redialing.
     if( !modem && !init_modem() )
-    	return 0;
+    	return;
 
     last_execute = time( NULL );
     
@@ -551,15 +555,6 @@ void* WvDialer::real_execute(void* contdata)
 	drain();
     	break;
     }
-
-    return 0;
-}
-
-
-void WvDialer::execute()
-/**********************/
-{
-    cont();
 }
 
 
