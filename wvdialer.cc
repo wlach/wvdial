@@ -74,10 +74,10 @@ WvDialer::WvDialer( WvConf& cfg, WvStringList& sect_list )
     // Ensure all sections in sect_list actually exist, warning if not.
     WvStringList::Iter	iter( sect_list );
     for( iter.rewind(); iter.next(); ) {
-    	if( cfg.get_section( iter.data()->str ) == NULL ) {
+    	if( cfg[*iter.data()] == NULL ) {
     	    err( WvLog::Warning,
 		 "Warning: section [%s] does not exist in wvdial.conf.\n",
-    	    	 iter.data()->str );
+    	    	 *iter.data() );
     	}
     }
 
