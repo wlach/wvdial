@@ -164,7 +164,7 @@ bool WvDialBrain::is_prompt( const char * c,
 // looking for a SPECIFIC prompt that contains that string.
 {
     const char *	cptr;
-    static const char *	prompt_punct	= ")>}]:.|-?$%";
+    static const char *	prompt_punct	= ")>}]:.|-?$%=";
     
     // if no promptstring was given, the search is simple:  it is a 
     // prompt if the last line ends in punctuation and no newline.

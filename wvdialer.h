@@ -92,6 +92,7 @@ public:
     	WvString	init9;
     	WvString	phnum;
     	WvString	dial_prefix;
+    	WvString	areacode;
     	WvString	dial_cmd;
     	WvString	login;
     	WvString	login_prompt;

@@ -372,6 +372,7 @@ void WvDialer::load_options()
     	{ "Init9",           &options.init9,        NULL, "",               0 },
     	{ "Phone",           &options.phnum,        NULL, "",               0 },
     	{ "Dial Prefix",     &options.dial_prefix,  NULL, "",               0 },
+    	{ "Area Code",       &options.areacode,     NULL, "",               0 },
     	{ "Dial Command",    &options.dial_cmd,     NULL, "ATDT",           0 },
     	{ "Username",        &options.login,        NULL, "",               0 },
     	{ "Login Prompt",    &options.login_prompt, NULL, "",               0 },
@@ -507,10 +508,12 @@ void WvDialer::async_dial()
     }
 	
     if( stat == Dial ) {
-    	// Construct the dial string.  We use the dial command, prefix, and
-    	// phone number as specified in the config file.
-	WvString s( "%s %s%s\r", options.dial_cmd,
+    	// Construct the dial string.  We use the dial command, prefix,
+	// area code, and phone number as specified in the config file.
+	WvString s( "%s %s%s%s%s\r", options.dial_cmd,
 				 options.dial_prefix,
+				 options.dial_prefix ? "," : "",
+				 options.areacode,
 				 options.phnum );
 	modem->print( s );
 	log( "Sending: %s\n", s );
