@@ -1,0 +1,129 @@
+/*
+ * Worldvisions Weaver Software:
+ *   Copyright (C) 1997, 1998 Worldvisions Computer Technology, Inc.
+ *
+ * Standalone WvDial program, for testing the WvDialer class.
+ *
+ * Created:	Sept 30 1997		D. Coombs
+ */
+
+#include "wvdialer.h"
+#include "wvver.h"
+#include "wvlogrcv.h"
+#include "wvconf.h"
+
+#include <signal.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+volatile bool want_to_die = false;
+
+
+// use no prefix string for app "Modem", and an arrow for everything else.
+// This makes the output of the wvdial application look nicer.
+class WvDialLogger : public WvLogConsole
+/**************************************/
+{
+public:
+    WvDialLogger() : WvLogConsole( dup( 2 ) ) // log to stderr (fd 2)
+        { }
+    virtual ~WvDialLogger();
+protected:
+    virtual void _make_prefix();
+};
+
+
+WvDialLogger::~WvDialLogger()
+/***************************/
+{
+}
+
+
+void WvDialLogger::_make_prefix()
+/*******************************/
+{
+    const char * name = appname( last_source );
+    if( !strcmp( name, "Modem" ) ) {
+	prefix = "";
+	prelen = 0;
+    } else {
+	prefix = "--> ";
+	prelen = 4;
+    }
+}
+
+static void print_version()
+/*************************/
+{
+    printf( "%s", wvdial_version_text );
+}
+
+static void print_help()
+/**********************/
+{
+    print_version();
+    printf( "\n%s", wvdial_help_text );
+}
+
+static void signalhandler( int parm )
+/***********************************/
+{
+    printf( "Caught signal #%d!  Attempting to exit gracefully...\n", parm );
+    want_to_die = true;
+}
+
+
+int main( int argc, char ** argv )
+/********************************/
+{
+#if DEBUG
+    free( malloc( 1 ) ); // for electric fence
+#endif
+
+    WvDialLogger 	rc;
+    WvConf		cfg( "/etc/wvdial.conf" );
+    WvStringList	sections;
+    
+    signal( SIGTERM, signalhandler );
+    signal( SIGINT, signalhandler );
+    signal( SIGHUP, signalhandler );
+    
+    if( !cfg.isok() || !cfg.isclean() ) {
+	return( 1 );
+    }
+
+    if( argc > 1 ) {
+    	for( int i=1; i < argc; i++ ) {
+	    if( !strcmp( argv[i], "--help" ) ) {
+	    	print_help();
+	    	return( 1 );
+	    }
+	    else if( !strcmp( argv[i], "--version" ) ) {
+	    	print_version();
+	    	return( 1 );
+	    }
+	    else if( argv[i][0] == '-' ) {
+		print_help();
+		return( 1 );
+	    }
+    	    sections.append( new WvString( "Dialer %s", argv[i] ), true );
+    	}
+    } else {
+	sections.append( new WvString( "Dialer Defaults" ), true);
+    }
+    
+    WvDialer dialer( cfg, sections );
+	
+    if( dialer.dial() == false )
+	return  1;
+	
+    while( !want_to_die && dialer.isok() 
+	  && dialer.status() != WvDialer::Idle ) {
+	dialer.select( 100 );
+	dialer.execute();
+    }
+
+    dialer.hangup();
+
+    return( 0 );
+}
