@@ -1,5 +1,5 @@
 TOPDIR=../..
-include $(TOPDIR)/rules.mk
+include $(TOPDIR)/wvrules.mk
 
 XPATH=.. ../utils ../configfile ../streams
 
