@@ -24,14 +24,14 @@ void WvPapChap::put_secret( WvString username, WvString password,
     assert( remote[0] );
 
     // PAP secrets:
-    nuke_contents();
+    contents.zap();
     load_file( PAP_SECRETS );
     do_secret( username, password, remote );
     if( write_file( PAP_SECRETS ) == false )
 	pap_success = false;
 
     // CHAP secrets:
-    nuke_contents();
+    contents.zap();
     load_file( CHAP_SECRETS );
     do_secret( username, password, remote );
     if( write_file( CHAP_SECRETS ) == false )
@@ -42,18 +42,6 @@ void WvPapChap::put_secret( WvString username, WvString password,
 ///////////////////////////////////////////////////////////
 // WvPapChap private functions
 ///////////////////////////////////////////////////////////
-
-void WvPapChap::nuke_contents()
-/*****************************/
-// Wipe out the "contents" list.
-{
-    WvStringList::Iter	iter( contents );
-
-    iter.rewind();
-    iter.next();
-    while( iter.cur() )
-    	iter.unlink();		// also deletes the WvString
-}
 
 bool WvPapChap::load_file( char * filename )
 /******************************************/
@@ -94,9 +82,9 @@ bool WvPapChap::write_file( char * filename )
     return( true );
 }
 
-void WvPapChap::do_secret( const char * _username, const char * password, 
-			   const char * remote )
-/**************************************************************************/
+void WvPapChap::do_secret( const char * _username, const char * _password, 
+			   const char * _remote )
+/***********************************************/
 // Goes through the "contents" list, looking for lines that have the same
 // username.  If they do, and the remote value is either "*" or remote,
 // the secret is removed.  Otherwise, it is left in place.  At the end of the
@@ -105,30 +93,22 @@ void WvPapChap::do_secret( const char * _username, const char * password,
 {
     WvStringList::Iter	iter( contents );
     WvString username;
-    char *cptr;
+    WvString password;
+    WvString remote;
 
     if( !_username || !password )
     	return;
     
-    // we need to change backslash to double-backslash in usernames, so pppd
-    // reads them correctly.
-    username.setsize(strlen(_username) * 2 + 1);
-    for (cptr = username.edit(); *_username; _username++)
-    {
-	*cptr++ = *_username;
-	if (*_username == '\\')
-	    *cptr++ = '\\'; // double it
-    }
-    *cptr = 0;
+    // we need to backslash-escape all punctuation, so that pppd reads it
+    // correctly.
+    username = backslash_escape( _username );
+    password = backslash_escape( _password );
+    remote   = backslash_escape( _remote );
 
-    iter.rewind();
-    iter.next();
-    while( iter.cur() ) {
+    for( iter.rewind(); iter.next(); ) {
     	// Is this line a comment?
-    	if( iter()[0] == '#' ) {
-    	    iter.next();
+    	if( iter()[0] == '#' )
     	    continue;
-    	}
 
     	// Is the line blank?
     	const char * p = iter();
@@ -136,10 +116,8 @@ void WvPapChap::do_secret( const char * _username, const char * password,
     	    p++;
     	while( *p != '\0' && isspace( *p ) );
     	p--;
-    	if( *p == '\0' ) {
-    	    iter.next();
+    	if( *p == '\0' )
     	    continue;
-    	}
 
 	// p points at the first non-whitespace char.
 	const char * q = p;
@@ -150,13 +128,12 @@ void WvPapChap::do_secret( const char * _username, const char * password,
 	if( *q == '\0' ) {
 	    // illegal line, so get rid of it.
 	    iter.unlink();
+            iter.rewind();
 	    continue;
 	}
-	if( strncmp( username, p, q-p ) != 0 ) {
+	if( strncmp( username, p, q-p ) != 0 )
 	    // different username, so let it stay.
-	    iter.next();
 	    continue;
-	}
 
 	p=q;
 	do
@@ -166,12 +143,11 @@ void WvPapChap::do_secret( const char * _username, const char * password,
 	if( strncmp( p, remote, strlen( remote ) ) == 0 || *p == '*' ) {
 	    // conflicting secret, so get rid of it.
 	    iter.unlink();
+            iter.rewind();
 	    continue;
 	}
 
 	// This secret line should be fine.
-	iter.next();
-	continue;
     }
 
     contents.append( new WvString( "%s\t%s\t%s", username, remote, password ), 

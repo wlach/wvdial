@@ -25,7 +25,7 @@ public:
     	: pap_success( true ), chap_success( true ) {}
     ~WvPapChap() {}
 
-    void put_secret( WvString username, WvString password, WvString remote );
+    void put_secret( WvString _username, WvString _password, WvString _remote );
     bool isok_pap() const
     	{ return( pap_success ); }
     bool isok_chap() const
@@ -37,7 +37,6 @@ private:
     bool	 chap_success;
 
     bool load_file( char * filename );
-    void nuke_contents();
     bool write_file( char * filename );
     void do_secret( const char * username, const char * password,
 		    const char * remote );
