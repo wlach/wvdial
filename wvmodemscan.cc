@@ -315,7 +315,7 @@ char *WvModemScan::is_isdn() const
 
     if (identifier == "3C882")		// 3Com Impact IQ
     	return identifier.str;
-    if (identifier == "940")		// Motorola BitSurfr
+    if (identifier == "960")		// Motorola BitSurfr
     	return identifier.str;
 
     return NULL;
