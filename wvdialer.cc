@@ -506,6 +506,8 @@ void WvDialer::async_dial()
 	for( int i=0; i<3; i++ ) {
 	    modem->write( "\r", 1 );
 	    continue_select(500);
+	    if (!isok())
+		break;
 	}
 	stat = Dial;
 	return;
