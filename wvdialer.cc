@@ -114,9 +114,10 @@ bool WvDialer::dial()
 /*******************/
 // Returns false on error, or true to go asynchronous while dialing.
 {
-    if( stat == Online ) {
+    if( stat == Online )
     	return( true );
-    } else if( stat != Idle ) {
+	
+    if( stat != Idle ) {
 	// (error message has already been printed elsewhere)
     	// err( "Modem is not ready to dial.\n" );
     	return( false );
