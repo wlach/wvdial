@@ -1,7 +1,7 @@
 TOPDIR=..
 include $(TOPDIR)/wvrules.mk
 
-XPATH=.. ../wvstreams/include
+XPATH=.. ../wvstreams/include $(PKGINC)
 
 default: all papchaptest
 all: wvdial.a wvdial wvdialconf
