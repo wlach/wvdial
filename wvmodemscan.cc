@@ -258,6 +258,7 @@ bool WvModemScan::doresult(const WvString &_s, int msec)
 	    char *p = strpbrk(cptr, "\n\r");
 	    if (p) *p=0;
 	    identifier = cptr;
+	    identifier.unique();
 	    status[stage] = Worked;
 	    debug("%s\n", identifier);
 	    return true;
@@ -313,6 +314,8 @@ const char *WvModemScan::is_isdn() const
     	return NULL;
 
     if (identifier == "3C882")		// 3Com Impact IQ
+    	return identifier;
+    if (identifier == "346800")		// USR ISDN TA
     	return identifier;
     if (identifier == "960")		// Motorola BitSurfr
     	return identifier;
