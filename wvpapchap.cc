@@ -82,7 +82,7 @@ bool WvPapChap::write_file( char * filename )
 /*******************************************/
 // Writes the "contents" list to the file, one entry per line.
 {
-    WvFile file( filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    WvFile file( filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR );
     if( file.isok() == false )
     	return( false );
 
