@@ -45,7 +45,7 @@ void WvDialLogger::_make_prefix()
 /*******************************/
 {
     const char * name = appname( last_source );
-    if( !strcmp( name, "Modem" ) ) {
+    if( !strncmp( name, "WvDial Modem", 12 ) ) {
 	prefix = "";
 	prelen = 0;
     } else {
