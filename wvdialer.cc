@@ -410,8 +410,8 @@ bool WvDialer::init_modem()
     log( "Initializing modem.\n" );
     
     // make modem happy
-    modem->print("\r\r\r\r\r");
-    while (modem->select(100))
+    modem->print( "\r\r\r\r\r" );
+    while( modem->select( 100 ) )
 	modem->drain();
 
     // Send up to nine init strings, in order.
