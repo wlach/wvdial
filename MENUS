@@ -59,3 +59,5 @@ Enter hostname (e.g. shell3.ba) with no password, or your SLIP/PPP login:
 options are: P FOR PPP, R FOR SHELL
 
 
+ENTER USERID ACCOUNT.
+===> [11]		(that's CTRL-Q)
