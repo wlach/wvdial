@@ -400,13 +400,14 @@ bool WvDialer::init_modem()
     int	received;
 
     // Open the modem...
-    if( !modem ) {
-	modem = new WvModem( options.modem, options.baud );
-	if( !modem->isok() ) {
-	    err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
-    	    return( false );
-	}
+    if( modem ) delete modem;
+    
+    modem = new WvModem( options.modem, options.baud );
+    if( !modem->isok() ) {
+	err( "Cannot open %s: %s\n", options.modem, modem->errstr() );
+	return( false );
     }
+
     log( "Initializing modem.\n" );
     
     // make modem happy
