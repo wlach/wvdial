@@ -11,9 +11,7 @@ wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 
 LIBS = -L../wvstreams -lwvutils -lwvstreams
 
-wvdial wvdialconf papchaptest atztest: wvdial.a
-
-pppmon: wvdial.a
+wvdial wvdialconf papchaptest atztest pppmon: wvdial.a
 
 clean:
 	rm -f wvdial wvdialconf wvdialmon papchaptest pppmon atztest *.o *.a
