@@ -7,16 +7,17 @@ a message to wvdial-list-request@worldvisions.ca with the subject
 
 WvDial
 ------
-- rename dialer.cc to wvdialer.cc (or something)
 - this login prompt doesn't work because it contains the word PPP:
   "Enter hostname (e.g. shell3.ba) with no password, or your SLIP/PPP login:"
+- "PRESS 1 FOR PPP, 2 FOR SHELL" (Golden Triangle)
+- "Command>" should be a prompt (Janis in London)
 - start PPP when you get an IP address string
 - 1ms-lag-mode for wvmodem
 - try harder with max speed detection (some modems just don't work at the
    max baud rate!)
 - mention /etc/wvdial.conf, /dev/ttyS*, and pap-secrets file permissions
 - allow passing of options on the command line:  if it has an '=' sign,
-	assume it's a configuration setting. (Yuck...)
+	assume it's a configuration setting.
 - find pppd in PATH, don't assume /usr/sbin/pppd
 - blank lines count as prompts (sometimes?)
 - portability: #ifdef's around B57600 and higher?
