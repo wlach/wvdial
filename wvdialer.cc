@@ -374,7 +374,7 @@ void WvDialer::load_options( WvConf& cfg, WvStringList& sect_list )
     	{ "Stupid Mode",     NULL, &options.stupid_mode,   "", false        },
     	{ "New PPPD",	     NULL, &options.new_pppd, 	   "", false	    },
     	{ "ISDN",	     NULL, &options.isdn,	   "", false        },
-    	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", false	    },
+    	{ "Auto Reconnect",  NULL, &options.auto_reconnect,"", true	    },
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
 
