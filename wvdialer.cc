@@ -76,7 +76,7 @@ WvDialer::WvDialer( WvConf &_cfg, WvStringList *_sect_list, bool _chat_mode )
     phnum_max = 0;      
     // tell wvstreams we need our own subtask
     uses_continue_select = true;
-    
+
     sect_list = _sect_list;
     chat_mode = _chat_mode;
     
@@ -152,8 +152,6 @@ WvDialer::~WvDialer()
 	delete modem;
     if( brain )
     	delete brain;
-    if( sect_list )
-	delete sect_list;
 }
 
 bool WvDialer::dial()

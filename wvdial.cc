@@ -85,10 +85,9 @@ int main( int argc, char ** argv )
     
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
-    WvConf		cfg( "/etc/wvdial.conf", 0600 );
-    WvConf		*extracfg = NULL;
-    WvStringList	*sections = new WvStringList;
-    WvStringList	*cmdlineopts = new WvStringList;
+    WvConf		cfg( "/dev/null");
+    WvStringList	sections;
+    WvStringList	cmdlineopts;
     WvLog		log( "WvDial", WvLog::Debug );
     char *		homedir = getenv("HOME");
     int			haveconfig = 1;
@@ -122,7 +121,7 @@ int main( int argc, char ** argv )
 	    }
             if( strchr( argv[i], '=' ) ) {
                 havecmdlineopts = 1;
-                cmdlineopts->append(new WvString(argv[i]),true);
+                cmdlineopts.append(new WvString(argv[i]),true);
                 continue;
             }
 	    if( !strcmp( argv[i], "--chat" ) ) 
@@ -145,54 +144,59 @@ int main( int argc, char ** argv )
 		print_version();
 		return 1;
 	    }
-	    else if( argv[i][0] == '-' ) {
+	    else if( argv[i][0] == '-' ) 
+	    {
 		print_help();
 		return 1;
 	    }
-	    sections->append( new WvString( "Dialer %s", argv[i] ), true );
+	    sections.append( new WvString( "Dialer %s", argv[i] ), true );
 	}
     } 
     else 
     {
-	sections->append( new WvString( "Dialer Defaults" ), true);
+	sections.append( new WvString( "Dialer Defaults" ), true);
     }
     
     if( !haveconfig)
+    {
+	// Load the system file first...
+	WvString stdconfig("/etc/wvdial.conf");
+	
+	if (!access(stdconfig, F_OK))
+	    cfg.load_file(stdconfig);
+
+	// Then the user specific one...
 	if (homedir)
         {
 	    WvString rcfile("%s/.wvdialrc", homedir);
 	    
 	    if (!access(rcfile, F_OK))
 		cfg.load_file(rcfile);
-        }
+	}
+    }
     
     // Inject all of the command line options on into the cfg file in a new
     // section called Command-Line if there are command line options.
-    if ( havecmdlineopts == 1 ) {
-	WvString filename;
-	if (homedir)
-	    filename = WvString("%s/.wvdial.tmp.%s",homedir,getpid());
-	else
-	    filename = WvString("/tmp/wvdial.%s",getpid());
-	extracfg = new WvConf(filename,0600);
-        WvStringList::Iter i(*cmdlineopts);
+    if ( havecmdlineopts == 1 ) 
+    {
+        WvStringList::Iter i(cmdlineopts);
         for (i.rewind();i.next();)
         {
             char *name = i().edit();
             char *value = strchr(name,'=');
-
+	    
             // Value should never be null since it can't get into the list
             // if it doesn't have an = in i()
-        
-            *value++ = 0;
+            // 
+            *value = 0;
+	    value++;
             name = trim_string(name);
             value = trim_string(value);
-            extracfg->set("Command-Line",name,value);
+            cfg.set("Command-Line",name,value);
         }
-	cfg.load_file(filename); // can we unlink it now??
-        sections->append( new WvString("Command-Line"),true);
+        sections.append( new WvString("Command-Line"),true);
     }
-
+    
     if( !cfg.isok() || !cfg.isclean() ) 
     {
 	return 1;
@@ -205,7 +209,7 @@ int main( int argc, char ** argv )
 			       WvLog::Debug2 );
     }
     
-    WvDialer dialer( cfg, sections, chat_mode );
+    WvDialer dialer( cfg, &sections, chat_mode );
     
     if( !chat_mode )
 	if( dialer.isok() && dialer.options.ask_password )
@@ -220,9 +224,9 @@ int main( int argc, char ** argv )
 	dialer.select( 100 );
 	dialer.callback();
     }
-
+    
     int retval;
-
+    
     if ((dialer.status() != WvDialer::Idle) || !dialer.isok()) 
     {
 	retval = 1;
@@ -231,11 +235,11 @@ int main( int argc, char ** argv )
     {
 	retval = 0;
     }
-
+    
     dialer.hangup();
-
+    
     if( syslog )
 	delete syslog;
-
+    
     return( retval );
 }
