@@ -77,7 +77,6 @@ public:
 
     friend class WvDialBrain;
 
-private:
     struct {
     	WvString	modem;
     	int		baud;
@@ -108,6 +107,7 @@ private:
     	int		auto_reconnect;
     } options;
 
+private:
     WvDialBrain *	brain;
     
     bool		been_online;
