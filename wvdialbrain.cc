@@ -365,10 +365,11 @@ void WvDialBrain::token_list_done( BrainToken * token_list )
 
 void WvDialBrain::guess_menu_guts( BrainToken * token_list )
 /**********************************************************/
-// There are two cases which may occur in a valid menu line.
-// Number one is of the form "1 - start PPP"
-// Number two is of the form "(1) start PPP"
-// We start by checking for case number 1.  If it fails, try case 2.
+// There are three cases which may occur in a valid menu line.
+// Number 1 is of the form "P for PPP"
+// Number 2 is of the form "1 - start PPP"
+// Number 3 is of the form "(1) start PPP"
+// We check for these cases in order.
 {
     BrainToken *	lmarker = NULL;
     BrainToken *	rmarker = NULL;
@@ -377,6 +378,46 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     int			index;
 
     /////////////// FIRST CASE
+    // This should be generalized later, but for now we'll look for "FOR PPP",
+    // and then examine the thing in front of THAT.  If it's not punctuation,
+    // we'll use it as a prompt response.  If it IS punctuation, but is NOT
+    // a bracket, we'll take the thing before THAT even, and use it as a prompt
+    // response.
+    tok = token_list;
+    for( ; tok != NULL; tok = tok->next ) {
+        bool failed = false;
+    	if( tok->type == TOK_PUNCT )
+    	    continue;
+
+    	// Only looking at words and numbers now.
+    	BrainToken * tok2 = tok->next;
+    	for( ; tok2 != NULL; tok2 = tok2->next ) {
+    	    if( tok2->type != TOK_PUNCT )
+    	    	break;
+    	    // Only looking at punctuation after the word we're investigating.
+    	    if( strchr( brackets, tok2->tok_char ) ) {
+    	    	failed = true;
+    	    	break;
+    	    }
+    	}
+    	if( failed )
+    	    continue;
+
+    	if( !tok2 || !tok2->next )
+    	    break;
+
+    	// Now tok is the potential response, and tok2 is the next word or
+    	// number, as long as there were no brackets in between.
+    	// So now we can look for "for ppp".
+    	if( !strcmp( tok2->tok_str, "for" ) &&
+    	    !strcmp( tok2->next->tok_str, "ppp" ) )
+    	{
+    	    set_prompt_response( tok->tok_str );
+    	    return;
+    	}
+    }
+
+    /////////////// SECOND CASE
     // Find the first right-bracket on the line, and evaluate everything
     // before it.  Things that are allowed are numbers, and words other 
     // than "press" etc.
@@ -419,7 +460,7 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     	return;
     }
 
-    /////////////// SECOND CASE
+    /////////////// THIRD CASE
     // Find the first (and recursively innermost) matching pair of brackets.
     // For example: "This ('a', by the way) is what you type to start ppp."
     //              will parse out simply the letter a.
@@ -427,6 +468,8 @@ void WvDialBrain::guess_menu_guts( BrainToken * token_list )
     // Start by finding the RIGHTmost right-bracket which immediately
     // follows the LEFTmost right-bracket (ie - no words in between).
     // In the above example, it is the first apostrophe.
+    //
+    // Nov 6/98: Ummmmm, does the above paragraph make sense?
     bool ready_to_break = false;
     tok     		= token_list;
     rmarker 		= NULL;
