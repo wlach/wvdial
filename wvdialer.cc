@@ -163,16 +163,15 @@ void WvDialer::hangup()
     }
 
     if( stat != Idle ) {
-	if( modem && !modem->isok() ) {
-    	    stat = ModemError;
-	    return;
-	}
-
 	time_t 	now;
 	time( &now );
 	log( "Disconnecting at %s", ctime( &now ) );
 	if( modem )
+	{
 	    modem->hangup();
+	    delete modem;
+	    modem = NULL;
+	}
 	stat = Idle;
     }
 }
@@ -196,8 +195,11 @@ bool WvDialer::select_setup(SelectInfo &si)
 bool WvDialer::isok() const
 /*************************/
 {
-    return( (!modem || modem->isok())
-    	&& stat != ModemError && stat != OtherError );
+    bool b = (!modem || modem->isok())
+	&& stat != ModemError && stat != OtherError;
+    if (!b)
+	fprintf(stderr, "Returning not ok!!\n");
+    return b;
 }
 
 char * WvDialer::connect_status() const
