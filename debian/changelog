@@ -1,10 +1,12 @@
-wvdial (1.54) unstable; urgency=high
+wvdial (1.54-1) unstable; urgency=low
 
-  * Synchronize with WvStreams 3.71
+  * Synchronize with WvStreams 3.73
   * More cleanup of various internals
   * Add support for SmartLink WinModems
+  * Re-add debian revision.
+  * Acknowledge NMU. (Closes: #141654) 
 
- -- Patrick Patterson <ppatters@debian.org>  Mon, 29 Jul 2002 18:39:51 -0400
+ -- James Morrison <phython@debian.org>  Mon, 14 Apr 2003 11:56:18 -0400
 
 wvdial (1.53.0.1) unstable; urgency=low
 
