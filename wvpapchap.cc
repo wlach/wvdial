@@ -8,6 +8,7 @@
 
 #include "wvpapchap.h"
 #include "wvfile.h"
+#include "strutils.h"
 #include <assert.h>
 #include <ctype.h>
 #include <sys/stat.h>

@@ -23,6 +23,10 @@ wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 
 LIBS += -L../wvstreams -lwvutils -lwvstreams
 
+ifdef USE_WVCONFEMU
+LIBS += -luniconf
+endif
+
 wvdial wvdialconf papchaptest pppmon: wvdial.a
 
 install-bin: all

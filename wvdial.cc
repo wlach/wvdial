@@ -12,7 +12,6 @@
 #include "wvlog.h"
 #include "wvlogrcv.h"
 #include "wvsyslog.h"
-#include "wvconf.h"
 
 #include <signal.h>
 #include <sys/wait.h>
@@ -79,7 +78,12 @@ int main( int argc, char ** argv )
     
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
-    WvConf		cfg( "/dev/null");
+#ifdef USE_WVCONFEMU
+    UniConfRoot uniconf;
+    WvConf cfg(uniconf);
+#else
+    WvConf		cfg("/dev/null");
+#endif
     WvStringList	sections;
     WvStringList	cmdlineopts;
     WvLog		log( "WvDial", WvLog::Debug );
