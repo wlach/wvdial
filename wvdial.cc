@@ -84,7 +84,7 @@ int main( int argc, char ** argv )
 
     WvDialLogger 	rc;
     WvSyslog		*syslog = NULL;
-    WvConf		cfg( "/etc/wvdial.conf" );
+    WvConf		cfg( "/etc/wvdial.conf", 0600 );
     WvStringList	*sections = new WvStringList;
     WvLog		log( "WvDial", WvLog::Debug );
 

@@ -7,8 +7,9 @@ a message to wvdial-list-request@worldvisions.ca with the subject
 
 WvDial
 ------
-- "Command>" should be a prompt (Janis in London)
 - 1ms-lag-mode for wvmodem
+- adjust the number of seconds before "hoping for the best" 
+	- sometimes the login prompt takes a long time to answer.
 - mention /etc/wvdial.conf, /dev/ttyS*, and pap-secrets file permissions
 - allow passing of options on the command line:  if it has an '=' sign,
 	assume it's a configuration setting.
