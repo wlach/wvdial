@@ -257,7 +257,7 @@ int main(int argc, char **argv)
     dialer.hangup();
     
     RELEASE(filelog);
-    if (syslog) delete syslog;
+    delete syslog;
 
     return(retval);
 }
