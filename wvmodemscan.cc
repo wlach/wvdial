@@ -19,8 +19,8 @@
 // startup at atz atq0 atv1 ate1 ats0 carrier dtr fastdial
 // baudstep reinit done
 static char *commands[WvModemScan::NUM_STAGES] = {
-    NULL, "", "Z", "Q0", "V1", "E1", "S0=0", "&C1", "&D2", "S11=55",
-    "+FCLASS=0", NULL,
+    NULL, "Q0 V1 E1", "Z", "S0=0",
+    "&C1", "&D2", "S11=55", "+FCLASS=0", NULL,
     NULL, "", NULL
 };
 
@@ -62,9 +62,9 @@ bool WvModemScan::isok() const
 
 WvString WvModemScan::initstr() const
 {
-    WvString s;
-    s.setsize(100);
-    strcpy(s.edit(), "AT");
+    char s[200];
+
+    strcpy(s, "AT");
     
     for (int i = 0; i < NUM_STAGES; i++)
     {
@@ -75,11 +75,11 @@ WvString WvModemScan::initstr() const
 	if ((commands[i][0]=='Z' || commands[i][0]=='I') && status[i] != Test)
 	    continue;
 	
-	strcat(s.edit(), commands[i]);
-	strcat(s.edit(), " ");
+	strcat(s, commands[i]);
+	strcat(s, " ");
     }
     
-    return s;
+    return WvString(trim_string(s)).unique();
 }
 
 
@@ -110,9 +110,6 @@ void WvModemScan::execute()
 	
     case AT:
     case ATZ:
-    case ATQ0:
-    case ATV1:
-    case ATE1:
     case ATS0:
     case Carrier:
     case DTR:
@@ -122,7 +119,7 @@ void WvModemScan::execute()
 	assert(modem);
 	status[stage] = Test;
 	if ( !doresult(WvString("%s\r", initstr()), stage==ATZ ? 3000 : 500)
-	    || (stage <= ATZ && status[stage]==Fail) )
+	    || ((stage <= ATZ || stage == Reinit) && status[stage]==Fail) )
 	{
 	    tries++;
 	    
@@ -140,7 +137,7 @@ void WvModemScan::execute()
 	    stage++;
 	}
 	break;
-
+	
     case GetIdent:
 	assert(modem);
 	status[stage] = Test;
@@ -265,11 +262,8 @@ bool WvModemScan::doresult(const WvString &_s, int msec)
     
     debug("%s\n", cptr);
 
-    if (!strncmp(cptr, "OK", 2)
-	|| (stage <= ATV1 && *(strchr(cptr,0) - 1)=='0'))
-    {
+    if (!strncmp(cptr, "OK", 2))
 	status[stage] = Worked;
-    }
     else
 	status[stage] = Fail;
     
@@ -413,9 +407,11 @@ void WvModemScanList::execute()
     assert (!isdone());
 
     WvModemScanList::Iter i(*this);
-    
-    i.rewind();
-    if (!i.next()) return; // note: the first next() is the _first_ item!
+
+    for (i.rewind(); i.next(); )
+	if (!i().isdone()) break;
+
+    if (!i.cur()) return; 
     
     WvModemScan &s(i);
     
@@ -460,9 +456,8 @@ bool WvModemScanList::isdone()
 {
     WvModemScanList::Iter i(*this);
     
-    i.rewind();
-    if (i.next())
-	return i().isdone();
-    else
-	return true; // empty list, so we are done!
+    for (i.rewind(); i.next(); )
+	if (!i().isdone()) return false;
+    
+    return true;
 }

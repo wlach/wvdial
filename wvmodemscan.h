@@ -18,7 +18,7 @@ class WvModem;
 class WvModemScan
 {
 public:
-    enum Stage { Startup=0, AT, ATZ, ATQ0, ATV1, ATE1, ATS0, 
+    enum Stage { Startup=0, AT, ATZ, ATS0, 
 			Carrier, DTR, FastDial, FCLASS, GetIdent,
 			BaudStep, Reinit, Done, NUM_STAGES };
     
