@@ -60,7 +60,7 @@ WvModemScan::~WvModemScan()
     if (isok() && isdone())
 	debug(WvLog::Info, "Speed %s; init \"%s\"\n", maxbaud(), initstr());
     
-    RELEASE(modem);
+    WVRELEASE(modem);
 }
 
 
@@ -376,7 +376,7 @@ void WvModemScan::execute()
     
     if (stage == Done) // we just incremented stage number to Done
     {
-	RELEASE(modem);
+	WVRELEASE(modem);
     }
 }
 
