@@ -87,6 +87,7 @@ int main( int argc, char ** argv )
     WvConf		cfg( "/etc/wvdial.conf", 0600 );
     WvStringList	*sections = new WvStringList;
     WvLog		log( "WvDial", WvLog::Debug );
+    char *		homedir = getenv("HOME");
 
     bool chat_mode = false;
     
@@ -96,6 +97,14 @@ int main( int argc, char ** argv )
     
     if( !cfg.isok() || !cfg.isclean() ) {
 	return( 1 );
+    }
+    
+    if (homedir)
+    {
+	WvString rcfile("%s/.wvdialrc", homedir);
+	
+	if (!access(rcfile, F_OK))
+	    cfg.load_file(rcfile);
     }
 
     if( argc > 1 ) {
