@@ -645,7 +645,6 @@ void WvDialer::load_options()
     	    *( opts[i].str_member ) = 
     	    		cfg.fuzzy_get( *sect_list, opts[i].name, 
     	    		    cfg.get( d, opts[i].name, opts[i].str_default ) );
-	    opts[i].str_member->unique();
     	}
     }
 
@@ -653,10 +652,7 @@ void WvDialer::load_options()
     const char * newopt = cfg.fuzzy_get( *sect_list, "Init",
 	                        cfg.get( d, "Init", NULL ) );
     if( newopt ) 
-    {
 	options.init1 = newopt;
-	options.init1.unique();
-    }
 }
 
 bool WvDialer::init_modem()
@@ -1110,7 +1106,6 @@ int WvDialer::ask_password()
 	tmp[ strlen(tmp)-1 ] = '\0';
     
     options.password = tmp;
-    options.password.unique();
     
     return 1;
 }

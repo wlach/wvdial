@@ -57,7 +57,6 @@ bool WvPapChap::load_file( char * filename )
     from_file = file.getline( 0 );
     while( from_file ) {
     	tmp = new WvString( from_file );
-    	tmp->unique();
     	contents.append( tmp, true );
     	from_file = file.getline( 0 );
     }

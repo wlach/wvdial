@@ -29,7 +29,7 @@ public:
    ~WvDialMon ();
    
    // void setexec( const WvString name ) { executename = name; };
-   void setconnectmsg( const WvString name ) { connectmsg = name; };
+   void setconnectmsg( WvStringParm name ) { connectmsg = name; };
    
    void setdnstests (WvString, WvString);
    void setcheckdns (int flag) { do_check_dns = flag; }

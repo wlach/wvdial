@@ -84,7 +84,7 @@ WvString WvModemScan::initstr() const
     char s[200];
 
     if (isdn_init)
-	return (isdn_init.unique());
+	return (isdn_init);
 
     strcpy(s, "AT");
     
@@ -101,7 +101,7 @@ WvString WvModemScan::initstr() const
 	strcat(s, " ");
     }
     
-    return WvString(trim_string(s)).unique();
+    return WvString(trim_string(s));
 }
 
 
@@ -386,7 +386,6 @@ bool WvModemScan::doresult(WvStringParm _s, int msec)
 	    char *p = strpbrk(cptr, "\n\r");
 	    if (p) *p=0;
 	    identifier = cptr;
-	    identifier.unique();
 	    status[stage] = Worked;
 	    debug("%s\n", identifier);
 	    return true;
