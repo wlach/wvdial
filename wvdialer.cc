@@ -512,7 +512,7 @@ void WvDialer::async_dial()
 	// area code, and phone number as specified in the config file.
 	WvString s( "%s %s%s%s%s\r", options.dial_cmd,
 				 options.dial_prefix,
-				 options.dial_prefix ? "," : "",
+				 !options.dial_prefix ? "" : ",",
 				 options.areacode,
 				 options.phnum );
 	modem->print( s );
