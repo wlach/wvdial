@@ -20,6 +20,7 @@
 #include "wvpipe.h"
 #include "wvstreamclone.h"
 #include "wvdialmon.h"
+#include "wvcont.h"
 
 #define INBUF_SIZE	1024
 #define DEFAULT_BAUD	57600U
@@ -197,6 +198,8 @@ private:
    
     // These are used to pipe the password to pppd
     int          pppd_passwdfd[2];	// two fd of the pipe
-   
+
+    WvCont cont;
+    void* real_execute(void* contdata = 0);
 };
 #endif // __DIALER_H
