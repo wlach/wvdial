@@ -3,3 +3,4 @@ wvdial
 wvdialconf
 papchaptest
 pppmon
+*.libs
