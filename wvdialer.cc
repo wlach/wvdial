@@ -692,7 +692,8 @@ int WvDialer::wait_for_modem( char * 	strs[],
     char *	soff;
     int		result;
     int		len;
-
+    const char *ppp_marker = NULL;
+    
     while( modem->select( timeout ) ) {
 	last_rx = time( NULL );
     	onset = offset;
@@ -719,9 +720,14 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	// Search the buffer for a valid menu option...
 	// If guess_menu returns an offset, we zap everything before it in
 	// the buffer.  This prevents finding the same menu option twice.
-	const char *ppp_marker = brain->guess_menu( buffer );
-	if( ppp_marker != NULL )
-	    memset( buffer, ' ', ppp_marker-buffer );
+	// ... but don't do this in the Dial state, because the CONNECT line
+	// is all we care about.  Is there a nicer way to do this?
+	if (stat != WaitDial)
+	{
+	    ppp_marker = brain->guess_menu( buffer );
+	    if( ppp_marker != NULL )
+		memset( buffer, ' ', ppp_marker-buffer );
+	}
 	
 	// Now we can search using strstr.
 	for( result = 0; strs[ result ] != NULL; result++ ) {
