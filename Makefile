@@ -1,10 +1,23 @@
 ifeq ($(TOPDIR),)
-  TOPDIR=.
-  prefix=/usr/local
-  WVSTREAMS_LIB=$(prefix)/lib
-  WVSTREAMS_SRC=.
-  WVSTREAMS_INC=$(prefix)/include/wvstreams
-  WVSTREAMS_BIN=$(prefix)/bin
+ TOPDIR=.
+
+ prefix=/usr/local
+ WVSTREAMS_INC=
+ WVSTREAMS_LIB=
+ WVSTREAMS_BIN=$(prefix)/bin
+ WVSTREAMS_SRC=.
+
+ PC_CFLAGS=$(shell pkg-config --cflags libwvstreams)
+ ifeq ($(PC_CFLAGS),)
+  $(error WvStreams does not appear to be installed)
+ endif
+ CPPFLAGS+=$(PC_CFLAGS)
+
+ PC_LIBS=$(shell pkg-config --libs libwvstreams)
+ ifeq ($(PC_LIBS),)
+  $(error WvStreams does not appear to be installed)
+ endif
+ LIBS+=$(PC_LIBS)
 else
  XPATH=..
 endif
