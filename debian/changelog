@@ -1,3 +1,20 @@
+wvdial (1.54.0-1.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Recompile with latest libwvstreams-dev (Closes: #291506)
+  * Use pkg-config to get the right compiler flags
+    (Closes: #289236)
+  * While I'm on it, remove .. and ../wvstreams from include paths,
+    since these should probably never be used in a Debian package
+
+ -- Frank Lichtenheld <djpig@debian.org>  Fri, 21 Jan 2005 09:42:37 +0100
+
+wvdial (1.54.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- James A. Morrison <phython@debian.org>  Sun, 15 Feb 2004 13:23:24 -0500
+
 wvdial (1.54+20031110-1) unstable; urgency=low
 
   * Fix build depends. (Closes: #218344)
