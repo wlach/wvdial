@@ -19,7 +19,7 @@ ifeq ($(TOPDIR),)
  endif
  LIBS+=$(PC_LIBS)
 else
- XPATH=..
+ XPATH=$(TOPDIR)/src
 endif
 
 BINDIR=${prefix}/bin
