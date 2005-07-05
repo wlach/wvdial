@@ -39,7 +39,7 @@ protected:
 void WvDialLogger::_make_prefix()
 /*******************************/
 {
-    WvString name = appname(last_source);
+    WvString name = last_source;
     if(name == "WvDial Modem") 
     {
 	prefix = "";
