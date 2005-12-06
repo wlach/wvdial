@@ -1,12 +1,13 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
+ *   Copyright (C) 1997-2005 Net Integration Technologies, Inc.
  *
  * Standalone WvDial program, for testing the WvDialer class.
  *
  * Created:	Sept 30 1997		D. Coombs
  */
 
+#include "wvargs.h"
 #include "wvdialer.h"
 #include "wvver.h"
 #include "wvlog.h"
@@ -52,25 +53,27 @@ void WvDialLogger::_make_prefix()
     }
 }
 
-static void print_version()
-/*************************/
-{
-    printf( "%s", wvdial_version_text );
-}
-
-static void print_help()
-/**********************/
-{
-    print_version();
-    printf( "\n%s", wvdial_help_text );
-}
-
 static void signalhandler(int sig)
 /***********************************/
 {
     fprintf(stderr, "Caught signal %d:  Attempting to exit gracefully...\n", sig);
     want_to_die = true;
     signal(sig, SIG_DFL);
+}
+
+
+bool haveconfig = false;
+static bool config_cb(WvStringParm value, void *userdata)
+{
+    WvConf *cfg = reinterpret_cast<WvConf*>(userdata);
+    if (!access(value, F_OK))
+    {
+	cfg->load_file(value);
+	haveconfig = true;
+	return true;
+    }
+    fprintf(stderr, "Cannot read `%s'\n", value.cstr());
+    return false;
 }
 
 
@@ -90,8 +93,6 @@ int main(int argc, char **argv)
     WvStringList	cmdlineopts;
     WvLog		log( "WvDial", WvLog::Debug );
     WvString		homedir = getenv("HOME");
-    int			haveconfig = 0;
-    int			havecmdlineopts = 0;
     
     bool chat_mode = false;
     bool write_syslog = true;
@@ -100,64 +101,52 @@ int main(int argc, char **argv)
     signal(SIGINT, signalhandler);
     signal(SIGHUP, signalhandler);
 
-    if(argc > 1) 
+    WvArgs args;
+    args.set_version("WvDial " WVDIAL_VER_STRING "\n"
+		     "Copyright (c) 1997-2005 Net Integration Technologies, "
+		     "Inc.");
+    args.set_help_header("An intelligent PPP dialer.");
+    args.set_help_footer("Optional SECTION arguments refer to sections in "
+			 "configuration file (usually)\n"
+			 "/etc/wvdial.conf, $HOME/.wvdialrc or the file "
+			 "specified by --config.\n"
+			 "Specified sections are all read, with later ones "
+			 "overriding previous ones.\n"
+			 "Any options not in the listed sections are taken "
+			 "from [Dialer Defaults].\n"
+			 "\n"
+			 "Also, optional OPTION=value parameters allow you "
+			 "to override options within\n"
+			 "the configuration files.\n");
+    args.set_email("<wvdial-list@lists.nit.ca>");
+
+    args.add_option('C', "config",
+		    "use configfile instead of /etc/wvdial.conf",
+		    "configfile", WvArgs::ArgCallback(&config_cb), &cfg);
+    args.add_set_bool_option('c', "chat",
+			     "used when running wvdial from pppd", chat_mode);
+    args.add_reset_bool_option('n', "no-syslog",
+			       "don't send output to SYSLOG", chat_mode);
+    args.add_optional_arg("SECTION", true);
+    args.add_optional_arg("OPTION=value", true);
+
+    WvStringList remaining_args;
+    args.process(argc, argv, &remaining_args);
+
     {
-	for(int i=1; i < argc; i++) 
+	WvStringList::Iter i(remaining_args);
+	for (i.rewind(); i.next(); )
 	{
-	    if(!strcmp(argv[i], "--config" )) 
-	    {	
-		if (!access(argv[++i < argc ? i : i - 1], F_OK)) 
-		{
-		    haveconfig = 1;
-		    cfg.load_file(WvString(argv[i]));
-		    continue;
-		} 
-		else 
-		{
-		    log("Error: --config requires a valid argument\n");
-		    print_help();
-		    return 1;			    
-		}
-	    }
-            if(strchr(argv[i], '=' )) 
-	    {
-                havecmdlineopts = 1;
-                cmdlineopts.append(new WvString(argv[i]),true);
-                continue;
-            }
-	    if(!strcmp(argv[i], "--chat" )) 
-	    {
-		chat_mode = true;
-		continue;
-	    }
-	    if(!strcmp( argv[i], "--no-syslog" )) 
-	    {
-		write_syslog = false;
-		continue;
-	    }
-	    if( !strcmp(argv[i], "--help")) 
-	    {
-		print_help();
-		return 1;
-	    }
-	    else if(!strcmp(argv[i], "--version")) 
-	    {
-		print_version();
-		return 1;
-	    }
-	    else if(argv[i][0] == '-') 
-	    {
-		print_help();
-		return 1;
-	    }
-	    sections.append(new WvString("Dialer %s", argv[i]), true);
+	    if (strchr(i(), '=' ))
+		cmdlineopts.append(new WvString(i()),true);
+	    else
+		sections.append(new WvString("Dialer %s", i()), true);
 	}
-    } 
-    else 
-    {
-	sections.append(new WvString("Dialer Defaults"), true);
     }
-    
+
+    if (sections.isempty())
+	sections.append(new WvString("Dialer Defaults"), true);
+
     if( !haveconfig)
     {
 	// Load the system file first...
@@ -178,7 +167,7 @@ int main(int argc, char **argv)
     
     // Inject all of the command line options on into the cfg file in a new
     // section called Command-Line if there are command line options.
-    if (havecmdlineopts == 1) 
+    if (!cmdlineopts.isempty()) 
     {
         WvStringList::Iter i(cmdlineopts);
         for (i.rewind();i.next();)
@@ -195,7 +184,7 @@ int main(int argc, char **argv)
             value = trim_string(value);
             cfg.set("Command-Line", name, value);
         }
-        sections.append(new WvString("Command-Line"), true);
+        sections.prepend(new WvString("Command-Line"), true);
     }
     
     if(!cfg.isok()) 

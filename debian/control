@@ -2,14 +2,14 @@ Source: wvdial
 Section: comm
 Priority: optional
 Maintainer: Simon Law <sfllaw@debian.org>
-Uploaders: Baruch Even <baruch@debian.org>, James Morrison <phython@debian.org>, Patrick Patterson <ppatters@debian.org>
-Build-Depends: debhelper (>> 4.0), libwvstreams-dev (>= 5.0), pkg-config
-Standards-Version: 3.6.1
+Uploaders: James Morrison <phython@debian.org>, Patrick Patterson <ppatters@debian.org>
+Build-Depends: debhelper (>> 4.0), libwvstreams-dev (>= 4.0), pkg-config
+Standards-Version: 3.6.2.1
 
 Package: wvdial
 Architecture: any
 Depends: ppp (>= 2.3.0), ${shlibs:Depends}
-Description: PPP dialer with built-in intelligence.
+Description: PPP dialer with built-in intelligence
  WvDial sacrifices some of the flexibility of programs like "chat" in order
  to make your dialup configuration easier.  When you install this package,
  your modem will be detected automatically and you need to specify just

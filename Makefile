@@ -32,9 +32,12 @@ include $(TOPDIR)/wvrules.mk
 default: all papchaptest
 all: wvdial.a wvdial wvdialconf pppmon
 
-wvdial.a: wvdialer.o wvdialtext.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
+wvdial.a: wvdialer.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 	wvdialmon.o
 
+ifeq ($(WVSTREAMS_LIB),)
+ LIBUNICONF:=-luniconf
+endif
 wvdial wvdialconf papchaptest pppmon: wvdial.a $(LIBUNICONF)
 
 install-bin: all

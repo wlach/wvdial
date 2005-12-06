@@ -10,7 +10,8 @@
 build: build-stamp
 build-stamp:
 	dh_testdir
-	$(MAKE) CXXOPTS="-fno-implement-inlines -fno-rtti -fno-exceptions"
+	$(MAKE) CXXOPTS="-fno-implement-inlines -fno-rtti -fno-exceptions" \
+		VERBOSE=1
 	touch build-stamp
 
 clean:
@@ -30,13 +31,14 @@ binary-arch: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	$(MAKE) prefix=`pwd`/debian/tmp/usr \
-		PPPDIR=`pwd`/debian/tmp/etc/ppp/peers \
+	$(MAKE) prefix=`pwd`/debian/wvdial/usr \
+		PPPDIR=`pwd`/debian/wvdial/etc/ppp/peers \
 		install-bin
-	cp debian/pon.wvdial debian/poff.wvdial debian/tmp/usr/bin/
+	cp debian/pon.wvdial debian/poff.wvdial debian/wvdial/usr/bin/
 	dh_installdocs
 	dh_installman
 	dh_installchangelogs ChangeLog
+	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms

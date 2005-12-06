@@ -1,3 +1,20 @@
+wvdial (1.56-1) unstable; urgency=low
+
+  * New upstream release.
+    - Understand "no answer" from modem.  (Closes: Bug#181098)
+    - wvdialconf defaults to editing /etc/wvdial.conf.  (Closes: Bug#201671)
+    - You can set options on the command line.  (Closes: Bug#246697)
+    - Support crippled serial ports again.  (Closes: Bug#294999)
+  * Don't clobber too much on a purge.  (Closes: Bug#236616)
+  * Use Debhelper 4.  (Closes: Bug#332948)
+  * Postinst now uses chown properly.  (Closes: Bug#332949)
+  * Lintian clean.  (Closes: Bug#332950)
+  * Allow WvDial to configure itself non-interactively.
+  * Acknowledge non-maintainer upload.
+    (Closes: Bug#289129, Bug#291506, Bug#289236, Bug#331511)
+
+ -- Simon Law <sfllaw@debian.org>  Fri,  2 Dec 2005 01:30:40 -0500
+
 wvdial (1.54.0-1.1) unstable; urgency=high
 
   * Non-maintainer upload.

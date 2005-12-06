@@ -1,12 +1,17 @@
-.TH WVDIAL 1 "May 2001" "Worldvisions WvDial"
-
+.TH WVDIAL 1 "December 2005" "WvDial"
+.\"
 .SH NAME
 wvdial \- PPP dialer with built-in intelligence.
-
+.\"
 .SH SYNOPSIS
 .B wvdial
-.I "--help | --version | --chat | --config | option=value | --no-syslog | section..."
-
+[
+.I OPTIONS
+]
+[
+.I SECTION
+] ...
+.\"
 .SH DESCRIPTION
 .B wvdial
 is an intelligent PPP dialer, which means that it dials a modem and
@@ -33,51 +38,39 @@ Any time after connecting,
 .B wvdial
 will start PPP if it sees a PPP sequence from the server.  Otherwise,
 it tries to convince the server to start PPP by doing the following:
-.PP
-.HP
-\ - responding to any login/password prompts it sees;
-.br
-.HP
-\ - interpreting "choose one of the following"-style menus;
-.br
-.HP
-\ - eventually, sending the word "ppp" (a common terminal server command).
+.IP \(bu 4
+responding to any login/password prompts it sees;
+.IP \(bu
+interpreting \(lqchoose one of the following\(rq-style menus;
+.IP \(bu
+eventually, sending the word \(lqppp\(rq (a common terminal server command).
 .PP
 If all of this fails,
 .B wvdial
 just runs
 .BR pppd (8)
 and hopes for the best. It will bring up the connection, and then wait
-patiently for you to drop the link by pressin CTRL-C.
-
+patiently for you to drop the link by pressing CTRL\-C.
+.\"
 .SH OPTIONS
 Several options are recognized by
 .BR wvdial .
 .TP
-.I "\-\-chat"
+.B \-c, \-\-chat
 Run wvdial as a chat replacement from within pppd, instead of the more
 normal method of having wvdial negotiate the connection and then call
 pppd.
 .TP
-.I "\-\-config \fR[\|\fIconfigfile\fR\|]
-Run wvdial with configfile as the configuration file (instead of
-/etc/wvdial.conf). This is mainly usefull only if you want to have per-user
+.B \-C, \-\-config=CONFIGFILE
+Run wvdial with CONFIGFILE as the configuration file, instead of
+.IR /etc/wvdial.conf .
+This is mainly useful only if you want to have per-user
 configurations, or you want to avoid having dial-up information (usernames,
 passwords, calling card numbers, etc.) in a system wide configuration file.
 .TP
-.I "\-\-no-syslog"
+.B \-n, \-\-no-syslog
 Don't output debug information to the syslog daemon (only useful together
 with --chat).
-.TP
-.I "\-\-help"
-Prints a short message describing how to use
-.B wvdial
-and exits.
-.TP
-.I "\-\-version"
-Displays
-.BR wvdial 's
-version number and exits.
 .PP
 .B wvdial
 is normally run without command line options, in which case it reads
@@ -85,19 +78,23 @@ its configuration from the
 .I "[Dialer Defaults]"
 section of
 .IR /etc/wvdial.conf .
-(The configuration file is described in more detail in wvdial.conf(5)
+(The configuration file is described in more detail in
+.BR wvdial.conf (5)
 manual page.)
 .PP
-One or more sections of
+One or more 
+.IR SECTION s
+of
 .I
 /etc/wvdial.conf
 may be specified on the command line.  Settings in these sections will
 override settings in
 .IR "[Dialer Defaults]" .
-.TP
-For example, the command:
-.B wvdial phone2
 .PP
+For example, the command:
+.RS
+.B wvdial phone2
+.RE
 will read default options from the
 .I "[Dialer Defaults]"
 section, then override any or all of the options with those found in the
@@ -106,10 +103,11 @@ section.
 .PP
 If more than one section is specified, they are processed in the order they
 are given.  Each section will override all the sections that came before it.
-.TP
-For example, the command:
-.B wvdial phone2 pulse shh
 .PP
+For example, the command:
+.RS
+.B wvdial phone2 pulse shh
+.RE
 will read default options from the
 .I "[Dialer Defaults]"
 section, then override any or all of the options with those found in the
@@ -125,13 +123,14 @@ Using this method, it is possible to easily configure
 to switch between different internet providers, modem init strings,
 account names, and so on without specifying the same configuration
 information over and over.
-
+.\"
 .SH BUGS
-"Intelligent" programs are frustrating when they don't work right.
+\(lqIntelligent\(rq programs are frustrating when they don't work right.
 This version of
 .B wvdial
-has only minimal support for disabling or overriding its "intelligence",
-with the "Stupid Mode", "Login Prompt", and "Password Prompt" options.
+has only minimal support for disabling or overriding its \(lqintelligence\(rq,
+with the \(lqStupid Mode\(rq, \(lqLogin Prompt\(rq, and \(lqPassword 
+Prompt\(rq options.
 So, in general if you have a nice ISP, it will probably work,
 and if you have a weird ISP, it might not.
 .PP
@@ -140,11 +139,6 @@ by the fact that
 .B wvdial
 finally made it to version 1.00; it could well contain many bugs and 
 misfeatures.  Let us know if you have problems by sending e-mail to
-.BR <wvdial@nit.ca> .
-.PP
-Also, there is now a mailing list for discussion about
-.BR wvdial .
-If you are having problems, or have anything else to say, send e-mail to
 .BR <wvdial-list@lists.nit.ca> .
 .PP
 You may encounter some error messages if you don't have write access to
@@ -157,7 +151,7 @@ Unfortunately, there's really no nice way around this yet.
 /etc/wvdial.conf
 Configuration file which contains modem, dialing, and login
 information. See 
-.Bwvdial.conf(5).
+.BR wvdial.conf (5).
 .TP
 /dev/ttyS*
 Serial port devices.
@@ -169,19 +163,17 @@ Required for correct authentication in pppd version 2.3.0 or newer.
 Contains a list of usernames and passwords used by pppd for authentication.
 .B wvdial
 maintains this list automatically.
-
+.\"
 .SH AUTHORS
-Dave Coombs and Avery Pennarun for Net Integration Technologies, as
-part of the Worldvisions Weaver project. We would like to thank SuSE and
+Dave Coombs and Avery Pennarun for Net Integration Technologies.
+We would also like to thank SuSE and
 RedHat for adding a number of various cool features to
-.Bwvdial.
+.BR wvdial .
 Thanks guys!
-
+.\"
 .SH SEE ALSO
 .BR wvdial.conf (5),
 .BR wvdialconf (1),
 .BR pppd (8),
 .BR chat (8).
-.TP
-.B FAQ: 
-.BR http://www.dsb3.com/wvdial/
+

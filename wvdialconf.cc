@@ -1,14 +1,17 @@
 /*
  * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
+ *   Copyright (C) 1997-2005 Net Integration Technologies, Inc.
  *
  * WvDial configuration utility.  Generates a basic wvdial.conf file.
  */
+
 #include "uniconfroot.h"
+#include "wvargs.h"
 #include "wvconfemu.h"
 #include "wvfile.h"
 #include "wvmodemscan.h"
 #include "wvstrutils.h"
+#include "wvver.h"
 #include <ctype.h>
 
 
@@ -49,15 +52,25 @@ int main(int argc, char **argv)
 #if DEBUG
     free(malloc(1));    // for electric fence
 #endif	
-    
-    if (argc != 2 || argv[1][0]=='-')
-    {
-	wvcon->print("Usage: %s <configfile-name>\n"
-		"\t(create/update a wvdial.conf file automatically)\n",
-		argv[0]);
-	return 1;
-    }
-    
+    WvString conffilename("/etc/wvdial.conf");
+
+    WvArgs args;
+    args.set_version("WvDialConf " WVDIAL_VER_STRING "\n"
+		     "Copyright (c) 1997-2005 Net Integration Technologies, "
+		     "Inc.");
+    args.set_help_header("Create or update a WvDial configuration file");
+    args.set_help_footer("You must specify the FILENAME of the configuration "
+			 "file to generate.");
+    args.set_email("<wvdial-list@lists.nit.ca>");
+    args.add_optional_arg("FILENAME", false);
+
+    WvStringList remaining_args;
+    args.process(argc, argv, &remaining_args);
+    if (!remaining_args.isempty())
+	conffilename = remaining_args.popstr();
+
+    wvcon->print("Editing `%s'.\n\n", conffilename);
+
     wvcon->print("Scanning your serial ports for a modem.\n\n");
     
     WvModemScanList l;
@@ -71,10 +84,10 @@ int main(int argc, char **argv)
 	    "Is it in use by another program?\n"
 	  "Did you configure it properly with setserial?\n\n"
 		
-	  "Please read the FAQ at http://open.nit.ca/wvdial/\n\n"
+	  "Please read the FAQ at http://open.nit.ca/wiki/?WvDial\n\n"
 		
 	  "If you still have problems, send mail to "
-	    "wvdial-list@lists.nit.ca.\n");
+	    "<wvdial-list@lists.nit.ca>.\n");
 	return 1;
     }
     
@@ -86,14 +99,14 @@ int main(int argc, char **argv)
     
     wvcon->print("\nFound %s on %s",
         m.is_isdn() ? "an ISDN TA" :
-        strncmp("/dev/ttyACM",fn,11) ? "a modem" : "an USB modem", (const char *)fn);
+        strncmp("/dev/ttyACM",fn,11) ? "a modem" : "an USB modem", fn.cstr());
     if (m.use_modem_link) {
         wvcon->print(", using link /dev/modem in config.\n");
         fn = "/dev/modem";
     } else {
         wvcon->print(".\n");    
     }
-    UniConfRoot uni(WvString("ini:%s", argv[1]), 0660);
+    UniConfRoot uni(WvString("ini:%s", conffilename), 0660);
     WvConfEmu cfg(uni); // Create it read/write owner and group only
     static char s[]="Dialer Defaults";
     cfg.set(s, "Modem", fn);
@@ -101,14 +114,15 @@ int main(int argc, char **argv)
     cfg.set(s, "Init1", m.is_isdn() ? "AT&F" : "ATZ");
     cfg.set(s, "Init2", init);
     cfg.set(s, "ISDN",  m.use_default_asyncmap() ? "1" : "0");
-    cfg.set(s, "Modem Name",  m.modem_name ? (const char *)m.modem_name : "");
+    cfg.set(s, "Modem Name",  m.modem_name ? m.modem_name.cstr() : "");
     cfg.set(s, "Modem Type",  m.is_isdn() ? "ISDN Terminal Adapter" :
             strncmp("/dev/ttyACM",fn,11) ? "Analog Modem" : "USB Modem");  
  
     if (m.modem_name)
-        wvcon->print("Config for %s written to %s.\n", (const char *)m.modem_name, argv[1]);
+        wvcon->print("Config for %s written to %s.\n",
+		     m.modem_name, conffilename);
     else
-        wvcon->print("Modem configuration written to %s.\n", argv[1]);
+        wvcon->print("Modem configuration written to %s.\n", conffilename);
 
     // insert some entries to let people know what they need to edit
     if (!cfg.get(s, "Phone"))

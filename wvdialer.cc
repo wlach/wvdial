@@ -33,7 +33,6 @@ static char *	dial_responses[] = {
 	"no dialtone",
 	"no dial tone",
 	"busy",
-	"delayed",
 	"error",
 	"voice",
 	"fclass",
@@ -1355,7 +1354,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
 	strlwr( buffer + onset );
 	
 	// Now we can search using strstr.
-	for( result = 0; strs[ result ] != NULL; result++ ) 
+	for( result = 0; strs[ result ] != NULL; result++ )
 	{
 	    len = strlen( strs[ result ] );
 	    soff = strstr( buffer, strs[ result ] );
