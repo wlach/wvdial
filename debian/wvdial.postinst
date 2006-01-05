@@ -1,0 +1,67 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ]; then
+
+    # Should really deal with this by parsing wvdial.conf and detecting
+    # if someone has changed anything.
+    set +e
+    skip=""
+    if grep -qi ^phone /etc/wvdial.conf 2>/dev/null; then
+	if grep -qi ^modem /etc/wvdial.conf 2>/dev/null; then
+	    echo
+	    echo "/etc/wvdial.conf already exists -- leaving it alone."
+	    echo "  (Run wvdialconf manually if you want to re-detect your modem.)"
+	    echo
+	    skip="yes"
+	fi
+    fi
+
+    if [ -z "$skip" ]; then
+	set -e
+
+	# Source debconf library.
+	. /usr/share/debconf/confmodule
+
+	db_get wvdial/wvdialconf
+	if [ "$RET" = "true" ]; then
+	    db_get wvdial/phone
+	    phone="$RET"
+	    db_get wvdial/login
+	    login="$RET"
+	    db_get wvdial/passphrase
+	    password="$RET"
+	    db_reset wvdial/passphrase
+	    db_reset wvdial/passphrase2
+
+	    # Create /etc/wvdial.conf
+	    umask 077
+	    cat >/etc/wvdial.conf <<-EOF
+		[Dialer Defaults]
+		Phone = $phone
+		Username = $login
+		Password = $password
+		New PPPD = yes
+		EOF
+	    chown root:dialout /etc/wvdial.conf
+	    chmod 0640 /etc/wvdial.conf
+
+	    # Try to detect the modem
+	    if wvdialconf /etc/wvdial.conf; then
+		# success
+		echo
+		echo "Success!  You can run \"wvdial\" to connect to the internet."
+		echo "  (You can also change your configuration by editing /etc/wvdial.conf)"
+		echo
+	    else
+		# failed
+		echo
+		echo "Sorry.  You can retry the autodetection at any time by running \"wvdialconf\"."
+		echo "   (Or you can create /etc/wvdial.conf yourself.)"
+	    fi
+	fi
+    fi
+fi
+
+#DEBHELPER#

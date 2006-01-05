@@ -1,4 +1,4 @@
-wvdial (1.56-1) unstable; urgency=low
+wvdial (1.55-1) unstable; urgency=low
 
   * New upstream release.
     - Understand "no answer" from modem.  (Closes: Bug#181098)

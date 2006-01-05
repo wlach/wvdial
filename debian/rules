@@ -35,6 +35,7 @@ binary-arch: build
 		PPPDIR=`pwd`/debian/wvdial/etc/ppp/peers \
 		install-bin
 	cp debian/pon.wvdial debian/poff.wvdial debian/wvdial/usr/bin/
+	dh_installdebconf
 	dh_installdocs
 	dh_installman
 	dh_installchangelogs ChangeLog

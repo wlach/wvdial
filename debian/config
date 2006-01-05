@@ -1,0 +1,59 @@
+#!/bin/sh
+
+set -e
+
+# Source debconf library
+. /usr/share/debconf/confmodule
+
+db_capb backup
+
+STATE=1
+LASTSTATE=5
+while [ "$STATE" != 0 ] && [ "$STATE" -le "$LASTSTATE" ]; do
+    case "$STATE" in
+	1)
+	    db_input medium wvdial/wvdialconf || true
+            ;;
+	2)
+	    db_get wvdial/wvdialconf
+	    if [ "$RET" = "true" ]; then
+		db_input high wvdial/phone || true
+	    fi
+            ;;
+	3)
+	    db_get wvdial/wvdialconf
+	    if [ "$RET" = "true" ]; then
+		db_input high wvdial/login || true
+	    fi
+            ;;
+	4)
+	    db_get wvdial/wvdialconf
+	    if [ "$RET" = "true" ]; then
+		db_input high wvdial/passphrase || true
+		db_input high wvdial/passphrase2 || true
+	    fi
+            ;;
+	5)
+	    db_get wvdial/wvdialconf
+	    if [ "$RET" = "true" ]; then
+		db_get wvdial/passphrase
+		PASSPHRASE="$RET"
+		db_get wvdial/passphrase2
+		if [ "$RET" != "$PASSPHRASE" ]; then
+		    db_input high wvdial/passphrases_mismatch || true
+		    db_reset wvdial/passphrase
+		    db_reset wvdial/passphrase2
+		    db_fset wvdial/passphrase seen false
+		    db_fset wvdial/passphrase2 seen false
+		    STATE=3
+		fi
+	    fi
+	    ;;
+    esac
+
+    if db_go; then
+	STATE=$(($STATE + 1))
+    else
+	STATE=$(($STATE - 1))
+    fi
+done

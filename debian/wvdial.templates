@@ -1,0 +1,36 @@
+Template: wvdial/wvdialconf
+Type: boolean
+Default: true
+_Description: Automatically detect and configure your modem?
+ WvDial can automatically detect your modem and create its configuration
+ file.   This detection may cause problems with some computers.
+ .
+ You may reconfigure WvDial by running a program called wvdialconf which
+ will write these settings into the /etc/wvdial.conf file.
+
+Template: wvdial/phone
+Type: string
+_Description: Internet service provider's telephone number
+ Please provide the telephone number that your Internet service provider
+ (ISP) has given to you.
+
+Template: wvdial/login
+Type: string
+_Description: User name
+ Please provide the user name or login for your account with your ISP.
+
+Template: wvdial/passphrase
+Type: password
+_Description: Passphrase
+ Please provide the password or passphrase that unlocks access to your
+ account.
+
+Template: wvdial/passphrase2
+Type: password
+_Description: Again
+ Retype the password or passphrase for verification.
+
+Template: wvdial/passphrases_mismatch
+Type: note
+_Description: Passphrases must match
+ The two passphrases that you entered do not match.  Please retype them.
