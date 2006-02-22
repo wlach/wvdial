@@ -106,17 +106,18 @@ int main(int argc, char **argv)
     } else {
         wvcon->print(".\n");    
     }
-    UniConfRoot uni(WvString("ini:%s", conffilename), 0660);
-    WvConfEmu cfg(uni); // Create it read/write owner and group only
-    static char s[]="Dialer Defaults";
-    cfg.set(s, "Modem", fn);
-    cfg.setint(s, "Baud", m.maxbaud());
-    cfg.set(s, "Init1", m.is_isdn() ? "AT&F" : "ATZ");
-    cfg.set(s, "Init2", init);
-    cfg.set(s, "ISDN",  m.use_default_asyncmap() ? "1" : "0");
-    cfg.set(s, "Modem Name",  m.modem_name ? m.modem_name.cstr() : "");
-    cfg.set(s, "Modem Type",  m.is_isdn() ? "ISDN Terminal Adapter" :
-            strncmp("/dev/ttyACM",fn,11) ? "Analog Modem" : "USB Modem");  
+    UniConfRoot root(WvString("ini:%s", conffilename), 0660);
+    UniConf cfg(root["Dialer Defaults"]);
+    cfg.xset("Modem", fn);
+    cfg.xsetint("Baud", m.maxbaud());
+    cfg.xset("Init1", (m.is_isdn() ? "AT&F" : "ATZ"));
+    cfg.xset("Init2", init);
+    cfg.xset("ISDN", (m.use_default_asyncmap() ? "1" : "0"));
+    cfg.xset("Modem Name", (m.modem_name ? m.modem_name.cstr() : ""));
+    cfg.xset("Modem Type", (m.is_isdn()
+			    ? "ISDN Terminal Adapter"
+			    : (strncmp("/dev/ttyACM",fn,11)
+			       ? "Analog Modem" : "USB Modem")));  
  
     if (m.modem_name)
         wvcon->print("Config for %s written to %s.\n",
@@ -125,14 +126,15 @@ int main(int argc, char **argv)
         wvcon->print("Modem configuration written to %s.\n", conffilename);
 
     // insert some entries to let people know what they need to edit
-    if (!cfg.get(s, "Phone"))
-	cfg.set(s, "; Phone", "<Target Phone Number>");
-    if (!cfg.get(s, "Username"))
-	cfg.set(s, "; Username", "<Your Login Name>");
-    if (!cfg.get(s, "Password"))
-	cfg.set(s, "; Password", "<Your Password>");
+    if (!cfg.xget("Phone"))
+	cfg.xset("; Phone", "<Target Phone Number>");
+    if (!cfg.xget("Username"))
+	cfg.xset("; Username", "<Your Login Name>");
+    if (!cfg.xget("Password"))
+	cfg.xset("; Password", "<Your Password>");
     
     check_ppp_options();
     
+    cfg.commit();
     return 0;
 }
