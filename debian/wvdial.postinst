@@ -4,37 +4,24 @@ set -e
 
 if [ "$1" = "configure" ]; then
 
-    # Should really deal with this by parsing wvdial.conf and detecting
-    # if someone has changed anything.
     set +e
-    skip=""
-    if grep -qi ^phone /etc/wvdial.conf 2>/dev/null; then
-	if grep -qi ^modem /etc/wvdial.conf 2>/dev/null; then
-	    echo
-	    echo "/etc/wvdial.conf already exists -- leaving it alone."
-	    echo "  (Run wvdialconf manually if you want to re-detect your modem.)"
-	    echo
-	    skip="yes"
-	fi
-    fi
 
-    if [ -z "$skip" ]; then
-	set -e
+    # Source Debconf module
+    . /usr/share/debconf/confmodule
 
-	# Source debconf library.
-	. /usr/share/debconf/confmodule
+    # Update the /etc/wvdial.conf file
+    db_get wvdial/wvdialconf
+    if [ "$RET" = "true" ]; then
+	db_get wvdial/phone
+	phone="$RET"
+	db_get wvdial/login
+	login="$RET"
+	db_get wvdial/passphrase
+	password="$RET"
+	db_reset wvdial/passphrase
+	db_reset wvdial/passphrase2
 
-	db_get wvdial/wvdialconf
-	if [ "$RET" = "true" ]; then
-	    db_get wvdial/phone
-	    phone="$RET"
-	    db_get wvdial/login
-	    login="$RET"
-	    db_get wvdial/passphrase
-	    password="$RET"
-	    db_reset wvdial/passphrase
-	    db_reset wvdial/passphrase2
-
+	if [ ! -e '/etc/wvdial.conf' ]; then
 	    # Create /etc/wvdial.conf
 	    umask 077
 	    cat >/etc/wvdial.conf <<-EOF
@@ -46,16 +33,39 @@ if [ "$1" = "configure" ]; then
 		EOF
 	    chown root:dialout /etc/wvdial.conf
 	    chmod 0640 /etc/wvdial.conf
-
-	    # Try to detect the modem
+	elif type uni >/dev/null 2>/dev/null; then
+	    export UNICONF='ini:/etc/wvdial.conf'
+	    if [ -n "$phone" ]; then
+		uni set '/Dialer Defaults/Phone' "$phone"
+		uni del '/Dialer Defaults/; Phone'
+	    fi
+	    if [ -n "$login" ]; then
+		uni set '/Dialer Defaults/Username' "$login"
+		uni del '/Dialer Defaults/; Username'
+	    fi
+	    if [ -n "$password" ]; then
+		uni set '/Dialer Defaults/Password' "$password"
+		uni del '/Dialer Defaults/; Password'
+	    fi
+	fi
+ 
+	if grep -qi ^modem /etc/wvdial.conf 2>/dev/null; then
+	    echo
+	    echo "/etc/wvdial.conf already exists -- not probing your modem."
+	    echo "  (Run wvdialconf manually if you want to re-detect your modem.)"
+	    echo
+	else
+	# Try to detect the modem
 	    if wvdialconf /etc/wvdial.conf; then
-		# success
+		if [ -e /etc/wvdial.conf ]; then
+		    chown root:dialout /etc/wvdial.conf
+		    chmod 0640 /etc/wvdial.conf
+		fi
 		echo
 		echo "Success!  You can run \"wvdial\" to connect to the internet."
 		echo "  (You can also change your configuration by editing /etc/wvdial.conf)"
 		echo
 	    else
-		# failed
 		echo
 		echo "Sorry.  You can retry the autodetection at any time by running \"wvdialconf\"."
 		echo "   (Or you can create /etc/wvdial.conf yourself.)"

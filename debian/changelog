@@ -1,3 +1,11 @@
+wvdial (1.56-1) unstable; urgency=low
+
+  * New upstream release.
+   - wvdialconf actually writes settings.  (Closes: Bug#350882)
+  * Reduce the priority of debconf questions.  (Closes: Bug#348621)
+
+ -- Simon Law <sfllaw@debian.org>  Wed, 22 Feb 2006 13:20:56 -0500
+
 wvdial (1.55-1) unstable; urgency=low
 
   * New upstream release.

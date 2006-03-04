@@ -7,30 +7,52 @@ set -e
 
 db_capb backup
 
+# Update the Debconf database with information from /etc/wvdial.conf
+if [ -e /etc/wvdial.conf ] && type uni >/dev/null 2>/dev/null; then
+    export UNICONF='ini:/etc/wvdial.conf'
+    update_db()
+    {
+	RET=`uni get "$1"`
+	if [ $? ]; then
+	    db_set "$2" "$RET"
+	fi
+    }
+else
+    # We can't do anything
+    update_db()
+    {
+	true
+    }
+fi
+
 STATE=1
 LASTSTATE=5
 while [ "$STATE" != 0 ] && [ "$STATE" -le "$LASTSTATE" ]; do
     case "$STATE" in
 	1)
-	    db_input medium wvdial/wvdialconf || true
+	    db_input low wvdial/wvdialconf || true
             ;;
 	2)
 	    db_get wvdial/wvdialconf
 	    if [ "$RET" = "true" ]; then
-		db_input high wvdial/phone || true
+		update_db 'Dialer Defaults/Phone' wvdial/phone
+		db_input medium wvdial/phone || true
 	    fi
             ;;
 	3)
 	    db_get wvdial/wvdialconf
 	    if [ "$RET" = "true" ]; then
-		db_input high wvdial/login || true
+		update_db 'Dialer Defaults/Username' wvdial/login
+		db_input medium wvdial/login || true
 	    fi
             ;;
 	4)
 	    db_get wvdial/wvdialconf
 	    if [ "$RET" = "true" ]; then
-		db_input high wvdial/passphrase || true
-		db_input high wvdial/passphrase2 || true
+		update_db 'Dialer Defaults/Password' wvdial/passphrase
+		update_db 'Dialer Defaults/Password' wvdial/passphrase2
+		db_input medium wvdial/passphrase || true
+		db_input medium wvdial/passphrase2 || true
 	    fi
             ;;
 	5)
@@ -40,7 +62,7 @@ while [ "$STATE" != 0 ] && [ "$STATE" -le "$LASTSTATE" ]; do
 		PASSPHRASE="$RET"
 		db_get wvdial/passphrase2
 		if [ "$RET" != "$PASSPHRASE" ]; then
-		    db_input high wvdial/passphrases_mismatch || true
+		    db_input medium wvdial/passphrases_mismatch || true
 		    db_reset wvdial/passphrase
 		    db_reset wvdial/passphrase2
 		    db_fset wvdial/passphrase seen false
