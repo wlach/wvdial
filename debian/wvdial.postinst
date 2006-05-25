@@ -55,7 +55,7 @@ if [ "$1" = "configure" ]; then
 	    echo "  (Run wvdialconf manually if you want to re-detect your modem.)"
 	    echo
 	else
-	# Try to detect the modem
+	    # Try to detect the modem
 	    if wvdialconf /etc/wvdial.conf >/var/log/wvdialconf.log 2>&1; then
 		if [ -e /etc/wvdial.conf ]; then
 		    chown root:dialout /etc/wvdial.conf
@@ -70,6 +70,7 @@ if [ "$1" = "configure" ]; then
 		echo "Sorry.  You can retry the autodetection at any time by running \"wvdialconf\"."
 		echo "   (Or you can create /etc/wvdial.conf yourself.)"
 	    fi
+	    chmod 0644 /var/log/wvdialconf.log
 	fi
     fi
 fi
