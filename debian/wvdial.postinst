@@ -56,7 +56,7 @@ if [ "$1" = "configure" ]; then
 	    echo
 	else
 	# Try to detect the modem
-	    if wvdialconf /etc/wvdial.conf; then
+	    if wvdialconf /etc/wvdial.conf >/var/log/wvdialconf.log 2>&1; then
 		if [ -e /etc/wvdial.conf ]; then
 		    chown root:dialout /etc/wvdial.conf
 		    chmod 0640 /etc/wvdial.conf
