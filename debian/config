@@ -12,9 +12,13 @@ if [ -e /etc/wvdial.conf ] && type uni >/dev/null 2>/dev/null; then
     export UNICONF='ini:/etc/wvdial.conf'
     update_db()
     {
+    	set +e
 	RET=`uni get "$1"`
 	if [ $? ]; then
+	    set -e
 	    db_set "$2" "$RET"
+	else
+	    set -e
 	fi
     }
 else
