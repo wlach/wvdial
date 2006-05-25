@@ -7,7 +7,6 @@
 
 #include "uniconfroot.h"
 #include "wvargs.h"
-#include "wvconfemu.h"
 #include "wvfile.h"
 #include "wvmodemscan.h"
 #include "wvstrutils.h"
