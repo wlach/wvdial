@@ -21,6 +21,9 @@
 #include <assert.h>
 #include <xplc/xplc.h>
 
+// N_() is defined here just for internationalization.
+#define N_(String)  String
+
 static char *	init_responses[] = {
 	"ok",
 	"error",
@@ -288,27 +291,27 @@ char *WvDialer::connect_status() const
     case Dial:
     case WaitDial:
 	if( dial_stat == 1 )
-	    strcpy( msg, "Last attempt timed out.  Trying again." );
+	    strcpy( msg, N_("Last attempt timed out.  Trying again.") );
 	else if( dial_stat == 2 )
-	    strcpy( msg, "Modem did not connect last attempt.  Trying again." );
+	    strcpy( msg, N_("Modem did not connect last attempt.  Trying again.") );
 	else if( dial_stat == 3 )
-	    strcpy( msg, "No dial tone last attempt.  Trying again." );
+	    strcpy( msg, N_("No dial tone last attempt.  Trying again.") );
     	else if( dial_stat == 4 )
-    	    strcpy( msg, "Busy signal on last attempt.  Trying again." );
+    	    strcpy( msg, N_("Busy signal on last attempt.  Trying again.") );
     	else if( dial_stat == 5 )
-    	    strcpy( msg, "Voice answer on last attempt.  Trying again." );
+    	    strcpy( msg, N_("Voice answer on last attempt.  Trying again.") );
     	else if( dial_stat == 6 )
-    	    strcpy( msg, "Fax answer on last attempt.  Trying again." );
+    	    strcpy( msg, N_("Fax answer on last attempt.  Trying again.") );
 	else if( dial_stat == 7 )
-            strcpy( msg, "No answer on last attempt.  Trying again." );
+            strcpy( msg, N_("No answer on last attempt.  Trying again.") );
     	else
     	    return( NULL );
 	break;
     case WaitAnything:
-    	strcpy( msg, "Waiting for a response from Internet Provider." );
+    	strcpy( msg, N_("Waiting for a response from Internet Provider.") );
     	break;
     case WaitPrompt:
-    	strcpy( msg, "Waiting for a prompt from Internet Provider." );
+    	strcpy( msg, N_("Waiting for a prompt from Internet Provider.") );
     	break;
     case AutoReconnectDelay:
     	sprintf( msg, "Next attempt in 00:%02ld:%02ld.", 

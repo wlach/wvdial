@@ -73,6 +73,9 @@ public:
     Status status() const
         { return stat; }
    
+    time_t auto_reconnect_time() const
+        { return (auto_reconnect_at - time(NULL)); }
+   
     virtual bool pre_select(SelectInfo &si);
     virtual bool isok() const;
    
