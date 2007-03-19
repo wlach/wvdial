@@ -1,32 +1,27 @@
-ifeq ($(TOPDIR),)
- TOPDIR=.
 
- prefix=/usr/local
- WVSTREAMS_INC=
- WVSTREAMS_LIB=
- WVSTREAMS_BIN=$(prefix)/bin
- WVSTREAMS_SRC=.
+prefix=/usr/local
+WVSTREAMS_INC=
+WVSTREAMS_LIB=
+WVSTREAMS_BIN=$(prefix)/bin
+WVSTREAMS_SRC=.
 
- PC_CFLAGS=$(shell pkg-config --cflags libwvstreams)
- ifeq ($(PC_CFLAGS),)
-  $(error WvStreams does not appear to be installed)
- endif
- CPPFLAGS+=$(PC_CFLAGS)
-
- PC_LIBS=$(shell pkg-config --libs libwvstreams)
- ifeq ($(PC_LIBS),)
-  $(error WvStreams does not appear to be installed)
- endif
- LIBS+=$(PC_LIBS)
-else
- XPATH=$(TOPDIR)/src
+PC_CFLAGS=$(shell pkg-config --cflags libwvstreams)
+ifeq ($(PC_CFLAGS),)
+ $(error WvStreams does not appear to be installed)
 endif
+CPPFLAGS+=$(PC_CFLAGS)
+
+PC_LIBS=$(shell pkg-config --libs libwvstreams)
+ifeq ($(PC_LIBS),)
+ $(error WvStreams does not appear to be installed)
+endif
+LIBS+=$(PC_LIBS)
 
 BINDIR=${prefix}/bin
 MANDIR=${prefix}/share/man
 PPPDIR=/etc/ppp/peers
 
-include $(TOPDIR)/wvrules.mk
+include wvrules.mk
 
 
 default: all papchaptest
@@ -35,10 +30,9 @@ all: wvdial.a wvdial wvdialconf pppmon
 wvdial.a: wvdialer.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 	wvdialmon.o
 
-ifeq ($(WVSTREAMS_LIB),)
- LIBUNICONF:=-luniconf
-endif
-wvdial wvdialconf papchaptest pppmon: wvdial.a $(LIBUNICONF)
+wvdial: LDFLAGS+=-luniconf
+
+wvdial wvdialconf papchaptest pppmon: wvdial.a
 
 install-bin: all
 	[ -d ${BINDIR}      ] || install -d ${BINDIR}
