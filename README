@@ -5,31 +5,18 @@ Welcome to WvDial
 It's amazing!  It's your wildest dream come true!  Dialup networking for
 Linux that doesn't require chat scripts!
 
-Okay, so maybe you're not as excited as I am, but we at Worldvisions hope
-this will brighten up your week.  WvDial is our attempt to make the
-previously rather complicated configuration of Linux dial-up networking as
-simple as phone number - username - password.
-
-Actually we have loftier goals in mind for what we call the "Worldvisions
-Weaver" project, and that's where WvDial comes from.  WvDial and its
-supporting libraries are the first components of the Weaver system that we
-are releasing for free (under the LGPL; see below).  The rest of Weaver will
-probably be released for free eventually, but to maintain our competitive
-edge (and also save our programmers from looking silly) we're keeping the
-rest to ourselves for now.  No promises about that.
-
-But that doesn't stop you from having fun right now!  WvDial is and will
-remain totally free, and we hope that all Linux distributions will try to
-integrate it and help make Linux (even more of) a killer Internet
-workstation.
+Okay, so maybe you're not as excited as I am, but we hope this will brighten 
+up your week.  WvDial attempts to make the previously rather complicated
+configuration of Linux dial-up networking as simple as 
+phone number - username - password.
 
 But first there is something we should tell you:
 
 The GNU Library General Public License
 ======================================
 
-WvDial was written by Dave Coombs and Avery Pennarun of Worldvisions
-Computer Technology, Inc. and is released to the public under the terms of
+WvDial was originally written by Dave Coombs and Avery Pennarun of Net 
+Integration Technologies, and is released to the public under the terms of
 GNU's LGPL, or Library General Public License.
 
 This is not quite the same as the General Public License (GPL) that most
@@ -50,8 +37,7 @@ the system does not have to be (L)GPL'd.
 We think that this is a fair way to share this software, because it
 guarantees that everyone can fix bugs and when anyone does, everyone can get
 the patch.  But still, people can build small Linux systems based on WvDial
-(...like our Weaver) without having to give out the source code to their
-*entire* main program.
+without having to give out the source code to their *entire* main program.
 
 Naturally none of that is legally binding.  The nice people at GNU have
 prepared the legalese already and you can find their license verbatim in the
@@ -71,16 +57,14 @@ few things installed on your Linux system:
 	- pppd 2.2.0f or 2.3.5, with the pppd program preferably 
 		at /usr/sbin/pppd.
 
-	- gcc 2.7.2 or higher, with g++ (but you don't necessarily need
-		libg++ or libstdc++, as WvDial doesn't need them)
+	- gcc 2.7.2 or higher, with g++.
 
 	- GNU make; you may need version 3.75 or higher, I'm not sure.
 
-	- The WvStreams library (REALLY IMPORTANT: STOP RIGHT NOW if you
-	  don't have this, and go download it from http://open.nit.ca/download)
+	- WvStreams; version 4.4 or higher.
 
 Almost any halfway modern Linux system should have all of these. The last is
-available from http://open.nit.ca/download/
+available from http://alumnit.ca/wiki/index.php?page=DownloadReleases
 
 Building WvDial is a simple matter.  First, check the Makefile to see if
 everything looks okay to you.  By default, wvdial and wvdialconf will
@@ -115,11 +99,10 @@ to build the configuration completely by yourself.  Read the wvdial(1) man
 page ("man wvdial") for more information about that.
 
 In any case, if your modem is not detected or the detection sequence
-confuses you in some way, let us know by sending an e-mail message to
-wvdial@worldvisions.ca -- this is supposed to be a stable release, but
-everybody knows that doesn't really mean anything.  Things could still go
-wrong, and we really want to know if they do.  Remember, if we don't know 
-there's a problem, we can't fix it.
+confuses you in some way, let us know by sending us a message -- this is 
+supposed to be a stable release, but everybody knows that doesn't really mean 
+anything.  Things could still go wrong, and we really want to know if they do.
+Remember, if we don't know there's a problem, we can't fix it.
 
 On my computer the modem detection sequence looks like this:
 	
@@ -245,7 +228,7 @@ doesn't work, you can always fix it without doing any programming.  WvDial
 uses built-in intelligence, but if its intelligence fails, you're out of
 luck.
 
-And now the good news: E-mail us about the problem and we'll do our best to 
+And now the good news: Let us know about the problem and we'll do our best to 
 help.  If we can do it, we want WvDial to work with nearly every ISP around, 
 without any special configuration.
 
@@ -253,13 +236,13 @@ The most useful thing you can do for us is create a complete transcript
 of your wvdial session:
 	wvdial 2>&1 | tee wvdial.out
 
-Then e-mail the wvdial.out file to us along with your comments.  Similarly,
+Then send the wvdial.out file to us along with your comments.  Similarly,
 if the problem is during the modem detection phase (ALL modems should be
 detected successfully in a working wvdialconf!) you can get a transcript
 like this:
 	wvdialconf /dev/null 2>&1 | tee wvdialconf.out
 
-And e-mail us wvdialconf.out.
+And send us wvdialconf.out.
 
 
 Concluding Notes
@@ -273,14 +256,10 @@ wvdialconf(1) man pages anyway. (Oh, and don't forget about wvdial.conf(5)
 too!)
 
 Even though this is supposed to be a stable release, there may still be bugs
-in this thing.  Tell us about them, every last one.  Send us e-mail at:
-		wvdial@nit.ca
+in this thing.  Tell us about them, every last one.  For up-to-date contact
+information, see the WvDial web page at:
 
-Or better yet, why not send your comments to the WvDial Mailing List, at:
-		wvdial-list@lists.nit.ca
-
-There is a (currently cheesy) web page for wvdial at:
-		http://open.nit.ca/wvdial/
+		http://alumnit.ca/wiki/index.php?page=WvDial
 
 ...have fun with it!
 

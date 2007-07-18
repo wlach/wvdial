@@ -118,7 +118,6 @@ int main(int argc, char **argv)
 			 "Also, optional OPTION=value parameters allow you "
 			 "to override options within\n"
 			 "the configuration files.\n");
-    args.set_email("<wvdial-list@lists.nit.ca>");
 
     args.add_option('C', "config",
 		    "use configfile instead of /etc/wvdial.conf",
