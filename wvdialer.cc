@@ -249,7 +249,7 @@ void WvDialer::hangup()
     }
 }
 
-bool WvDialer::pre_select( SelectInfo& si )
+void WvDialer::pre_select( SelectInfo& si )
 /*******************************************/
 {
     if( isok() && stat != Online && stat != Idle
@@ -259,13 +259,32 @@ bool WvDialer::pre_select( SelectInfo& si )
 	// select() already returns true whenever the modem is readable,
 	// but when we are doing a timeout (eg. PreDial1/2) for example,
 	// we need to execute() even if no modem data is incoming.
-	return( true );
+	si.msec_timeout = 0;
     } 
     else 
     {
-	return WvStreamClone::pre_select( si );
+	WvStreamClone::pre_select( si );
     }
 }
+
+
+bool WvDialer::post_select( SelectInfo& si )
+{
+    if( isok() && stat != Online && stat != Idle
+	&& time( NULL ) - last_execute > 1 )
+    {
+	// Pretend we have "data ready," so execute() gets called.
+	// select() already returns true whenever the modem is readable,
+	// but when we are doing a timeout (eg. PreDial1/2) for example,
+	// we need to execute() even if no modem data is incoming.
+	return true;
+    } 
+    else 
+    {
+	return WvStreamClone::post_select( si );
+    }
+}
+
 
 bool WvDialer::isok() const
 /*************************/

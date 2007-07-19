@@ -76,7 +76,8 @@ public:
     time_t auto_reconnect_time() const
         { return (auto_reconnect_at - time(NULL)); }
    
-    virtual bool pre_select(SelectInfo &si);
+    virtual void pre_select(SelectInfo &si);
+    virtual bool post_select(SelectInfo &si);
     virtual bool isok() const;
    
     int	  connect_attempts;

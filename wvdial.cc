@@ -33,11 +33,11 @@ public:
         { }
 
 protected:
-    virtual void _make_prefix();
+    virtual void _make_prefix(time_t now);
 };
 
 
-void WvDialLogger::_make_prefix()
+void WvDialLogger::_make_prefix(time_t now)
 /*******************************/
 {
     WvString name = last_source;
