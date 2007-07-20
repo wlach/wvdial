@@ -1,3 +1,9 @@
+wvdial (1.60-1) unstable; urgency=low
+
+   * New upstream release.
+
+ -- William Lachance <wrlach@gmail.com>  Thu, 19 Jul 2007 19:30:09 -0400
+	
 wvdial (1.56-1) unstable; urgency=low
 
   * New upstream release.
