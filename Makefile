@@ -30,7 +30,8 @@ all: wvdial.a wvdial wvdialconf pppmon
 wvdial.a: wvdialer.o wvmodemscan.o wvpapchap.o wvdialbrain.o \
 	wvdialmon.o
 
-wvdial: LDFLAGS+=-luniconf
+wvdial wvdialconf papchaptest pppmon: \
+  LDFLAGS+=-luniconf -lwvstreams -lwvutils -lwvbase
 
 wvdial wvdialconf papchaptest pppmon: wvdial.a
 
