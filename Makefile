@@ -22,7 +22,11 @@ MANDIR=${prefix}/share/man
 PPPDIR=/etc/ppp/peers
 
 include wvrules.mk
+include config.mk
 
+config.mk:
+	@echo "Please run ./configure. Stop."
+	@exit 1
 
 default: all papchaptest
 all: wvdial.a wvdial wvdialconf pppmon

@@ -1,10 +1,12 @@
 *.[oa]
+*.libs
 *~
 .*.d
-.libs
 /CC
 /CXX
+config.mk
 papchaptest
 pppmon
+version.h
 wvdial
 wvdialconf
