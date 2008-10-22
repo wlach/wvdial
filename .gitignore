@@ -4,7 +4,9 @@
 .*.d
 /CC
 /CXX
+ChangeLog
 config.mk
+gen-cc
 papchaptest
 pppmon
 version.h
