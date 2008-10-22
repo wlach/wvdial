@@ -641,6 +641,7 @@ void WvDialer::load_options()
         { "Idle Seconds",    NULL, &options.idle_seconds,  "", 0            },
         { "ISDN",            NULL, &options.isdn,          "", false        },
         { "Ask Password",    NULL, &options.ask_password,  "", false        },
+        { "Dial Timeout",    NULL, &options.dial_timeout,  "", 60           },
 
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
@@ -908,7 +909,7 @@ void WvDialer::async_dial()
     switch( received ) 
     {
     case -1:	// nothing -- return control.
-	if( time( NULL ) - last_rx  >= 60 ) 
+	if( time( NULL ) - last_rx  >= options.dial_timeout ) 
 	{
 	    log( WvLog::Warning, "Timed out while dialing.  Trying again.\n" );
 	    stat = PreDial1;
