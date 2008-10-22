@@ -7,7 +7,7 @@
  */
 
 #include "wvdialer.h"
-#include "wvver.h"
+#include "version.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

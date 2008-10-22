@@ -9,7 +9,7 @@
 
 #include "wvargs.h"
 #include "wvdialer.h"
-#include "wvver.h"
+#include "version.h"
 #include "wvlog.h"
 #include "wvlogrcv.h"
 #include "wvlogfile.h"

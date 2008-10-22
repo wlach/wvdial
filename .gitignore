@@ -1,0 +1,10 @@
+*.[oa]
+*~
+.*.d
+.libs
+/CC
+/CXX
+papchaptest
+pppmon
+wvdial
+wvdialconf

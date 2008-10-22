@@ -10,7 +10,7 @@
 #include "wvfile.h"
 #include "wvmodemscan.h"
 #include "wvstrutils.h"
-#include "wvver.h"
+#include "version.h"
 #include <ctype.h>
 
 
