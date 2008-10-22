@@ -1,0 +1,26 @@
+#!/bin/sh -e
+OUTFILE=$1
+EXT=$2
+echo "* Generating $OUTFILE" >&2
+TEMPFILE=gencc-$$.tmp
+
+cat >$TEMPFILE <<-EOF 
+	#!/bin/sh
+	set -e
+	
+	MODE=\$1
+	BASE=\$2
+	DIR=\$(dirname \$BASE)
+	DEPFILE=\$(dirname \$BASE)/.\$(basename \$BASE .o).d
+	shift
+	shift
+	
+	$CC \$MODE -o \$BASE.o \$BASE.$EXT \\
+	        -MMD -MF \$DEPFILE -MP -MQ \$BASE.o \\
+	        $CPPFLAGS \\
+	        $CFLAGS \\
+	        "\$@"
+EOF
+
+chmod a+x $TEMPFILE
+mv $TEMPFILE $OUTFILE
