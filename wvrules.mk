@@ -239,7 +239,7 @@ dist: dist-hook
 	@echo '--> Making dist in ../build/$(PKGDIR)...'
 	@test -d ../build || mkdir ../build
 	@rsync -a --delete --force '$(shell pwd)/' '../build/$(PKGDIR)'
-	cd ../build/$(PKGDIR) && git clean -f -x
+	cd ../build/$(PKGDIR) && git clean -d -f -x
 	cd ../build/$(PKGDIR) && git log > ChangeLog
 	@find '../build/$(PKGDIR)' -name .git -type d -print0 | xargs -0 rm -rf --
 	@find '../build/$(PKGDIR)' -name .gitignore -type f -print0 | xargs -0 rm -f --
