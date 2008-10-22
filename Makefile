@@ -68,5 +68,8 @@ uninstall: uninstall-bin uninstall-man
 clean:
 	rm -f wvdial wvdialconf wvdialmon papchaptest pppmon
 
+distclean:
+	rm -f version.h config.mk
+
 .PHONY: clean all install-bin install-man install uninstall-bin uninstall-man \
 	uninstall
