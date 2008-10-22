@@ -60,7 +60,6 @@ int main(int argc, char **argv)
     args.set_help_header("Create or update a WvDial configuration file");
     args.set_help_footer("You must specify the FILENAME of the configuration "
 			 "file to generate.");
-    args.set_email("<wvdial-list@lists.nit.ca>");
     args.add_optional_arg("FILENAME", false);
 
     WvStringList remaining_args;
@@ -83,10 +82,7 @@ int main(int argc, char **argv)
 	    "Is it in use by another program?\n"
 	  "Did you configure it properly with setserial?\n\n"
 		
-	  "Please read the FAQ at http://open.nit.ca/wiki/?WvDial\n\n"
-		
-	  "If you still have problems, send mail to "
-	    "<wvdial-list@lists.nit.ca>.\n");
+	  "Please read the FAQ at http://alumnit.ca/wiki/?WvDial\n");
 	return 1;
     }
     
