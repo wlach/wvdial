@@ -1,3 +1,7 @@
+WVPACKAGE_NAME=@PACKAGE_NAME@
+WVPACKAGE_STRING=@PACKAGE_STRING@
+WVPACKAGE_TARNAME=@PACKAGE_TARNAME@
+WVPACKAGE_VERSION=@PACKAGE_VERSION@
 
 prefix=/usr/local
 WVSTREAMS_INC=
@@ -22,11 +26,6 @@ MANDIR=${prefix}/share/man
 PPPDIR=/etc/ppp/peers
 
 include wvrules.mk
-include config.mk
-
-config.mk:
-	@echo "Please run ./configure. Stop."
-	@exit 1
 
 default: all papchaptest
 all: wvdial.a wvdial wvdialconf pppmon
@@ -69,7 +68,7 @@ clean:
 	rm -f wvdial wvdialconf wvdialmon papchaptest pppmon
 
 distclean:
-	rm -f version.h config.mk
+	rm -f version.h Makefile
 
 .PHONY: clean all install-bin install-man install uninstall-bin uninstall-man \
 	uninstall

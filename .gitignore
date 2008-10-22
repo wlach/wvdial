@@ -5,8 +5,7 @@
 /CC
 /CXX
 ChangeLog
-config.mk
-gen-cc
+Makefile
 papchaptest
 pppmon
 version.h
