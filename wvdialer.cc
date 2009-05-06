@@ -784,7 +784,7 @@ bool WvDialer::init_modem()
 			    err( "Bad init string.\n" );
 			    return( false );
 		    }
-		    goto end_outer;
+		    break;
 		case 1:
 		    err( "Bad init string.\n" );
 		    goto end_outer;
