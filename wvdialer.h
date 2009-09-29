@@ -30,11 +30,11 @@ extern const char wvdial_version_text[];
 struct OptInfo
 /************/
 {
-    char *	name;
-    WvString *	str_member;
-    int *	int_member;
-    char *	str_default;
-    int		int_default;
+    const char * name;
+    WvString *	 str_member;
+    int *	 int_member;
+    const char * str_default;
+    int		 int_default;
 };
 
 class WvConf;
@@ -185,9 +185,9 @@ private:
     void		start_ppp();
    
     // The following members are for the wait_for_modem() function.
-    int		wait_for_modem( char *strs[], int timeout, bool neednewline,
+    int		wait_for_modem( const char *strs[], int timeout, bool neednewline,
 				bool verbose = true);
-    int		async_wait_for_modem( char * strs[], bool neednewline,
+    int		async_wait_for_modem( const char * strs[], bool neednewline,
 				      bool verbose = true);
     char	        buffer[ INBUF_SIZE + 1 ];
     off_t	offset;

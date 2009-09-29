@@ -44,7 +44,7 @@ void WvPapChap::put_secret( WvString username, WvString password,
 // WvPapChap private functions
 ///////////////////////////////////////////////////////////
 
-bool WvPapChap::load_file( char * filename )
+bool WvPapChap::load_file( const char * filename )
 /******************************************/
 // Loads filename into the "contents" string list, one line per entry.
 {
@@ -66,7 +66,7 @@ bool WvPapChap::load_file( char * filename )
     return( true );
 }
 
-bool WvPapChap::write_file( char * filename )
+bool WvPapChap::write_file( const char * filename )
 /*******************************************/
 // Writes the "contents" list to the file, one entry per line.
 {

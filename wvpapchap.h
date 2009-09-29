@@ -36,8 +36,8 @@ private:
     bool	 pap_success;
     bool	 chap_success;
 
-    bool load_file( char * filename );
-    bool write_file( char * filename );
+    bool load_file( const char * filename );
+    bool write_file( const char * filename );
     void do_secret( const char * username, const char * password,
 		    const char * remote );
 };

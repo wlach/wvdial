@@ -20,7 +20,7 @@ bool     default_asyncmap = false;
 
 // startup at atz atq0 atv1 ate1 ats0 carrier dtr fastdial
 // baudstep reinit done
-static char *commands[WvModemScan::NUM_STAGES] = {
+static const char *commands[WvModemScan::NUM_STAGES] = {
     NULL, "Q0 V1 E1", "Z", "S0=0",
     "&C1", "&D2", "+FCLASS=0", NULL,
     NULL, "", NULL

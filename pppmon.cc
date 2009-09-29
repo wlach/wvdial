@@ -24,7 +24,7 @@ WvDialMon pppd_mon;
 int main( int argc, char ** argv )
 {
   int argc_ppp = 0;
-  char *argv_ppp[ argc+10 ];
+  const char * argv_ppp[ argc+10 ];
   
   argv_ppp[argc_ppp++] = "/usr/sbin/pppd";
   
@@ -60,7 +60,7 @@ int main( int argc, char ** argv )
   
   if( pid == (pid_t) 0 ) {	// we are the child
     argv_ppp[argc_ppp] = NULL;
-    execv( argv_ppp[0], argv_ppp );
+    execv( argv_ppp[0], (char* const*)argv_ppp );
     fprintf( stderr, "exec failed: %s\n", strerror(errno) );
     exit( EXIT_FAILURE );
   }

@@ -24,13 +24,13 @@
 // N_() is defined here just for internationalization.
 #define N_(String)  String
 
-static char *	init_responses[] = {
+static const char *	init_responses[] = {
 	"ok",
 	"error",
 	NULL
 };
 
-static char *	dial_responses[] = {
+static const char *	dial_responses[] = {
 	"connect",
 	"no carrier",
 	"no dialtone",
@@ -43,7 +43,7 @@ static char *	dial_responses[] = {
 	NULL
 };
 
-static char *	prompt_strings[] = {
+static const char *	prompt_strings[] = {
 	"}!}",
 	"!}!",
 	NULL
@@ -646,7 +646,7 @@ void WvDialer::load_options()
     	{ NULL,		     NULL, NULL,                   "", 0            }
     };
 
-    char *	d = "Dialer Defaults";
+    const char * d = "Dialer Defaults";
 
     for( int i=0; opts[i].name != NULL; i++ ) 
     {
@@ -1339,7 +1339,7 @@ static void strip_parity( char * buf, size_t size )
 }
 
 
-int WvDialer::wait_for_modem( char * 	strs[], 
+int WvDialer::wait_for_modem( const char * strs[], 
 			      int	timeout, 
 			      bool	neednewline,
 			      bool 	verbose )
@@ -1422,7 +1422,7 @@ int WvDialer::wait_for_modem( char * 	strs[],
     return( result ); // -1 == timeout
 }
 
-int WvDialer::async_wait_for_modem( char * strs[], bool neednl, bool verbose )
+int WvDialer::async_wait_for_modem( const char * strs[], bool neednl, bool verbose )
 /****************************************************************************/
 {
     return( wait_for_modem( strs, 10, neednl, verbose ) );
