@@ -495,11 +495,16 @@ static int fileselect(const struct dirent *e)
 	// (no internal ISDN support)   || !strncmp(e->d_name, "ttyI", 4);
 }
 
-
+#if defined(__GLIBC__) && __GLIBC_PREREQ(2, 10)
+static int filesort(const dirent **e1, const dirent **e2)
+#else
 static int filesort(const void *_e1, const void *_e2)
+#endif
 {
+#if !(defined(__GLIBC__) && __GLIBC_PREREQ(2, 10))
     dirent const * const *e1 = (dirent const * const *)_e1;
     dirent const * const *e2 = (dirent const * const *)_e2;
+#endif
     const char *p1, *p2;
     int diff;
     
