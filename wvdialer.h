@@ -141,6 +141,7 @@ public:
 	int              idle_seconds;
 	int              isdn;
 	int              ask_password;
+	int              no_hardware_protocol;
 	int              dial_timeout;
        
     } options;
