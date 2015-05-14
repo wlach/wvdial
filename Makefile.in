@@ -21,6 +21,8 @@ ifeq ($(PC_LIBS),)
 endif
 LIBS+=$(PC_LIBS)
 
+wvdial-LIBS+= -luniconf
+
 BINDIR=${prefix}/bin
 MANDIR=${prefix}/share/man
 PPPDIR=/etc/ppp/peers
