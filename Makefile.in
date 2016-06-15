@@ -21,9 +21,9 @@ ifeq ($(PC_LIBS),)
 endif
 LIBS+=$(PC_LIBS)
 
-BINDIR=${prefix}/bin
-MANDIR=${prefix}/share/man
-PPPDIR=/etc/ppp/peers
+BINDIR=$(DESTDIR)/${prefix}/bin
+MANDIR=$(DESTDIR)/${prefix}/share/man
+PPPDIR=$(DESTDIR)/etc/ppp/peers
 
 include wvrules.mk
 
