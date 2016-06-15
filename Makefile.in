@@ -21,9 +21,9 @@ ifeq ($(PC_LIBS),)
 endif
 LIBS+=$(PC_LIBS)
 
-BINDIR=${prefix}/bin
-MANDIR=${prefix}/share/man
-PPPDIR=/etc/ppp/peers
+BINDIR=$(DESTDIR)/${prefix}/bin
+MANDIR=$(DESTDIR)/${prefix}/share/man
+PPPDIR=$(DESTDIR)/etc/ppp/peers
 
 include wvrules.mk
 
@@ -46,10 +46,10 @@ install-bin: all
 	cp ppp.provider-pipe ${PPPDIR}/wvdial-pipe
 
 install-man:
-	[ -d ${MANDIR}/man1 ] || install -d ${MANDIR}/man1
-	[ -d ${MANDIR}/man5 ] || install -d ${MANDIR}/man5
-	install -m 0644 wvdial.1 wvdialconf.1 ${MANDIR}/man1
-	install -m 0644 wvdial.conf.5 ${MANDIR}/man5
+	[ -d $(DESTDIR)/${MANDIR}/man1 ] || install -d $(DESTDIR)/${MANDIR}/man1
+	[ -d $(DESTDIR)/${MANDIR}/man5 ] || install -d $(DESTDIR)/${MANDIR}/man5
+	install -m 0644 wvdial.1 wvdialconf.1 $(DESTDIR)/${MANDIR}/man1
+	install -m 0644 wvdial.conf.5 $(DESTDIR)/${MANDIR}/man5
 
 install: install-bin install-man
 
